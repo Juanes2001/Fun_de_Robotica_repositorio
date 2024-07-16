@@ -493,7 +493,7 @@ void inSystem (void){
 	handlerTimerBlinky.TIMx_Config.TIMx_interruptEnable  = BTIMER_ENABLE_INTERRUPT;
 	handlerTimerBlinky.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
 	handlerTimerBlinky.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_100us;
-	handlerTimerBlinky.TIMx_Config.TIMx_period           = 500;
+	handlerTimerBlinky.TIMx_Config.TIMx_period           = 1000;
 	BasicTimer_Config(&handlerTimerBlinky);
 	startTimer(&handlerTimerBlinky);
 
