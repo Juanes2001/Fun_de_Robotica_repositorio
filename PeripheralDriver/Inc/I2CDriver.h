@@ -17,6 +17,8 @@
 #define MAIN_CLOCK_4_MHz_FOR_I2C   4
 #define MAIN_CLOCK_16_MHz_FOR_I2C  16
 #define MAIN_CLOCK_20_MHz_FOR_I2C  20
+#define MAIN_CLOCK_50_MHz_FOR_I2C  50
+
 
 #define I2C_MODE_SM    0
 #define I2C_MODE_FM    1
@@ -33,6 +35,7 @@ typedef struct
 	uint8_t       slaveAddress;
 	uint8_t		  modeI2C;
 	uint8_t       dataI2C;
+	uint8_t       clkSpeed;
 }I2C_Handler_t;
 
 /* Prototipos de las funciones publicas */

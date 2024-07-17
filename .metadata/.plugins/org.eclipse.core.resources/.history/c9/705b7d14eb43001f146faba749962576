@@ -69,15 +69,11 @@ void i2c_config(I2C_Handler_t *ptrHandlerI2C){
 	 * y el tiempo máximo para el cambio de la señal (T-Rise).
 	 * Todo comienza con los dos registros en 0
 	 */
-	//Nos aseguramos de que el periferico está desactivado
-	ptrHandlerI2C->ptrI2Cx->CR1 &= ~(0b1);
 
 	ptrHandlerI2C->ptrI2Cx->CCR = 0;
 	ptrHandlerI2C->ptrI2Cx->TRISE = 0;
 
 	if(ptrHandlerI2C->modeI2C == I2C_MODE_SM){
-
-
 
 		//Estamos en modo "standar" (SM Mode)
 		// Seleccionamos el modo estandar

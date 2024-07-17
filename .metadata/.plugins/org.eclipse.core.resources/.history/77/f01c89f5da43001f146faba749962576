@@ -58,26 +58,21 @@ void i2c_config(I2C_Handler_t *ptrHandlerI2C){
 
 	}else if (ptrHandlerI2C->clkSpeed == MAIN_CLOCK_50_MHz_FOR_I2C){
 
-		ptrHandlerI2C->ptrI2Cx->CR2 |= (MAIN_CLOCK_50_MHz_FOR_I2C << I2C_CR2_FREQ_Pos);
 
 	}
 
 
 
 	/* 4. Configuramos el modo I2C en el que el sistema funciona
-	 * En esta configuracion se incluye tambien la velocidad del reloj
+	 * En esta configuracion se incluye tambien la velocidad del relo
 	 * y el tiempo máximo para el cambio de la señal (T-Rise).
 	 * Todo comienza con los dos registros en 0
 	 */
-	//Nos aseguramos de que el periferico está desactivado
-	ptrHandlerI2C->ptrI2Cx->CR1 &= ~(0b1);
 
 	ptrHandlerI2C->ptrI2Cx->CCR = 0;
 	ptrHandlerI2C->ptrI2Cx->TRISE = 0;
 
 	if(ptrHandlerI2C->modeI2C == I2C_MODE_SM){
-
-
 
 		//Estamos en modo "standar" (SM Mode)
 		// Seleccionamos el modo estandar

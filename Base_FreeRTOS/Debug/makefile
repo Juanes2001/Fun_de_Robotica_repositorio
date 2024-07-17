@@ -11,6 +11,7 @@ RM := rm -rf
 -include sources.mk
 -include ThirdParty/SEGGER/SEGGER/Syscalls/subdir.mk
 -include ThirdParty/SEGGER/SEGGER/subdir.mk
+-include ThirdParty/SEGGER/Rec/subdir.mk
 -include ThirdParty/SEGGER/OS/subdir.mk
 -include ThirdParty/SEGGER/Config/subdir.mk
 -include ThirdParty/FreeRTOS/portable/MemMang/subdir.mk
@@ -66,8 +67,8 @@ all: main-build
 main-build: Base_FreeRTOS.elf secondary-outputs
 
 # Tool invocations
-Base_FreeRTOS.elf Base_FreeRTOS.map: $(OBJS) $(USER_OBJS) /home/juan/FundamentosDeRobotica/Base_FreeRTOS/STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Base_FreeRTOS.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/juan/FundamentosDeRobotica/Base_FreeRTOS/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Base_FreeRTOS.map" -Wl,--gc-sections -static -L/home/juan/FundamentosDeRobotica/PeripheralDriver/Debug --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Base_FreeRTOS.elf Base_FreeRTOS.map: $(OBJS) $(USER_OBJS) /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Base_FreeRTOS.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Base_FreeRTOS.map" -Wl,--gc-sections -static -L/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Debug --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

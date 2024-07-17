@@ -26,3 +26,6 @@ arm-none-eabi-ar -r  "libPeripheralDriver.a" @"objects.list"
 arm-none-eabi-ar: creating libPeripheralDriver.a
 Finished building target: libPeripheralDriver.a
  
+
+20:22:59 Build Finished. 0 errors, 0 warnings. (took 2s.205ms)
+
