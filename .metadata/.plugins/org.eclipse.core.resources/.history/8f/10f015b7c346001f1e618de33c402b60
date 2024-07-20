@@ -34,7 +34,6 @@
 #include "RCCHunMHz.h"
 #include "EXTIDriver.h"
 #include "MotorsDriver.h"
-#include "I2CDriver.h"
 
 /*definicion de variables del sistema*/
 
