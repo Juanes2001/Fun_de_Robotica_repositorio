@@ -38,8 +38,8 @@
 
 #define I2C_MAX_RISE_TIME_SM_4MHz       5
 #define I2C_MAX_RISE_TIME_SM_16MHz      17
-#define I2C_MAX_RISE_TIME_SM_20MHz      21
-#define I2C_MAX_RISE_TIME_SM_50MHz      51
+#define I2C_MAX_RISE_TIME_SM_16MHz      21
+#define I2C_MAX_RISE_TIME_SM_16MHz      51
 
 
 #define I2C_MAX_RISE_TIME_FM_4MHz       2

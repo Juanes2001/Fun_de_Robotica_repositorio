@@ -23,7 +23,7 @@ void sendDataBytes(I2C_Handler_t *ptrHandlerI2C, char *dataBytes, uint8_t sizeAr
 
 	i2c_startTransaction(ptrHandlerI2C);
 
-	i2c_sendSlaveAddressRW(ptrHandlerI2C, ptrHandlerI2C->slaveAddress, I2C_WRITE_DATA);
+	i2c_sendSlaveAddressRW(ptrHandlerI2C, ptrHandlerI2C->I2C_Config.slaveAddress, I2C_WRITE_DATA);
 
 	i2c_sendDataByte (ptrHandlerI2C, OLED_CONTROLBYTE_DISPLAY);
 
@@ -47,7 +47,7 @@ void sendCommandByte ( I2C_Handler_t *ptrHandlerI2C,  char command){
 
 	i2c_startTransaction(ptrHandlerI2C);
 
-	i2c_sendSlaveAddressRW(ptrHandlerI2C, ptrHandlerI2C->slaveAddress, I2C_WRITE_DATA);
+	i2c_sendSlaveAddressRW(ptrHandlerI2C, ptrHandlerI2C->I2C_Config.slaveAddress, I2C_WRITE_DATA);
 
 	i2c_sendDataByte (ptrHandlerI2C, OLED_CONTROLBYTE_CONFIG);
 

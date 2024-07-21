@@ -37,20 +37,6 @@
 #define GYRO_1000  2
 #define GYRO_2000  3
 
-
-//Ejes
-
-//Eje de aceleracion en X,Y,Z
-#define ACCEL_X 0
-#define ACCEL_Y 1
-#define ACCEL_Z 2;
-
-//Eje de rotacion en X,Y,Z
-#define GYRO_X 0
-#define GYRO_Y 1
-#define GYRO_Z 2
-
-
 //Modulo I2C a usar
 
 #define MODULE_1 0
@@ -64,7 +50,6 @@ typedef struct
 {
 	uint8_t 		cantidad;
 	uint8_t 		fullScale;
-	uint8_t         axis;
 	uint8_t 		I2CModule;
 	GPIO_Handler_t  *ptrGPIOhandler;
 	I2C_Handler_t   *ptrI2Chandler;
@@ -77,21 +62,9 @@ typedef struct
 void configMPUAccel (MPUAccel_Config *ptrMPUAccel);
 void initMPU (MPUAccel_Config *ptrMPUAccel);
 void writeData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t data);
-uint8_t readData (MPUAccel_Config *ptrMPUAccel, uint8_t RA);
-
-
-uint8_t readAccel_X (MPUAccel_Config *ptrMPUAccel);
-uint8_t readAccel_Y (MPUAccel_Config *ptrMPUAccel);
-uint8_t readAccel_Z (MPUAccel_Config *ptrMPUAccel);
-
-
-uint8_t readGyro_X (MPUAccel_Config *ptrMPUAccel);
-uint8_t readGyro_Y (MPUAccel_Config *ptrMPUAccel);
-uint8_t readGyro_Z (MPUAccel_Config *ptrMPUAccel);
 
 
 
-uint8_t WHOIAM (MPUAccel_Config *ptrMPUAccel);
 
 
 

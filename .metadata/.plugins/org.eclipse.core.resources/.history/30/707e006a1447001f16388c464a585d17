@@ -48,7 +48,7 @@
 //Eje de rotacion en X,Y,Z
 #define GYRO_X 0
 #define GYRO_Y 1
-#define GYRO_Z 2
+#define GYRO_Z 2;
 
 
 //Modulo I2C a usar
@@ -78,20 +78,16 @@ void configMPUAccel (MPUAccel_Config *ptrMPUAccel);
 void initMPU (MPUAccel_Config *ptrMPUAccel);
 void writeData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t data);
 uint8_t readData (MPUAccel_Config *ptrMPUAccel, uint8_t RA);
-
-
 uint8_t readAccel_X (MPUAccel_Config *ptrMPUAccel);
-uint8_t readAccel_Y (MPUAccel_Config *ptrMPUAccel);
-uint8_t readAccel_Z (MPUAccel_Config *ptrMPUAccel);
-
-
-uint8_t readGyro_X (MPUAccel_Config *ptrMPUAccel);
-uint8_t readGyro_Y (MPUAccel_Config *ptrMPUAccel);
-uint8_t readGyro_Z (MPUAccel_Config *ptrMPUAccel);
+uint8_t readAccel_X (MPUAccel_Config *ptrMPUAccel);
+uint8_t readGYRO_ (MPUAccel_Config *ptrMPUAccel);
 
 
 
 uint8_t WHOIAM (MPUAccel_Config *ptrMPUAccel);
+
+
+
 
 
 
