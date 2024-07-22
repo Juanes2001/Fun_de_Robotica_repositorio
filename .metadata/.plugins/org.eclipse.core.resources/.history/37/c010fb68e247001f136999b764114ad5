@@ -199,7 +199,7 @@ uint8_t WHOIAM (MPUAccel_Config *ptrMPUAccel){
 // EN las siguientes 6 funciones llamamos los datos dentro de los registros respectivos para poder tener los datos de
 //Aceleracion y velocidad angular
 
-float readAccel_X (MPUAccel_Config *ptrMPUAccel){
+uint8_t readAccel_X (MPUAccel_Config *ptrMPUAccel){
 
 	//Creamos las variables donde almacenamos todos los datos
 
@@ -248,7 +248,7 @@ float readAccel_X (MPUAccel_Config *ptrMPUAccel){
 }
 
 
-float readAccel_Y (MPUAccel_Config *ptrMPUAccel){
+uint8_t readAccel_Y (MPUAccel_Config *ptrMPUAccel){
 
 	//Creamos las variables donde almacenamos todos los datos
 
@@ -297,7 +297,7 @@ float readAccel_Y (MPUAccel_Config *ptrMPUAccel){
 }
 
 
-float readAccel_Z (MPUAccel_Config *ptrMPUAccel){
+uint8_t readAccel_Z (MPUAccel_Config *ptrMPUAccel){
 
 	//Creamos las variables donde almacenamos todos los datos
 
@@ -346,7 +346,7 @@ float readAccel_Z (MPUAccel_Config *ptrMPUAccel){
 }
 
 
-float readGyro_X  (MPUAccel_Config *ptrMPUAccel){
+uint8_t readAccel_X (MPUAccel_Config *ptrMPUAccel){
 
 	//Creamos las variables donde almacenamos todos los datos
 
@@ -354,34 +354,34 @@ float readGyro_X  (MPUAccel_Config *ptrMPUAccel){
 	uint16_t GYROX_L = 0;
 	float    GYROX   = 0;
 
-	// Llamamos los bytes alto y bajo de los registros 0x43 y 0x44 respectivamente para el eje X
-	GYROX_H = readData(ptrMPUAccel, 0x43);
-	GYROX_L = readData(ptrMPUAccel, 0x44);
+	// Llamamos los bytes alto y bajo de los registros 0x3B y 0x3C respectivamente para el eje X
+	AccelX_H = readData(ptrMPUAccel, 0x3B);
+	AccelX_L = readData(ptrMPUAccel, 0x3C);
 
 	//Juntamos ambos bytes en un solo numero para tener la lectura completa del ADC;
-	GYROX = (GYROX_H << 8) | (GYROX_L);
+	AccelX = (AccelX_H << 8) | (AccelX_L);
 
-	// Como queremos es el dato de cuantos dps hay , entonces dividimos GYROX por la sensibilidad respectiva
+	// Como queremos es el dato de cuantas unidades de gravedad hay , entonces dividimos AccelX por la sensibilidad respectiva
 	// Preguntamos que caso de rango se tiene para este caso
-	switch (ptrMPUAccel->fullScaleGYRO){
-		case GYRO_250 :{
+	switch (ptrMPUAccel->fullScaleACCEL){
+		case ACCEL_2G :{
 
-			GYROX /= GYRO_250_SENS;
-
-			break;
-		}case GYRO_500 :{
-
-			GYROX /= GYRO_500_SENS;
+			AccelX /= ACCEL_2G_SENS;
 
 			break;
-		}case GYRO_1000 :{
+		}case ACCEL_4G :{
 
-			GYROX /= GYRO_1000_SENS;
+			AccelX /= ACCEL_4G_SENS;
 
 			break;
-		}case GYRO_2000 :{
+		}case ACCEL_8G :{
 
-			GYROX /= GYRO_2000_SENS;
+			AccelX /= ACCEL_8G_SENS;
+
+			break;
+		}case ACCEL_16G :{
+
+			AccelX /= ACCEL_16G_SENS;
 
 			break;
 		}default:{
@@ -390,106 +390,8 @@ float readGyro_X  (MPUAccel_Config *ptrMPUAccel){
 
 	}
 
-	return GYROX;
+	return AccelX;
 
 }
-
-
-float readGyro_Y  (MPUAccel_Config *ptrMPUAccel){
-
-	//Creamos las variables donde almacenamos todos los datos
-
-	uint16_t GYROY_H = 0;
-	uint16_t GYROY_L = 0;
-	float    GYROY   = 0;
-
-	// Llamamos los bytes alto y bajo de los registros 0x45 y 0x46 respectivamente para el eje Y
-	GYROY_H = readData(ptrMPUAccel, 0x45);
-	GYROY_L = readData(ptrMPUAccel, 0x46);
-
-	//Juntamos ambos bytes en un solo numero para tener la lectura completa del ADC;
-	GYROY = (GYROY_H << 8) | (GYROY_L);
-
-	// Como queremos es el dato de cuantos dps hay , entonces dividimos GYROY por la sensibilidad respectiva
-	// Preguntamos que caso de rango se tiene para este caso
-	switch (ptrMPUAccel->fullScaleGYRO){
-		case GYRO_250 :{
-
-			GYROY /= GYRO_250_SENS;
-
-			break;
-		}case GYRO_500 :{
-
-			GYROY /= GYRO_500_SENS;
-
-			break;
-		}case GYRO_1000 :{
-
-			GYROY /= GYRO_1000_SENS;
-
-			break;
-		}case GYRO_2000 :{
-
-			GYROY /= GYRO_2000_SENS;
-
-			break;
-		}default:{
-			break;
-		}
-
-	}
-
-	return GYROY;
-
-}
-
-float readGyro_Z  (MPUAccel_Config *ptrMPUAccel){
-
-	//Creamos las variables donde almacenamos todos los datos
-
-	uint16_t GYROZ_H = 0;
-	uint16_t GYROZ_L = 0;
-	float    GYROZ   = 0;
-
-	// Llamamos los bytes alto y bajo de los registros 0x47 y 0x48 respectivamente para el eje Z
-	GYROZ_H = readData(ptrMPUAccel, 0x47);
-	GYROZ_L = readData(ptrMPUAccel, 0x48);
-
-	//Juntamos ambos bytes en un solo numero para tener la lectura completa del ADC;
-	GYROZ = (GYROZ_H << 8) | (GYROZ_L);
-
-	// Como queremos es el dato de cuantos dps hay , entonces dividimos GYROZ por la sensibilidad respectiva
-	// Preguntamos que caso de rango se tiene para este caso
-	switch (ptrMPUAccel->fullScaleGYRO){
-		case GYRO_250 :{
-
-			GYROZ /= GYRO_250_SENS;
-
-			break;
-		}case GYRO_500 :{
-
-			GYROZ /= GYRO_500_SENS;
-
-			break;
-		}case GYRO_1000 :{
-
-			GYROZ /= GYRO_1000_SENS;
-
-			break;
-		}case GYRO_2000 :{
-
-			GYROZ /= GYRO_2000_SENS;
-
-			break;
-		}default:{
-			break;
-		}
-
-	}
-
-	return GYROZ;
-
-}
-
 
 

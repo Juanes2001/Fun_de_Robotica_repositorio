@@ -87,14 +87,14 @@ void writeData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t data);
 uint8_t readData (MPUAccel_Config *ptrMPUAccel, uint8_t RA);
 
 
-float readAccel_X (MPUAccel_Config *ptrMPUAccel);
-float readAccel_Y (MPUAccel_Config *ptrMPUAccel);
-float readAccel_Z (MPUAccel_Config *ptrMPUAccel);
+uint8_t readAccel_X (MPUAccel_Config *ptrMPUAccel);
+uint8_t readAccel_Y (MPUAccel_Config *ptrMPUAccel);
+uint8_t readAccel_Z (MPUAccel_Config *ptrMPUAccel);
 
 
-float readGyro_X (MPUAccel_Config *ptrMPUAccel);
-float readGyro_Y (MPUAccel_Config *ptrMPUAccel);
-float readGyro_Z (MPUAccel_Config *ptrMPUAccel);
+uint8_t readGyro_X (MPUAccel_Config *ptrMPUAccel);
+uint8_t readGyro_Y (MPUAccel_Config *ptrMPUAccel);
+uint8_t readGyro_Z (MPUAccel_Config *ptrMPUAccel);
 
 
 
