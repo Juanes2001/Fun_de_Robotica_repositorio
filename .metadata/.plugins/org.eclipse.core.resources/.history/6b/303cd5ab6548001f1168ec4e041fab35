@@ -93,9 +93,6 @@ USART_Handler_t handlerUSART1 = {0};
 Motor_Handler_t handlerMotor1 = {0};
 Motor_Handler_t handlerMotor2 = {0};
 
-//I2C
-I2C_Handler_t handler_I2C1 = {0};
-
 
 // Variables para los comandos
 char bufferReception[64];
