@@ -75,6 +75,7 @@ typedef struct
 //Funciones
 
 void configMPUAccel (MPUAccel_Config *ptrMPUAccel);
+void initMPU (MPUAccel_Config *ptrMPUAccel);
 void writeData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t data);
 uint8_t readData (MPUAccel_Config *ptrMPUAccel, uint8_t RA);
 

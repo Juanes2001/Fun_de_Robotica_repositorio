@@ -1,0 +1,26 @@
+/*
+ * MPUAccel.c
+ *
+ *  Created on: 26/11/2022
+ *      Author: ALEJANDRA MARIA
+ */
+
+#include "MPUAccel.h"
+#include "I2CDriver.h"
+#include "GPIOxDriver.h"
+
+
+void configMPUAccel (MPUAccel_Config *ptrMPUAccel){
+
+	// Paso 1 se configuran los pines GPIO y el perisferico I2C respectivo para poder configurar a partir del
+	//MCU el sensor, se tiene en cuenta tanto la lectura del pin SDA como el SCL
+
+	GPIO_Config(ptrMPUAccel->ptrGPIOhandler);
+	i2c_config(ptrMPUAccel->ptrI2Chandler);
+
+
+	// Paso 2 Inicializamos correctamente el acelerometro usando la comunicacion con este y sus registros.
+
+
+
+}

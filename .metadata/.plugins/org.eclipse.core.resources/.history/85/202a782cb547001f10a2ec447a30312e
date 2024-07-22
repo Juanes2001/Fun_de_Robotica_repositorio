@@ -38,39 +38,7 @@ void configMPUAccel (MPUAccel_Config *ptrMPUAccel){
 
 		case ACELERACION :{
 
-			switch (ptrMPUAccel->fullScale){
 
-				case ACCEL_2G :{
-
-					writeData(ptrMPUAccel, 0x1C, ACCEL_2G);
-
-					break;
-				}
-				case ACCEL_4G :{
-
-					writeData(ptrMPUAccel, 0x1C, ACCEL_4G);
-
-					break;
-				}
-				case ACCEL_8G :{
-
-					writeData(ptrMPUAccel, 0x1C, ACCEL_8G);
-
-					break;
-				}
-				case ACCEL_16G :{
-
-					writeData(ptrMPUAccel, 0x1C, ACCEL_2G);
-
-					break;
-				}
-
-				default:{
-
-					break;
-				}
-
-			}
 
 			break;
 		}
