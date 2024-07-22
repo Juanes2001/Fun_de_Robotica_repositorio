@@ -30,26 +30,12 @@
 #define ACCEL_8G  2
 #define ACCEL_16G 3
 
-//Sensibilidades respectivamente por rango de aceleración
-
-#define ACCEL_2G_SENS  16384
-#define ACCEL_4G_SENS  8192
-#define ACCEL_8G_SENS  4096
-#define ACCEL_16G_SENS 2048
-
 //Diferentes escalas para el GYRO
 
 #define GYRO_250   0
 #define GYRO_500   1
 #define GYRO_1000  2
 #define GYRO_2000  3
-
-//Sensibilidades respectivamente por rango de GYRO
-
-#define GYRO_250_SENS  131
-#define GYRO_500_SENS  66
-#define GYRO_1000_SENS 33
-#define GYRO_2000_SENS 16
 
 
 //Ejes
@@ -65,15 +51,21 @@
 #define GYRO_Z 2
 
 
+//Modulo I2C a usar
 
+#define MODULE_1 0
+#define MODULE_2 1
+#define MODULE_3 2
 
 
 
 
 typedef struct
 {
+	uint8_t 		cantidad;
 	uint8_t 		fullScaleACCEL;
 	uint8_t 		fullScaleGYRO;
+	uint8_t 		I2CModule;
 	GPIO_Handler_t  *ptrGPIOhandler;
 	I2C_Handler_t   *ptrI2Chandler;
 

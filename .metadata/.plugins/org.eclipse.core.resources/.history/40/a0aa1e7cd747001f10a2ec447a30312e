@@ -41,7 +41,7 @@ void configMPUAccel (MPUAccel_Config *ptrMPUAccel){
 		//de la gravedad)
 		byte = readData(ptrMPUAccel, 0x1C);
 		byte &= ~(0b00011000) ;
-		switch (ptrMPUAccel->fullScaleACCEL){
+		switch (ptrMPUAccel->fullScale){
 			case ACCEL_2G :{
 
 				writeData(ptrMPUAccel, 0x1C, (byte) | (ACCEL_2G << 3));
@@ -71,7 +71,7 @@ void configMPUAccel (MPUAccel_Config *ptrMPUAccel){
 		//Preguntamos por el Range del giroscopio pedido por el usuario, puede ser +-250, +-500, +-1000, +-2000 (°/segundo)
 		byte = readData(ptrMPUAccel, 0x1B);
 		byte &= ~(0b00011000) ;
-		switch (ptrMPUAccel->fullScaleGYRO){
+		switch (ptrMPUAccel->fullScale){
 			case GYRO_250 :{
 
 				writeData(ptrMPUAccel, 0x1B, (byte) | (GYRO_250 << 3));

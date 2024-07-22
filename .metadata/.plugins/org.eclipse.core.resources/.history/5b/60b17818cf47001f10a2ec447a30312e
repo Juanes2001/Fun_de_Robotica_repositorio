@@ -12,8 +12,8 @@
 
 void configMPUAccel (MPUAccel_Config *ptrMPUAccel){
 
-	uint8_t rdy  = 0;
-	uint8_t byte = 0;
+	uint8_t rdy = 0;
+
 	// Paso 1 se configuran los pines GPIO y el perisferico I2C respectivo para poder configurar a partir del
 	//MCU el sensor, se tiene en cuenta tanto la lectura del pin SDA como el SCL
 
@@ -29,74 +29,74 @@ void configMPUAccel (MPUAccel_Config *ptrMPUAccel){
 
 	// Paso 2 Inicializamos correctamente el acelerometro usando la comunicacion con este y sus registros,
 	// Reseteamos el MPU en el registro 0x6B Reseteando el bit 7, es decir 0b1 << 7 negado
-	byte = readData(ptrMPUAccel, 0x6B);
-	writeData(ptrMPUAccel, 0x6B , ~(0b1 << 7) & (byte) );
+	writeData(ptrMPUAccel, 0x6B , ~(0b1 << 7));
 
-	// los siguientes pasos se activan dentro del mismo switch case ya que se requiere saber cual cantidad se desea medir
-	//Paso 3,  configuramos el Full Rage de la cantidad pedida en el registro 0x1B y 0x1C para GYRO y Accel
+	//Paso 3 , configuramos el Full Rage de la cantidad pedida en el registro 0x1B y 0x1C para GYRO y Accel
 	// respectivamente
 
+	switch (ptrMPUAccel->cantidad){
 
-		//Preguntamos por el range requerido por el usuario de aceleracion, puede ser +-2g,4g,8g,16g (# X la aceleracion
-		//de la gravedad)
-		byte = readData(ptrMPUAccel, 0x1C);
-		byte &= ~(0b00011000) ;
-		switch (ptrMPUAccel->fullScaleACCEL){
-			case ACCEL_2G :{
+		case ACELERACION :{
 
-				writeData(ptrMPUAccel, 0x1C, (byte) | (ACCEL_2G << 3));
+			switch (ptrMPUAccel->fullScale){
 
-				break;
-			}case ACCEL_4G :{
+				case ACCEL_2G :{
 
-				writeData(ptrMPUAccel, 0x1C, (byte) | (ACCEL_4G << 3));
+					writeData(ptrMPUAccel, 0x1C, ACCEL_2G);
 
-				break;
-			}case ACCEL_8G :{
+					break;
+				}
+				case ACCEL_4G :{
 
-				writeData(ptrMPUAccel, 0x1C, (byte) | (ACCEL_8G << 3));
+					writeData(ptrMPUAccel, 0x1C, ACCEL_4G);
 
-				break;
-			}case ACCEL_16G :{
+					break;
+				}
+				case ACCEL_8G :{
 
-				writeData(ptrMPUAccel, 0x1C, (byte) | (ACCEL_16G << 3));
+					writeData(ptrMPUAccel, 0x1C, ACCEL_8G);
 
-				break;
-			}default:{
-				break;
+					break;
+				}
+				case ACCEL_16G :{
+
+					writeData(ptrMPUAccel, 0x1C, ACCEL_2G);
+
+					break;
+				}
+
+				default:{
+
+					break;
+				}
+
 			}
 
+			break;
+		}
+		case GIROSCOPIO :{
+
+
+
+			break;
+		}
+		case TEMPERATURA :{
+
+
+
+			break;
 		}
 
-		//Preguntamos por el Range del giroscopio pedido por el usuario, puede ser +-250, +-500, +-1000, +-2000 (°/segundo)
-		byte = readData(ptrMPUAccel, 0x1B);
-		byte &= ~(0b00011000) ;
-		switch (ptrMPUAccel->fullScaleGYRO){
-			case GYRO_250 :{
+		default:{
 
-				writeData(ptrMPUAccel, 0x1B, (byte) | (GYRO_250 << 3));
-
-				break;
-			}case GYRO_500 :{
-
-				writeData(ptrMPUAccel, 0x1B, (byte) | (GYRO_500 << 3));
-
-				break;
-			}case GYRO_1000 :{
-
-				writeData(ptrMPUAccel, 0x1B, (byte) | (GYRO_1000 << 3));
-
-				break;
-			}case GYRO_2000 :{
-
-				writeData(ptrMPUAccel, 0x1B, (byte) | (GYRO_2000 << 3));
-
-				break;
-			}default:{
-				break;
-			}
-
+			break;
 		}
+
+	}
+
+
+
+	//Paso 4, Preguntamos que cantidad se desea medir y se activa dentro del registro
 
 
 }
@@ -189,7 +189,7 @@ uint8_t WHOIAM (MPUAccel_Config *ptrMPUAccel){
 
 	whoami &= ~(129);
 
-	rdy = (ADDRESS_DOWN >> 1) && (whoami >> 1);
+	uint8_t rdy = (ADDRESS_DOWN >> 1) && (whoami >> 1);
 
 	return rdy;
 
