@@ -81,7 +81,7 @@ typedef struct
 void configMPUAccel (MPUAccel_Config *ptrMPUAccel);
 void writeData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t data);
 uint8_t readData (MPUAccel_Config *ptrMPUAccel, uint8_t RA);
-int* readContinuousData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t numbR_to_Read);
+char* readContinuousData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t numbR_to_Read);
 
 
 float readAccel_X (MPUAccel_Config *ptrMPUAccel);

@@ -182,10 +182,10 @@ uint8_t readData (MPUAccel_Config *ptrMPUAccel, uint8_t RA){
 
 
 
-int* readContinuousData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t numbR_to_Read){
+char* readContinuousData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t numbR_to_Read){
 
 	/* 0. Creamos una variable auxiliar para recribir el dato que leemos*/
-	int *auxRead = (int *) malloc (numbR_to_Read * sizeof(int));
+	char *auxRead = (char *) malloc (numbR_to_Read * sizeof(char));
 
 	//Limpiamos la bandera AF por si antes se levanto
 	ptrMPUAccel->ptrI2Chandler->ptrI2Cx->SR1 &= ~(I2C_SR1_AF);
@@ -227,7 +227,7 @@ int* readContinuousData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t numbR
 	i2c_stopTransaction(ptrMPUAccel->ptrI2Chandler);
 
 
-	return auxRead;
+	return *auxRead;
 
 
 }
