@@ -70,8 +70,7 @@ typedef struct
 {
 	uint8_t 		fullScaleACCEL;
 	uint8_t 		fullScaleGYRO;
-	GPIO_Handler_t  *ptrGPIOhandlerSCL;
-	GPIO_Handler_t  *ptrGPIOhandlerSDA;
+	GPIO_Handler_t  *ptrGPIOhandler;
 	I2C_Handler_t   *ptrI2Chandler;
 
 }MPUAccel_Config;

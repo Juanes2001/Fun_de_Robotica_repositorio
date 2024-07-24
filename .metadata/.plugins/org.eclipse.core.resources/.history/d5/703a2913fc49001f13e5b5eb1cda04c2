@@ -314,21 +314,21 @@ int main(void)
 
 
 
-		if (rxData != '\0'){
-		writeChar(&handlerUSART1, rxData);
-		bufferReception[counterReception] = rxData;
-		counterReception++;
+			if (rxData != '\0'){
+			writeChar(&handlerUSART1, rxData);
+			bufferReception[counterReception] = rxData;
+			counterReception++;
 
-		if (rxData == '@'){
-			doneTransaction = SET;
+			if (rxData == '@'){
+				doneTransaction = SET;
 
-			bufferReception[counterReception-1] = '\0';
+				bufferReception[counterReception-1] = '\0';
 
-			counterReception = 0;
+				counterReception = 0;
 
-		}
+			}
 
-		rxData = '\0';
+			rxData = '\0';
 
 		}
 
@@ -443,7 +443,7 @@ int main(void)
 
 			//"%u\t%u\t"
 
-			"%.3f\t%lu",
+			"%.3f\t%uld",
 
 			dps,tiempo
 
@@ -754,21 +754,12 @@ void inSystem (void){
 	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
 
-	handler_PINB9_I2C1.pGPIOx                             = GPIOB;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinAltFunMode  = AF4;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_OUT;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinNumber      = PIN_9;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_OPENDRAIN;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
-
 	handler_I2C1.ptrI2Cx = I2C1;
 	handler_I2C1.I2C_Config.clkSpeed = MAIN_CLOCK_50_MHz_FOR_I2C;
 	handler_I2C1.I2C_Config.slaveAddress = ADDRESS_DOWN;
 	handler_I2C1.I2C_Config.modeI2C = I2C_MODE_FM;
 
-	handler_MPUAccel_6050.ptrGPIOhandlerSCL  = &handler_PINB8_I2C1;
-	handler_MPUAccel_6050.ptrGPIOhandlerSDA  = &handler_PINB8_I2C1;
+	handler_MPUAccel_6050.ptrGPIOhandler  = &handler_PINB8_I2C1;
 	handler_MPUAccel_6050.ptrI2Chandler   = &handler_I2C1;
 	handler_MPUAccel_6050.fullScaleACCEL  = ACCEL_2G;
 	handler_MPUAccel_6050.fullScaleGYRO   = GYRO_250;

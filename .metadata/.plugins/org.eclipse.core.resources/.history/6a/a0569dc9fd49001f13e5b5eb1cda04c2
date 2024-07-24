@@ -16,10 +16,13 @@ void configMPUAccel (MPUAccel_Config *ptrMPUAccel){
 	uint8_t byte = 0;
 	// Paso 1 se configuran los pines GPIO y el perisferico I2C respectivo para poder configurar a partir del
 	//MCU el sensor, se tiene en cuenta tanto la lectura del pin SDA como el SCL
-	GPIO_Config(ptrMPUAccel->ptrGPIOhandlerSDA)
-	GPIO_Config(ptrMPUAccel->ptrGPIOhandlerSCL);
-	i2c_config(ptrMPUAccel->ptrI2Chandler);
 
+	//Paso 2, Colocamos en 0 el bit 7 del PM1, (registro 0x6B) ya que sin esto no se puede modificar ningun registro.
+	byte = readData(ptrMPUAccel, 0x6B);
+	writeData(ptrMPUAccel, 0x6B, ~(0b1 << 7) & (byte));
+
+	GPIO_Config(ptrMPUAccel->ptrGPIOhandler);
+	i2c_config(ptrMPUAccel->ptrI2Chandler);
 
 	// verificamos que el MPU se comunica con exito
 	while(!rdy){
@@ -27,9 +30,6 @@ void configMPUAccel (MPUAccel_Config *ptrMPUAccel){
 		rdy = WHOIAM(ptrMPUAccel);
 	}
 
-	//Paso 2, Colocamos en 0 el bit 7 del PM1, (registro 0x6B) ya que sin esto no se puede modificar ningun registro.
-	byte = readData(ptrMPUAccel, 0x6B);
-	writeData(ptrMPUAccel, 0x6B, ~(0b1 << 7) & (byte));
 
 
 	// Paso 3 Inicializamos correctamente el acelerometro usando la comunicacion con este y sus registros,

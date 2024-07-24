@@ -93,10 +93,12 @@ GPIO_Handler_t handler_PINB9_I2C1   = {0};
 EXTI_Config_t handlerExtiConEnc_1 = {0};
 EXTI_Config_t handlerExtiConEnc_2 = {0};
 
+
+
 //Timers
 BasicTimer_Handler_t handlerTimerBlinky = {0};
 BasicTimer_Handler_t handlerTIM2_vel    = {0};
-BasicTimer_Handler_t handlerTIM5_time   = {0};
+
 
 //PWMs
 PWM_Handler_t handlerPWM_1 = {0};
@@ -177,7 +179,6 @@ float Ts    = 80;
 
 //Variables
 float dps = 0;
-uint64_t tiempo = 0;
 
 
 //Creacion de tareas
@@ -314,21 +315,21 @@ int main(void)
 
 
 
-		if (rxData != '\0'){
-		writeChar(&handlerUSART1, rxData);
-		bufferReception[counterReception] = rxData;
-		counterReception++;
+			if (rxData != '\0'){
+			writeChar(&handlerUSART1, rxData);
+			bufferReception[counterReception] = rxData;
+			counterReception++;
 
-		if (rxData == '@'){
-			doneTransaction = SET;
+			if (rxData == '@'){
+				doneTransaction = SET;
 
-			bufferReception[counterReception-1] = '\0';
+				bufferReception[counterReception-1] = '\0';
 
-			counterReception = 0;
+				counterReception = 0;
 
-		}
+			}
 
-		rxData = '\0';
+			rxData = '\0';
 
 		}
 
@@ -443,9 +444,9 @@ int main(void)
 
 			//"%u\t%u\t"
 
-			"%.3f\t%lu",
+			"%.3f\t%u",
 
-			dps,tiempo
+			dps,
 
 			// counter_M1, counter_M2,
 
@@ -453,7 +454,6 @@ int main(void)
 			//, dist_1 ,dist_2
 			);
 
-			flagGyro = RESET;
 
 		}
 
@@ -754,39 +754,17 @@ void inSystem (void){
 	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
 
-	handler_PINB9_I2C1.pGPIOx                             = GPIOB;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinAltFunMode  = AF4;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_OUT;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinNumber      = PIN_9;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_OPENDRAIN;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
-
 	handler_I2C1.ptrI2Cx = I2C1;
 	handler_I2C1.I2C_Config.clkSpeed = MAIN_CLOCK_50_MHz_FOR_I2C;
 	handler_I2C1.I2C_Config.slaveAddress = ADDRESS_DOWN;
 	handler_I2C1.I2C_Config.modeI2C = I2C_MODE_FM;
 
-	handler_MPUAccel_6050.ptrGPIOhandlerSCL  = &handler_PINB8_I2C1;
-	handler_MPUAccel_6050.ptrGPIOhandlerSDA  = &handler_PINB8_I2C1;
+	handler_MPUAccel_6050.ptrGPIOhandler  = &handler_PINB8_I2C1;
 	handler_MPUAccel_6050.ptrI2Chandler   = &handler_I2C1;
 	handler_MPUAccel_6050.fullScaleACCEL  = ACCEL_2G;
 	handler_MPUAccel_6050.fullScaleGYRO   = GYRO_250;
 	configMPUAccel(&handler_MPUAccel_6050);
 
-
-	//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
-
-	////////////////////////////////Timer 5 para contador de tiempo ////////////////////////////////////
-
-
-
-	handlerTIM5_time.ptrTIMx                           = TIM5;
-	handlerTIM5_time.TIMx_Config.TIMx_interruptEnable  = BTIMER_ENABLE_INTERRUPT;
-	handlerTIM5_time.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
-	handlerTIM5_time.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_100us;
-	handlerTIM5_time.TIMx_Config.TIMx_period           = 1000;
-	BasicTimer_Config(&handlerTIM5_time);
 
 }
 
@@ -955,7 +933,7 @@ void parseCommands(char *stringVector){
 
 	}else if (strcmp(cmd, "gyro") == 0){
 
-		startTimer(&handlerTIM5_time);
+
 
 	}
 
@@ -997,23 +975,13 @@ void usart2Rx_Callback(void){
 
 }
 
-
-void BasicTimer5_Callback(void){
-
-	tiempo += 1;
-	flagGyro = SET;
-
-}
-
-//Interrupción Timer 3
+//Interrupción Timer 2
 void BasicTimer3_Callback(void){
 
 	GPIOxTooglePin(&handlerPinA5);
 	counterTIM3++;
 
 }
-
-//Interrupcion Timer 2
 
 void BasicTimer2_Callback(void){
 
