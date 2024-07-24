@@ -4,7 +4,7 @@
  *  Created on: 26/11/2022
  *      Author: ALEJANDRA MARIA
  */
-#include "stdlib.h"
+
 #include "MPUAccel.h"
 #include "I2CDriver.h"
 #include "GPIOxDriver.h"
@@ -116,7 +116,7 @@ void writeData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t data){
 	i2c_startTransaction (ptrMPUAccel->ptrI2Chandler);
 
 	//Mandamos el Address correspondiente y el bit escribir
-	i2c_sendSlaveAddressRW(ptrMPUAccel->ptrI2Chandler, ptrMPUAccel->ptrI2Chandler->I2C_Config.slaveAddress, I2C_WRITE_DATA);
+	i2c_sendSlaveAddressRW(ptrMPUAccel->ptrI2Chandler, ADDRESS_DOWN, I2C_WRITE_DATA);
 
 	// Dentro de la funcion anterior ya esta la espera respectiva para el ACK que debe mandar el Slave
 	i2c_sendMemoryAddress(ptrMPUAccel->ptrI2Chandler, RA);
@@ -152,7 +152,7 @@ uint8_t readData (MPUAccel_Config *ptrMPUAccel, uint8_t RA){
 	i2c_startTransaction (ptrMPUAccel->ptrI2Chandler);
 
 	//Mandamos el Address correspondiente y el bit escribir
-	i2c_sendSlaveAddressRW(ptrMPUAccel->ptrI2Chandler, ptrMPUAccel->ptrI2Chandler->I2C_Config.slaveAddress, I2C_WRITE_DATA);
+	i2c_sendSlaveAddressRW(ptrMPUAccel->ptrI2Chandler, ADDRESS_DOWN, I2C_WRITE_DATA);
 
 	// Dentro de la funcion anterior ya esta la espera respectiva para el ACK que debe mandar el Slave
 	i2c_sendMemoryAddress(ptrMPUAccel->ptrI2Chandler, RA);
@@ -167,7 +167,7 @@ uint8_t readData (MPUAccel_Config *ptrMPUAccel, uint8_t RA){
 
 	// Ya dentro de la anterior funcion esta la espera a que comience el bit de start
 	//Volvemos a mandar el Address con el bit de read (1)
-	i2c_sendSlaveAddressRW(ptrMPUAccel->ptrI2Chandler, ptrMPUAccel->ptrI2Chandler->I2C_Config.slaveAddress, I2C_READ_DATA);
+	i2c_sendSlaveAddressRW(ptrMPUAccel->ptrI2Chandler, ADDRESS_DOWN, I2C_READ_DATA);
 
 	// Mandamos el noAcknowledge despues de recibir el dato respectivo
 	i2c_sendNoAck(ptrMPUAccel->ptrI2Chandler);
@@ -185,7 +185,7 @@ uint8_t readData (MPUAccel_Config *ptrMPUAccel, uint8_t RA){
 char* readContinuousData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t numbR_to_Read){
 
 	/* 0. Creamos una variable auxiliar para recribir el dato que leemos*/
-	char *auxRead = (char *) malloc (numbR_to_Read * sizeof(char));
+	char auxRead [numbR_to_Read];
 
 	//Limpiamos la bandera AF por si antes se levanto
 	ptrMPUAccel->ptrI2Chandler->ptrI2Cx->SR1 &= ~(I2C_SR1_AF);
@@ -194,7 +194,7 @@ char* readContinuousData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t numb
 	i2c_startTransaction (ptrMPUAccel->ptrI2Chandler);
 
 	//Mandamos el Address correspondiente y el bit escribir
-	i2c_sendSlaveAddressRW(ptrMPUAccel->ptrI2Chandler, ptrMPUAccel->ptrI2Chandler->I2C_Config.slaveAddress, I2C_WRITE_DATA);
+	i2c_sendSlaveAddressRW(ptrMPUAccel->ptrI2Chandler, ADDRESS_DOWN, I2C_WRITE_DATA);
 
 	// Dentro de la funcion anterior ya esta la espera respectiva para el ACK que debe mandar el Slave
 	i2c_sendMemoryAddress(ptrMPUAccel->ptrI2Chandler, RA);
@@ -209,14 +209,14 @@ char* readContinuousData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t numb
 
 	// Ya dentro de la anterior funcion esta la espera a que comience el bit de start
 	//Volvemos a mandar el Address con el bit de read (1)
-	i2c_sendSlaveAddressRW(ptrMPUAccel->ptrI2Chandler, ptrMPUAccel->ptrI2Chandler->I2C_Config.slaveAddress, I2C_READ_DATA);
+	i2c_sendSlaveAddressRW(ptrMPUAccel->ptrI2Chandler, ADDRESS_DOWN, I2C_READ_DATA);
 
 	for(uint8_t i = 0 ; i < numbR_to_Read; i++){
 
 		// Mandamos un ACK para leer el siguiente registro
 		i2c_sendAck (ptrMPUAccel->ptrI2Chandler);
-		//Guardamos en un buffer los datos que vamos leyendo por cada ACK que mandamos
-		auxRead [i] = i2c_readDataByte(ptrMPUAccel->ptrI2Chandler);
+
+
 
 	}
 
@@ -226,6 +226,7 @@ char* readContinuousData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t numb
 	// Paramos la transacción
 	i2c_stopTransaction(ptrMPUAccel->ptrI2Chandler);
 
+	auxRead = i2c_readDataByte(ptrMPUAccel->ptrI2Chandler);
 
 	return auxRead;
 

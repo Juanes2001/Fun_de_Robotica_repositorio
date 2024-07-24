@@ -11,7 +11,6 @@
 #include <stm32f4xx.h>
 #include "I2CDriver.h"
 #include "GPIOxDriver.h"
-#include "stdlib.h"
 
 
 /* Definiciones para funcionamiento del acelerometro */
@@ -81,7 +80,7 @@ typedef struct
 void configMPUAccel (MPUAccel_Config *ptrMPUAccel);
 void writeData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t data);
 uint8_t readData (MPUAccel_Config *ptrMPUAccel, uint8_t RA);
-char* readContinuousData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t numbR_to_Read);
+uint8_t readContinuousData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t numbR_to_Read);
 
 
 float readAccel_X (MPUAccel_Config *ptrMPUAccel);

@@ -735,9 +735,7 @@ void inSystem (void){
 
 	handler_MPUAccel_6050.ptrGPIOhandler  = &handler_PINB8_I2C1;
 	handler_MPUAccel_6050.ptrI2Chandler   = &handler_I2C1;
-	handler_MPUAccel_6050.fullScaleACCEL  = ACCEL_2G;
-	handler_MPUAccel_6050.fullScaleGYRO   = GYRO_250;
-	configMPUAccel(&handler_MPUAccel_6050);
+	handler_MPUAccel_6050.fullScaleACCEL  =
 
 
 }
@@ -756,7 +754,6 @@ void parseCommands(char *stringVector){
 		writeMsg(&handlerUSART1, "1)  start #setPoint #dir --- setPoint de 0 a 9 ---  dir 0 CW 1 CCW \n");
 		writeMsg(&handlerUSART1, "2)  goTo #dutty #dir #distance  -----dutty de 0 a 100 ||  dir 0 CW 1 CCW || Distancia en mm \n" );
 		writeMsg(&handlerUSART1, "3)  off \n");
-		writeMsg(&handlerUSART1, "4)  gyro \n");
 		writeMsg(&handlerUSART1, " \n");
 
 	}else if (strcmp(cmd, "start") == 0){

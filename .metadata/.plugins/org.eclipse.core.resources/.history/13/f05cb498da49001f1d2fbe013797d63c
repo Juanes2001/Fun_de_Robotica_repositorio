@@ -11,12 +11,16 @@
 #include <stm32f4xx.h>
 #include "I2CDriver.h"
 #include "GPIOxDriver.h"
-#include "stdlib.h"
 
 
 /* Definiciones para funcionamiento del acelerometro */
 #define ADDRESS_UP          0b1101001
 #define ADDRESS_DOWN        0b1101000
+
+//Cantidad a medir [acceleracion, velocidad angular, temperatura]
+#define ACELERACION  0
+#define GIROSCOPIO   1
+#define TEMPERATURA  2
 
 //Escalas para cada una de las cantidades
 
@@ -81,7 +85,6 @@ typedef struct
 void configMPUAccel (MPUAccel_Config *ptrMPUAccel);
 void writeData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t data);
 uint8_t readData (MPUAccel_Config *ptrMPUAccel, uint8_t RA);
-char* readContinuousData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t numbR_to_Read);
 
 
 float readAccel_X (MPUAccel_Config *ptrMPUAccel);
@@ -92,8 +95,6 @@ float readAccel_Z (MPUAccel_Config *ptrMPUAccel);
 float readGyro_X (MPUAccel_Config *ptrMPUAccel);
 float readGyro_Y (MPUAccel_Config *ptrMPUAccel);
 float readGyro_Z (MPUAccel_Config *ptrMPUAccel);
-
-
 
 
 

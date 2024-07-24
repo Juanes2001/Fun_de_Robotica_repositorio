@@ -35,7 +35,6 @@
 #include "EXTIDriver.h"
 #include "MotorsDriver.h"
 #include "I2CDriver.h"
-#include "MPUAccel.h"
 
 /*definicion de variables del sistema*/
 
@@ -55,37 +54,21 @@ void breakMotor (void);
 
 //Definición Handlers
 //GPIO
-//Pin del User blinky
 GPIO_Handler_t handlerPinA5         = {0};
-
-//Pin de Reset
 GPIO_Handler_t handlerUserButton    = {0};
-
-
-//Pines PWM que controlan la velocidad de los motores
 GPIO_Handler_t handlerPinPwm_1      = {0};
 GPIO_Handler_t handlerPinPwm_2      = {0};
-
-//Pines de comunicacion USART
 GPIO_Handler_t handlerPinRx         = {0};
 GPIO_Handler_t handlerPinTx         = {0};
-
-//Pin para visualizar la velocidad del micro
 GPIO_Handler_t handlerMCO2Show      = {0};
-
-//Pines para encendido y apagado de los motores
 GPIO_Handler_t handlerEn2PinC11     = {0};
 GPIO_Handler_t handlerEn1PinC10     = {0};
-
-//Pines de salida para la direccion de las ruedas
 GPIO_Handler_t handlerIn2PinD2      = {0};
 GPIO_Handler_t handlerIn1PinC12     = {0};
-
-//Pines para lectura de encoders
 GPIO_Handler_t handlerEncoder1PinC1 = {0};
 GPIO_Handler_t handlerEncoder2PinC3 = {0};
 
-// Pines para I2C1
+
 GPIO_Handler_t handler_PINB8_I2C1   = {0};
 GPIO_Handler_t handler_PINB9_I2C1   = {0};
 
@@ -114,9 +97,6 @@ Motor_Handler_t handlerMotor2 = {0};
 
 //I2C
 I2C_Handler_t handler_I2C1 = {0};
-
-//MPUAccel
-MPUAccel_Config handler_MPUAccel_6050 ={0};
 
 
 // Variables para los comandos
@@ -720,24 +700,7 @@ void inSystem (void){
 
 		////////////////////////////////Configuracion PINES B8 (SCL) B9 (SDA) e I2C1 //////////////////////////////////////////////
 
-	handler_PINB8_I2C1.pGPIOx                             = GPIOB;
-	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinAltFunMode  = AF4;
-	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_OUT;
-	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinNumber      = PIN_8;
-	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_OPENDRAIN;
-	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
 
-	handler_I2C1.ptrI2Cx = I2C1;
-	handler_I2C1.I2C_Config.clkSpeed = MAIN_CLOCK_50_MHz_FOR_I2C;
-	handler_I2C1.I2C_Config.slaveAddress = ADDRESS_DOWN;
-	handler_I2C1.I2C_Config.modeI2C = I2C_MODE_FM;
-
-	handler_MPUAccel_6050.ptrGPIOhandler  = &handler_PINB8_I2C1;
-	handler_MPUAccel_6050.ptrI2Chandler   = &handler_I2C1;
-	handler_MPUAccel_6050.fullScaleACCEL  = ACCEL_2G;
-	handler_MPUAccel_6050.fullScaleGYRO   = GYRO_250;
-	configMPUAccel(&handler_MPUAccel_6050);
 
 
 }
@@ -756,7 +719,6 @@ void parseCommands(char *stringVector){
 		writeMsg(&handlerUSART1, "1)  start #setPoint #dir --- setPoint de 0 a 9 ---  dir 0 CW 1 CCW \n");
 		writeMsg(&handlerUSART1, "2)  goTo #dutty #dir #distance  -----dutty de 0 a 100 ||  dir 0 CW 1 CCW || Distancia en mm \n" );
 		writeMsg(&handlerUSART1, "3)  off \n");
-		writeMsg(&handlerUSART1, "4)  gyro \n");
 		writeMsg(&handlerUSART1, " \n");
 
 	}else if (strcmp(cmd, "start") == 0){
