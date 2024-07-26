@@ -8761,3 +8761,79 @@ Command-line arguments:  -os linux -ws gtk -arch x86_64
 
 !ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2024-07-26 10:09:58.879
 !MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-07-26 10:57:50.836
+!MESSAGE Indexed 'Base_FreeRTOS' (18 sources, 100 headers) in 1.89 sec: 7,936 declarations; 22,155 references; 3 unresolved inclusions; 109 syntax errors; 30 unresolved names (0.1%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-07-26 11:16:18.247
+!MESSAGE Indexed 'Base_FreeRTOS' (18 sources, 103 headers) in 1.22 sec: 8,063 declarations; 22,232 references; 0 unresolved inclusions; 109 syntax errors; 9 unresolved names (0.03%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-07-26 11:25:04.560
+!MESSAGE Indexed 'Base_FreeRTOS' (18 sources, 103 headers) in 1.1 sec: 8,063 declarations; 22,232 references; 0 unresolved inclusions; 109 syntax errors; 9 unresolved names (0.03%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-07-26 11:28:35.921
+!MESSAGE Indexed 'Base_FreeRTOS' (18 sources, 103 headers) in 0.999 sec: 8,063 declarations; 22,232 references; 0 unresolved inclusions; 109 syntax errors; 9 unresolved names (0.03%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-07-26 11:37:10.287
+!MESSAGE Indexed 'PeripheralDriver' (19 sources, 83 headers) in 1.24 sec: 4,742 declarations; 13,853 references; 0 unresolved inclusions; 1 syntax errors; 2 unresolved names (0.011%)
+
+!ENTRY org.eclipse.jface 4 2 2024-07-26 11:41:16.706
+!MESSAGE Problems occurred when invoking code from plug-in: "org.eclipse.jface".
+!STACK 0
+java.lang.NullPointerException
+	at org.eclipse.cdt.managedbuilder.ui.properties.ToolSettingsPrefStore.get(ToolSettingsPrefStore.java:427)
+	at org.eclipse.cdt.managedbuilder.ui.properties.ToolSettingsPrefStore.setSelection(ToolSettingsPrefStore.java:67)
+	at com.st.stm32cube.ide.mcu.toolchain.ui.unmanaged.ToolSettingsTab.updateDataForCategory(ToolSettingsTab.java:263)
+	at com.st.stm32cube.ide.mcu.toolchain.ui.unmanaged.ToolSettingsTab.updateUI(ToolSettingsTab.java:238)
+	at com.st.stm32cube.ide.mcu.toolchain.ui.unmanaged.ToolSettingsTab.access$0(ToolSettingsTab.java:229)
+	at com.st.stm32cube.ide.mcu.toolchain.ui.unmanaged.ToolSettingsTab$2.selectionChanged(ToolSettingsTab.java:199)
+	at org.eclipse.jface.viewers.Viewer$1.run(Viewer.java:151)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:45)
+	at org.eclipse.jface.util.SafeRunnable.run(SafeRunnable.java:174)
+	at org.eclipse.jface.viewers.Viewer.fireSelectionChanged(Viewer.java:148)
+	at org.eclipse.jface.viewers.StructuredViewer.updateSelection(StructuredViewer.java:2130)
+	at org.eclipse.jface.viewers.StructuredViewer.handleSelect(StructuredViewer.java:1176)
+	at org.eclipse.jface.viewers.StructuredViewer$4.widgetSelected(StructuredViewer.java:1205)
+	at org.eclipse.jface.util.OpenStrategy.fireSelectionEvent(OpenStrategy.java:263)
+	at org.eclipse.jface.util.OpenStrategy$1.handleEvent(OpenStrategy.java:421)
+	at org.eclipse.swt.widgets.EventTable.sendEvent(EventTable.java:89)
+	at org.eclipse.swt.widgets.Display.sendEvent(Display.java:5895)
+	at org.eclipse.swt.widgets.Widget.sendEvent(Widget.java:1520)
+	at org.eclipse.swt.widgets.Display.runDeferredEvents(Display.java:5126)
+	at org.eclipse.swt.widgets.Display.readAndDispatch(Display.java:4581)
+	at org.eclipse.jface.window.Window.runEventLoop(Window.java:823)
+	at org.eclipse.jface.window.Window.open(Window.java:799)
+	at org.eclipse.ui.dialogs.PropertyDialogAction.run(PropertyDialogAction.java:153)
+	at org.eclipse.jface.action.Action.runWithEvent(Action.java:474)
+	at org.eclipse.jface.action.ActionContributionItem.handleWidgetSelection(ActionContributionItem.java:580)
+	at org.eclipse.jface.action.ActionContributionItem.lambda$4(ActionContributionItem.java:414)
+	at org.eclipse.swt.widgets.EventTable.sendEvent(EventTable.java:89)
+	at org.eclipse.swt.widgets.Display.sendEvent(Display.java:5895)
+	at org.eclipse.swt.widgets.Widget.sendEvent(Widget.java:1520)
+	at org.eclipse.swt.widgets.Display.runDeferredEvents(Display.java:5126)
+	at org.eclipse.swt.widgets.Display.readAndDispatch(Display.java:4581)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine$5.run(PartRenderingEngine.java:1155)
+	at org.eclipse.core.databinding.observable.Realm.runWithDefault(Realm.java:338)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine.run(PartRenderingEngine.java:1046)
+	at org.eclipse.e4.ui.internal.workbench.E4Workbench.createAndRunUI(E4Workbench.java:155)
+	at org.eclipse.ui.internal.Workbench.lambda$3(Workbench.java:644)
+	at org.eclipse.core.databinding.observable.Realm.runWithDefault(Realm.java:338)
+	at org.eclipse.ui.internal.Workbench.createAndRunWorkbench(Workbench.java:551)
+	at org.eclipse.ui.PlatformUI.createAndRunWorkbench(PlatformUI.java:156)
+	at org.eclipse.ui.internal.ide.application.IDEApplication.start(IDEApplication.java:152)
+	at org.eclipse.equinox.internal.app.EclipseAppHandle.run(EclipseAppHandle.java:203)
+	at org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.runApplication(EclipseAppLauncher.java:136)
+	at org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.start(EclipseAppLauncher.java:104)
+	at org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:401)
+	at org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:255)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.eclipse.equinox.launcher.Main.invokeFramework(Main.java:659)
+	at org.eclipse.equinox.launcher.Main.basicRun(Main.java:596)
+	at org.eclipse.equinox.launcher.Main.run(Main.java:1467)
+	at org.eclipse.equinox.launcher.Main.main(Main.java:1440)
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-07-26 11:42:08.773
+!MESSAGE Indexed 'Base_FreeRTOS' (18 sources, 103 headers) in 1.28 sec: 8,063 declarations; 22,232 references; 0 unresolved inclusions; 109 syntax errors; 9 unresolved names (0.03%)
