@@ -1,7 +1,10 @@
-15:43:46 **** Incremental Build of configuration Debug for project Pruebas_sin_FreeRTOS ****
+18:23:02 **** Incremental Build of configuration Debug for project Pruebas_sin_FreeRTOS ****
 make -j12 all 
-makefile:63: *** unterminated variable reference.  Stop.
-"make -j12 all" terminated with exit code 2. Build might be incomplete.
+arm-none-eabi-size   Pruebas_sin_FreeRTOS.elf 
+   text	   data	    bss	    dec	    hex	filename
+  41968	    488	   2528	  44984	   afb8	Pruebas_sin_FreeRTOS.elf
+Finished building: default.size.stdout
+ 
 
-15:43:47 Build Failed. 1 errors, 0 warnings. (took 372ms)
+18:23:02 Build Finished. 0 errors, 0 warnings. (took 375ms)
 

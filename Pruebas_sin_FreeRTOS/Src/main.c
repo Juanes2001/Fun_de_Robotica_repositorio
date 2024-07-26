@@ -315,22 +315,27 @@ int main(void)
 
 
 		if (rxData != '\0'){
-		writeChar(&handlerUSART1, rxData);
-		bufferReception[counterReception] = rxData;
-		counterReception++;
+			writeChar(&handlerUSART1, rxData);
+			bufferReception[counterReception] = rxData;
+			counterReception++;
 
-		if (rxData == '@'){
-			doneTransaction = SET;
+			if (rxData == '@'){
+				doneTransaction = SET;
 
-			bufferReception[counterReception-1] = '\0';
+				bufferReception[counterReception-1] = '\0';
 
-			counterReception = 0;
+				counterReception = 0;
 
-		}
+			}else if (rxData == 'z'){
 
-		rxData = '\0';
+				memset(bufferReception, 0, sizeof(bufferReception));
+				counterReception = 0;
+				writeMsg(&handlerUSART1, "Buffer Vaciado\n \r");
+			}
 
-		}
+				rxData = '\0';
+
+			}
 
 		if (doneTransaction){
 			parseCommands(bufferReception);
@@ -443,15 +448,16 @@ int main(void)
 
 			//"%u\t%u\t"
 
-			"%.3f\t%lu",
+			"%.3f\n",
 
-			dps,tiempo
+			dps
 
 			// counter_M1, counter_M2,
 
 	//						 counterPWM1, diferenceM1, diferenceM2
 			//, dist_1 ,dist_2
 			);
+			writeMsg(&handlerUSART1, bufferMsg);
 
 			flagGyro = RESET;
 
@@ -748,7 +754,7 @@ void inSystem (void){
 
 	handler_PINB8_I2C1.pGPIOx                             = GPIOB;
 	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinAltFunMode  = AF4;
-	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_OUT;
+	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
 	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinNumber      = PIN_8;
 	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_OPENDRAIN;
 	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
@@ -756,7 +762,7 @@ void inSystem (void){
 
 	handler_PINB9_I2C1.pGPIOx                             = GPIOB;
 	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinAltFunMode  = AF4;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_OUT;
+	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
 	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinNumber      = PIN_9;
 	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_OPENDRAIN;
 	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
@@ -770,8 +776,8 @@ void inSystem (void){
 	handler_MPUAccel_6050.ptrGPIOhandlerSCL  = &handler_PINB8_I2C1;
 	handler_MPUAccel_6050.ptrGPIOhandlerSDA  = &handler_PINB9_I2C1;
 	handler_MPUAccel_6050.ptrI2Chandler   = &handler_I2C1;
-	handler_MPUAccel_6050.fullScaleACCEL  = ACCEL_2G;
-	handler_MPUAccel_6050.fullScaleGYRO   = GYRO_250;
+	handler_MPUAccel_6050.fullScaleACCEL  = ACCEL_4G;
+	handler_MPUAccel_6050.fullScaleGYRO   = GYRO_500;
 	configMPUAccel(&handler_MPUAccel_6050);
 
 
@@ -997,11 +1003,11 @@ void usart2Rx_Callback(void){
 
 }
 
-
+//Interrupcion Timer 5
 void BasicTimer5_Callback(void){
 
-	tiempo += 1;
 	flagGyro = SET;
+	tiempo += 1;
 
 }
 

@@ -60,7 +60,7 @@ main-build: Pruebas_sin_FreeRTOS.elf secondary-outputs
 
 # Tool invocations
 Pruebas_sin_FreeRTOS.elf Pruebas_sin_FreeRTOS.map: $(OBJS) $(USER_OBJS) /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Pruebas_sin_FreeRTOS/STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Pruebas_sin_FreeRTOS.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Pruebas_sin_FreeRTOS/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Pruebas_sin_FreeRTOS.map" -Wl,--gc-sections -static -L${workspace_loc:/PeripheralDriver/Debug --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "Pruebas_sin_FreeRTOS.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Pruebas_sin_FreeRTOS/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Pruebas_sin_FreeRTOS.map" -Wl,--gc-sections -static -L/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Debug --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
