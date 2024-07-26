@@ -28,7 +28,7 @@ void i2c_config(I2C_Handler_t *ptrHandlerI2C){
 	}
 
 	else if(ptrHandlerI2C->ptrI2Cx == I2C2){
-		RCC -> APB1ENR  |= RCC_APB1ENR_I2C2EN;
+		RCC -> APB1ENR |= RCC_APB1ENR_I2C2EN;
 	}
 
 	else if(ptrHandlerI2C->ptrI2Cx == I2C3){

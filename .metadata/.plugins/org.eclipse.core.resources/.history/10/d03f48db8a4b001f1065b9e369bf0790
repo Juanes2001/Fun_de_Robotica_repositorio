@@ -768,7 +768,7 @@ void inSystem (void){
 	handler_I2C1.I2C_Config.modeI2C = I2C_MODE_FM;
 
 	handler_MPUAccel_6050.ptrGPIOhandlerSCL  = &handler_PINB8_I2C1;
-	handler_MPUAccel_6050.ptrGPIOhandlerSDA  = &handler_PINB9_I2C1;
+	handler_MPUAccel_6050.ptrGPIOhandlerSDA  = &handler_PINB8_I2C1;
 	handler_MPUAccel_6050.ptrI2Chandler   = &handler_I2C1;
 	handler_MPUAccel_6050.fullScaleACCEL  = ACCEL_2G;
 	handler_MPUAccel_6050.fullScaleGYRO   = GYRO_250;

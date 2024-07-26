@@ -28,6 +28,8 @@ void i2c_config(I2C_Handler_t *ptrHandlerI2C){
 	}
 
 	else if(ptrHandlerI2C->ptrI2Cx == I2C2){
+		RCC -> AHB1RSTR |= RCC_APB1RSTR_I2C2RST;
+		RCC -> AHB1RSTR &= ~RCC_APB1RSTR_I2C2RST;
 		RCC -> APB1ENR  |= RCC_APB1ENR_I2C2EN;
 	}
 
