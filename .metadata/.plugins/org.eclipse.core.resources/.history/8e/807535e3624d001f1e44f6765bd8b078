@@ -24,7 +24,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>  // for usleep
+#include <string.h>
 
 
 #include "GPIOxDriver.h"
@@ -53,7 +53,6 @@ double distanceM1 (void);
 double distanceM2 (void);
 void breakMotor (void);
 float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis);
-
 
 //Definición Handlers
 //GPIO
@@ -964,7 +963,7 @@ void parseCommands(char *stringVector){
 
 	}else if (strcmp(cmd, "gyro") == 0){
 
-		calibr = calibracionGyros(&handler_MPUAccel_6050, 'z');
+//		calibr = calibracionGyros(&handler_MPUAccel_6050, 'z');
 		startTimer(&handlerTIM4_time);
 
 	}
@@ -1092,7 +1091,7 @@ void breakMotor(void){
 
 float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis){
 
-	uint16_t  numMedidas = 50;
+	uint16_t  numMedidas = 250;
 	float    medidas    = 0;
 	float    suma       = 0;
 	uint8_t  contador   = 0;
@@ -1104,6 +1103,7 @@ float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis){
 				medidas = readGyro_X(ptrMPUAccel);
 				suma += medidas;
 				contador++;
+
 			}
 			promedio = suma / numMedidas;
 			break;
@@ -1131,6 +1131,8 @@ float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis){
 
 	return promedio;
 }
+
+
 
 
 

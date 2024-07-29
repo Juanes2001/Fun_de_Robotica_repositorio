@@ -24,7 +24,8 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>  // for usleep
+#include <string.h>
+#include <unistd.h>  // for usleep
 
 
 #include "GPIOxDriver.h"
@@ -53,6 +54,7 @@ double distanceM1 (void);
 double distanceM2 (void);
 void breakMotor (void);
 float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis);
+void delay_ms(int milliseconds);
 
 
 //Definición Handlers
@@ -1104,6 +1106,7 @@ float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis){
 				medidas = readGyro_X(ptrMPUAccel);
 				suma += medidas;
 				contador++;
+				delay_ms (100);
 			}
 			promedio = suma / numMedidas;
 			break;
@@ -1112,6 +1115,7 @@ float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis){
 				medidas = readGyro_Y(ptrMPUAccel);
 				suma += medidas;
 				contador++;
+				delay_ms (100);
 			}
 			promedio = suma / numMedidas;
 			break;
@@ -1120,6 +1124,7 @@ float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis){
 				medidas = readGyro_Z(ptrMPUAccel);
 				suma += medidas;
 				contador++;
+				delay_ms (100);
 			}
 			promedio = suma / numMedidas;
 			break;
@@ -1132,6 +1137,12 @@ float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis){
 	return promedio;
 }
 
+
+// Function to create a delay in milliseconds
+void delay_ms(int milliseconds) {
+    // usleep takes sleep time in microseconds (1 millisecond = 1000 microseconds)
+    usleep(milliseconds * 1000);
+}
 
 
 

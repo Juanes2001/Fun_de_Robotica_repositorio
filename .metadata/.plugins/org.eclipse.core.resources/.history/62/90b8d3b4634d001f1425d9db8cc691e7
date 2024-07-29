@@ -24,7 +24,8 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>  // for usleep
+#include <string.h>
+#include <unistd.h>  // for usleep
 
 
 #include "GPIOxDriver.h"
@@ -53,7 +54,6 @@ double distanceM1 (void);
 double distanceM2 (void);
 void breakMotor (void);
 float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis);
-
 
 //Definición Handlers
 //GPIO
@@ -794,7 +794,7 @@ void inSystem (void){
 	handlerTIM4_time.TIMx_Config.TIMx_interruptEnable  = BTIMER_ENABLE_INTERRUPT;
 	handlerTIM4_time.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
 	handlerTIM4_time.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_100us;
-	handlerTIM4_time.TIMx_Config.TIMx_period           = 100;
+	handlerTIM4_time.TIMx_Config.TIMx_period           = 50;
 	BasicTimer_Config(&handlerTIM4_time);
 
 }
@@ -964,7 +964,7 @@ void parseCommands(char *stringVector){
 
 	}else if (strcmp(cmd, "gyro") == 0){
 
-		calibr = calibracionGyros(&handler_MPUAccel_6050, 'z');
+//		calibr = calibracionGyros(&handler_MPUAccel_6050, 'z');
 		startTimer(&handlerTIM4_time);
 
 	}
@@ -1092,7 +1092,7 @@ void breakMotor(void){
 
 float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis){
 
-	uint16_t  numMedidas = 50;
+	uint16_t  numMedidas = 250;
 	float    medidas    = 0;
 	float    suma       = 0;
 	uint8_t  contador   = 0;
@@ -1104,6 +1104,7 @@ float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis){
 				medidas = readGyro_X(ptrMPUAccel);
 				suma += medidas;
 				contador++;
+
 			}
 			promedio = suma / numMedidas;
 			break;
@@ -1132,6 +1133,12 @@ float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis){
 	return promedio;
 }
 
+
+// Function to create a delay in milliseconds
+void delay_ms(int milliseconds) {
+    // usleep takes sleep time in microseconds (1 millisecond = 1000 microseconds)
+    usleep(milliseconds * 1000);
+}
 
 
 
