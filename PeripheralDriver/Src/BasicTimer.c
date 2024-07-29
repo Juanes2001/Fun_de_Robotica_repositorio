@@ -29,7 +29,6 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 
 	uint32_t period = 0;
 	uint32_t speed   = 0;
-	stopTimer(ptrBTimerHandler);
 
 	/* 0. Desactivamos las interrupciones globales mientras configuramos el sistema.*/
 	__disable_irq();

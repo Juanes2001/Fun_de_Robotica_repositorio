@@ -61,11 +61,6 @@
 #define GYRO_Z 2
 
 
-
-
-
-
-
 typedef struct
 {
 	uint8_t 		fullScaleACCEL;
@@ -94,12 +89,8 @@ float readGyro_X (MPUAccel_Config *ptrMPUAccel);
 float readGyro_Y (MPUAccel_Config *ptrMPUAccel);
 float readGyro_Z (MPUAccel_Config *ptrMPUAccel);
 
-
-
-
-
 uint8_t WHOIAM (MPUAccel_Config *ptrMPUAccel);
 
-
+//float toFloat(CustomFloat32 cf);
 
 #endif /* MPUACCEL_H_ */

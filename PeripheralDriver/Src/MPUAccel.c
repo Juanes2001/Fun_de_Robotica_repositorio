@@ -266,9 +266,10 @@ float readAccel_X (MPUAccel_Config *ptrMPUAccel){
 
 	//Creamos las variables donde almacenamos todos los datos
 
-	uint16_t AccelX_H = 0;
-	uint16_t AccelX_L = 0;
-	float    AccelX   = 0;
+	int16_t AccelX_H  = 0;
+	int16_t AccelX_L  = 0;
+	int16_t    AccelX = 0;
+	double  AccelX_R  = 0;
 
 	// Llamamos los bytes alto y bajo de los registros 0x3B y 0x3C respectivamente para el eje X
 	AccelX_H = readData(ptrMPUAccel, 0x3B);
@@ -282,22 +283,22 @@ float readAccel_X (MPUAccel_Config *ptrMPUAccel){
 	switch (ptrMPUAccel->fullScaleACCEL){
 		case ACCEL_2G :{
 
-			AccelX /= ACCEL_2G_SENS;
+			AccelX_R = AccelX / (double) ACCEL_2G_SENS;
 
 			break;
 		}case ACCEL_4G :{
 
-			AccelX /= ACCEL_4G_SENS;
+			AccelX_R = AccelX / (double) ACCEL_4G_SENS;
 
 			break;
 		}case ACCEL_8G :{
 
-			AccelX /= ACCEL_8G_SENS;
+			AccelX_R = AccelX / (double) ACCEL_8G_SENS;
 
 			break;
 		}case ACCEL_16G :{
 
-			AccelX /= ACCEL_16G_SENS;
+			AccelX_R = AccelX / (double) ACCEL_16G_SENS;
 
 			break;
 		}default:{
@@ -306,7 +307,7 @@ float readAccel_X (MPUAccel_Config *ptrMPUAccel){
 
 	}
 
-	return AccelX;
+	return AccelX_R;
 
 }
 
@@ -315,9 +316,10 @@ float readAccel_Y (MPUAccel_Config *ptrMPUAccel){
 
 	//Creamos las variables donde almacenamos todos los datos
 
-	uint16_t AccelY_H = 0;
-	uint16_t AccelY_L = 0;
-	float    AccelY   = 0;
+	int16_t AccelY_H = 0;
+	int16_t AccelY_L = 0;
+	int16_t    AccelY   = 0;
+	double  AccelY_R   = 0;
 
 	// Llamamos los bytes alto y bajo de los registros 0x3D y 0x3E respectivamente para el eje Y
 	AccelY_H = readData(ptrMPUAccel, 0x3D);
@@ -326,27 +328,28 @@ float readAccel_Y (MPUAccel_Config *ptrMPUAccel){
 	//Juntamos ambos bytes en un solo numero para tener la lectura completa del ADC;
 	AccelY = (AccelY_H << 8) | (AccelY_L);
 
+
 	// Como queremos es el dato de cuantas unidades de gravedad hay , entonces dividimos AccelY por la sensibilidad respectiva
 	// Preguntamos que caso de rango se tiene para este caso
 	switch (ptrMPUAccel->fullScaleACCEL){
 		case ACCEL_2G :{
 
-			AccelY /= ACCEL_2G_SENS;
+			AccelY_R = AccelY / (double) ACCEL_2G_SENS;
 
 			break;
 		}case ACCEL_4G :{
 
-			AccelY /= ACCEL_4G_SENS;
+			AccelY_R = AccelY / (double) ACCEL_4G_SENS;
 
 			break;
 		}case ACCEL_8G :{
 
-			AccelY /= ACCEL_8G_SENS;
+			AccelY_R = AccelY / (double) ACCEL_8G_SENS;
 
 			break;
 		}case ACCEL_16G :{
 
-			AccelY /= ACCEL_16G_SENS;
+			AccelY_R = AccelY / (double) ACCEL_16G_SENS;
 
 			break;
 		}default:{
@@ -355,7 +358,7 @@ float readAccel_Y (MPUAccel_Config *ptrMPUAccel){
 
 	}
 
-	return AccelY;
+	return AccelY_R;
 
 }
 
@@ -364,9 +367,10 @@ float readAccel_Z (MPUAccel_Config *ptrMPUAccel){
 
 	//Creamos las variables donde almacenamos todos los datos
 
-	uint16_t AccelZ_H = 0;
-	uint16_t AccelZ_L = 0;
-	float    AccelZ   = 0;
+	int16_t AccelZ_H = 0;
+	int16_t AccelZ_L = 0;
+	int16_t    AccelZ   = 0;
+	double  AccelZ_R   = 0;
 
 	// Llamamos los bytes alto y bajo de los registros 0x3F y 0x40 respectivamente para el eje Z
 	AccelZ_H = readData(ptrMPUAccel, 0x3F);
@@ -380,22 +384,22 @@ float readAccel_Z (MPUAccel_Config *ptrMPUAccel){
 	switch (ptrMPUAccel->fullScaleACCEL){
 		case ACCEL_2G :{
 
-			AccelZ /= ACCEL_2G_SENS;
+			 AccelZ_R = AccelZ / (double) ACCEL_2G_SENS;
 
 			break;
 		}case ACCEL_4G :{
 
-			AccelZ /= ACCEL_4G_SENS;
+			 AccelZ_R = AccelZ / (double) ACCEL_4G_SENS;
 
 			break;
 		}case ACCEL_8G :{
 
-			AccelZ /= ACCEL_8G_SENS;
+			 AccelZ_R = AccelZ / (double) ACCEL_8G_SENS;
 
 			break;
 		}case ACCEL_16G :{
 
-			AccelZ /= ACCEL_16G_SENS;
+			 AccelZ_R = AccelZ / (double) ACCEL_16G_SENS;
 
 			break;
 		}default:{
@@ -404,7 +408,7 @@ float readAccel_Z (MPUAccel_Config *ptrMPUAccel){
 
 	}
 
-	return AccelZ;
+	return AccelZ_R;
 
 }
 
@@ -413,9 +417,10 @@ float readGyro_X  (MPUAccel_Config *ptrMPUAccel){
 
 	//Creamos las variables donde almacenamos todos los datos
 
-	uint16_t GYROX_H = 0;
-	uint16_t GYROX_L = 0;
-	float    GYROX   = 0;
+	int16_t GYROX_H = 0;
+	int16_t GYROX_L = 0;
+	int16_t   GYROX   = 0;
+	double  GYROX_R   = 0;
 
 	// Llamamos los bytes alto y bajo de los registros 0x43 y 0x44 respectivamente para el eje X
 	GYROX_H = readData(ptrMPUAccel, 0x43);
@@ -429,22 +434,22 @@ float readGyro_X  (MPUAccel_Config *ptrMPUAccel){
 	switch (ptrMPUAccel->fullScaleGYRO){
 		case GYRO_250 :{
 
-			GYROX /= GYRO_250_SENS;
+			GYROX_R = GYROX / (double) GYRO_250_SENS;
 
 			break;
 		}case GYRO_500 :{
 
-			GYROX /= GYRO_500_SENS;
+			GYROX_R = GYROX / (double) GYRO_500_SENS;
 
 			break;
 		}case GYRO_1000 :{
 
-			GYROX /= GYRO_1000_SENS;
+			GYROX_R = GYROX / (double) GYRO_1000_SENS;
 
 			break;
 		}case GYRO_2000 :{
 
-			GYROX /= GYRO_2000_SENS;
+			GYROX_R = GYROX / (double) GYRO_2000_SENS;
 
 			break;
 		}default:{
@@ -453,7 +458,7 @@ float readGyro_X  (MPUAccel_Config *ptrMPUAccel){
 
 	}
 
-	return GYROX;
+	return GYROX_R;
 
 }
 
@@ -462,9 +467,10 @@ float readGyro_Y  (MPUAccel_Config *ptrMPUAccel){
 
 	//Creamos las variables donde almacenamos todos los datos
 
-	uint16_t GYROY_H = 0;
-	uint16_t GYROY_L = 0;
-	float    GYROY   = 0;
+	int16_t GYROY_H = 0;
+	int16_t GYROY_L = 0;
+	int16_t   GYROY   = 0;
+	double  GYROY_R   = 0;
 
 	// Llamamos los bytes alto y bajo de los registros 0x45 y 0x46 respectivamente para el eje Y
 	GYROY_H = readData(ptrMPUAccel, 0x45);
@@ -478,22 +484,22 @@ float readGyro_Y  (MPUAccel_Config *ptrMPUAccel){
 	switch (ptrMPUAccel->fullScaleGYRO){
 		case GYRO_250 :{
 
-			GYROY /= GYRO_250_SENS;
+			GYROY_R = GYROY / (double) GYRO_250_SENS;
 
 			break;
 		}case GYRO_500 :{
 
-			GYROY /= GYRO_500_SENS;
+			GYROY_R = GYROY / (double) GYRO_500_SENS;
 
 			break;
 		}case GYRO_1000 :{
 
-			GYROY /= GYRO_1000_SENS;
+			GYROY_R = GYROY / (double) GYRO_1000_SENS;
 
 			break;
 		}case GYRO_2000 :{
 
-			GYROY /= GYRO_2000_SENS;
+			GYROY_R = GYROY / (double) GYRO_2000_SENS;
 
 			break;
 		}default:{
@@ -502,7 +508,7 @@ float readGyro_Y  (MPUAccel_Config *ptrMPUAccel){
 
 	}
 
-	return GYROY;
+	return GYROY_R;
 
 }
 
@@ -510,9 +516,10 @@ float readGyro_Z  (MPUAccel_Config *ptrMPUAccel){
 
 	//Creamos las variables donde almacenamos todos los datos
 
-	uint16_t GYROZ_H = 0;
-	uint16_t GYROZ_L = 0;
-	float    GYROZ   = 0;
+	int16_t  GYROZ_H  = 0;
+	int16_t  GYROZ_L  = 0;
+	int16_t  GYROZ    = 0;
+	double   GYROZ_R   = 0;
 
 	// Llamamos los bytes alto y bajo de los registros 0x47 y 0x48 respectivamente para el eje Z
 	GYROZ_H = readData(ptrMPUAccel, 0x47);
@@ -526,22 +533,22 @@ float readGyro_Z  (MPUAccel_Config *ptrMPUAccel){
 	switch (ptrMPUAccel->fullScaleGYRO){
 		case GYRO_250 :{
 
-			GYROZ /= GYRO_250_SENS;
+			GYROZ_R =   GYROZ / (double) GYRO_250_SENS ;
 
 			break;
 		}case GYRO_500 :{
 
-			GYROZ /= GYRO_500_SENS;
+			GYROZ_R = GYROZ /  (double) GYRO_500_SENS ;
 
 			break;
 		}case GYRO_1000 :{
 
-			GYROZ /= GYRO_1000_SENS;
+			GYROZ_R = GYROZ / (double)  GYRO_1000_SENS;
 
 			break;
 		}case GYRO_2000 :{
 
-			GYROZ /= GYRO_2000_SENS;
+			GYROZ_R = GYROZ / (double) GYRO_2000_SENS;
 
 			break;
 		}default:{
@@ -550,9 +557,8 @@ float readGyro_Z  (MPUAccel_Config *ptrMPUAccel){
 
 	}
 
-	return GYROZ;
+	return GYROZ_R;
 
 }
-
 
 

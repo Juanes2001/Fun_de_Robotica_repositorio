@@ -52,6 +52,7 @@ void parseCommands(char *stringVector);
 double distanceM1 (void);
 double distanceM2 (void);
 void breakMotor (void);
+float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis);
 
 //Definición Handlers
 //GPIO
@@ -94,13 +95,13 @@ EXTI_Config_t handlerExtiConEnc_1 = {0};
 EXTI_Config_t handlerExtiConEnc_2 = {0};
 
 //Timers
-BasicTimer_Handler_t handlerTimerBlinky = {0};
-BasicTimer_Handler_t handlerTIM2_vel    = {0};
-BasicTimer_Handler_t handlerTIM5_time   = {0};
+BasicTimer_Handler_t handlerTimerBlinky = {0}; // Timer 3
+BasicTimer_Handler_t handlerTIM2_vel    = {0}; // Timer 2
+BasicTimer_Handler_t handlerTIM4_time   = {0}; // Timer 4
 
 //PWMs
-PWM_Handler_t handlerPWM_1 = {0};
-PWM_Handler_t handlerPWM_2 = {0};
+PWM_Handler_t handlerPWM_1 = {0}; // Timer 5
+PWM_Handler_t handlerPWM_2 = {0}; // Timer 5
 
 //Usart
 USART_Handler_t handlerUSART1 = {0};
@@ -176,8 +177,9 @@ float theta = 150;
 float Ts    = 80;
 
 //Variables
-float dps = 0;
+float dps       = 0;
 uint32_t tiempo = 0;
+float calibr    = 0;
 
 
 //Creacion de tareas
@@ -442,8 +444,8 @@ int main(void)
 
 		}else if (flagGyro){
 
-			dps = readGyro_Z (&handler_MPUAccel_6050);
-
+			dps = readGyro_Z(&handler_MPUAccel_6050);
+			dps -= calibr;
 			sprintf (bufferMsg, //"%u\t%u\t%.3f\t%.3f\t
 
 			//"%u\t%u\t"
@@ -454,7 +456,7 @@ int main(void)
 
 			// counter_M1, counter_M2,
 
-	//						 counterPWM1, diferenceM1, diferenceM2
+	//					counterPWM1, diferenceM1, diferenceM2
 			//, dist_1 ,dist_2
 			);
 			writeMsg(&handlerUSART1, bufferMsg);
@@ -776,8 +778,8 @@ void inSystem (void){
 	handler_MPUAccel_6050.ptrGPIOhandlerSCL  = &handler_PINB8_I2C1;
 	handler_MPUAccel_6050.ptrGPIOhandlerSDA  = &handler_PINB9_I2C1;
 	handler_MPUAccel_6050.ptrI2Chandler   = &handler_I2C1;
-	handler_MPUAccel_6050.fullScaleACCEL  = ACCEL_4G;
-	handler_MPUAccel_6050.fullScaleGYRO   = GYRO_500;
+	handler_MPUAccel_6050.fullScaleACCEL  = ACCEL_2G;
+	handler_MPUAccel_6050.fullScaleGYRO   = GYRO_250;
 	configMPUAccel(&handler_MPUAccel_6050);
 
 
@@ -787,12 +789,12 @@ void inSystem (void){
 
 
 
-	handlerTIM5_time.ptrTIMx                           = TIM5;
-	handlerTIM5_time.TIMx_Config.TIMx_interruptEnable  = BTIMER_ENABLE_INTERRUPT;
-	handlerTIM5_time.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
-	handlerTIM5_time.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_100us;
-	handlerTIM5_time.TIMx_Config.TIMx_period           = 1000;
-	BasicTimer_Config(&handlerTIM5_time);
+	handlerTIM4_time.ptrTIMx                           = TIM4;
+	handlerTIM4_time.TIMx_Config.TIMx_interruptEnable  = BTIMER_ENABLE_INTERRUPT;
+	handlerTIM4_time.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
+	handlerTIM4_time.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_100us;
+	handlerTIM4_time.TIMx_Config.TIMx_period           = 100;
+	BasicTimer_Config(&handlerTIM4_time);
 
 }
 
@@ -961,7 +963,8 @@ void parseCommands(char *stringVector){
 
 	}else if (strcmp(cmd, "gyro") == 0){
 
-		startTimer(&handlerTIM5_time);
+//		calibr = calibracionGyros(&handler_MPUAccel_6050, 'z');
+		startTimer(&handlerTIM4_time);
 
 	}
 
@@ -1003,8 +1006,8 @@ void usart2Rx_Callback(void){
 
 }
 
-//Interrupcion Timer 5
-void BasicTimer5_Callback(void){
+//Interrupcion Timer 4
+void BasicTimer4_Callback(void){
 
 	flagGyro = SET;
 	tiempo += 1;
@@ -1044,6 +1047,7 @@ void callback_extInt3(void){
 
 //Definicion de funciones varias
 
+// Freno de motores
 void breakMotor(void){
 
 	//Se pregunta cual motor se quiere apagar
@@ -1083,7 +1087,50 @@ void breakMotor(void){
 }
 
 
+// Calibracion Gyros:
 
+float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis){
+
+	uint16_t  numMedidas = 250;
+	float    medidas    = 0;
+	float    suma       = 0;
+	uint8_t  contador   = 0;
+	float    promedio   = 0;
+
+	switch (axis) {
+		case 'x':{
+			while (contador < numMedidas){
+				medidas = readGyro_X(ptrMPUAccel);
+				suma += medidas;
+				contador++;
+
+			}
+			promedio = suma / numMedidas;
+			break;
+		}case 'y':{
+			while (contador < numMedidas){
+				medidas = readGyro_Y(ptrMPUAccel);
+				suma += medidas;
+				contador++;
+			}
+			promedio = suma / numMedidas;
+			break;
+		}case 'z':{
+			while (contador < numMedidas){
+				medidas = readGyro_Z(ptrMPUAccel);
+				suma += medidas;
+				contador++;
+			}
+			promedio = suma / numMedidas;
+			break;
+		}default:{
+			break;
+		}
+	}
+
+
+	return promedio;
+}
 
 
 
