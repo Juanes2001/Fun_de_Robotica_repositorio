@@ -65,6 +65,19 @@ typedef struct
 
 }USART_Config_t;
 
+enum {
+	e_USART_PRIORITY_6 =6,
+	e_USART_PRIORITY_7,
+	e_USART_PRIORITY_8,
+	e_USART_PRIORITY_9,
+	e_USART_PRIORITY_10,
+	e_USART_PRIORITY_11,
+	e_USART_PRIORITY_12,
+	e_USART_PRIORITY_13,
+	e_USART_PRIORITY_14,
+	e_USART_PRIORITY_15
+};
+
 /*
  * Definicion del Handler para un USART:
  * - Estructura que contiene los SFR que controlan el periferico
@@ -94,6 +107,8 @@ void writeMsg(USART_Handler_t *ptrUsartHandler, char* msgToSend);
 uint32_t brrCalculus (USART_Handler_t *ptrUsartHandler, uint32_t MCUvelocity);
 uint8_t getRxData(void);
 float roundToNDecimals(float number, int n);
+void usart_Set_Priority(USART_Handler_t *ptrUsartHandler, uint8_t newPriority);
+
 void usart1Rx_Callback(void);
 void usart2Rx_Callback(void);
 void usart6Rx_Callback(void);

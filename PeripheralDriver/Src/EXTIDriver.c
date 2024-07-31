@@ -585,7 +585,96 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 
 	}
 
+
+	// Seteamos la prioridad de la interrupcion.
+
+
+
 	/* 7.0 Volvemos a activar las interrupciones globales */
+	__enable_irq();
+
+}
+
+// Con esta funcion se setea la prioridad
+void exti_Set_Priority (EXTI_Config_t *extiConfig, uint8_t newPriority){
+
+	__disable_irq();
+
+		//Debemos patricular la interupcion en el NVIC para ello debemos hacerlo apra cada una de las posibles opciones
+	switch (extiConfig->pGPIOHandler->GPIO_PinConfig.GPIO_PinNumber) {
+			case 0: {
+				__NVIC_SetPriority(EXTI0_IRQn, newPriority);
+				break;
+			}
+
+			case 1: {
+				__NVIC_SetPriority(EXTI1_IRQn, newPriority);
+				break;
+			}
+			case 2: {
+				__NVIC_SetPriority(EXTI2_IRQn, newPriority);
+				break;
+			}
+			case 3: {
+				__NVIC_SetPriority(EXTI3_IRQn, newPriority);
+				break;
+			}
+			case 4: {
+				__NVIC_SetPriority(EXTI4_IRQn, newPriority);
+				break;
+			}
+			case 5: {
+				__NVIC_SetPriority(EXTI9_5_IRQn, newPriority);
+				break;
+			}
+			case 6: {
+				__NVIC_SetPriority(EXTI9_5_IRQn, newPriority);
+				break;
+			}
+			case 7: {
+				__NVIC_SetPriority(EXTI9_5_IRQn, newPriority);
+				break;
+			}
+			case 8: {
+				__NVIC_SetPriority(EXTI9_5_IRQn, newPriority);
+				break;
+			}
+			case 9: {
+				__NVIC_SetPriority(EXTI9_5_IRQn, newPriority);
+				break;
+			}
+			case 10: {
+				__NVIC_SetPriority(EXTI15_10_IRQn, newPriority);
+				break;
+			}
+			case 11: {
+				__NVIC_SetPriority(EXTI15_10_IRQn, newPriority);
+				break;
+			}
+			case 12: {
+				__NVIC_SetPriority(EXTI15_10_IRQn, newPriority);
+				break;
+			}
+			case 13: {
+				__NVIC_SetPriority(EXTI15_10_IRQn, newPriority);
+				break;
+			}
+			case 14: {
+				__NVIC_SetPriority(EXTI15_10_IRQn, newPriority);
+				break;
+			}
+			case 15: {
+				__NVIC_SetPriority(EXTI15_10_IRQn, newPriority);
+				break;
+			}
+
+			default: {
+				__NOP();
+				break;
+			}
+
+		}
+
 	__enable_irq();
 
 }

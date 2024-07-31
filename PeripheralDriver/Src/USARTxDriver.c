@@ -85,31 +85,31 @@ void USART_Config(USART_Handler_t *ptrUsartHandler){
 
 	// 2.4 Configuramos los stop bits (SFR USART_CR2)
 	switch(ptrUsartHandler->USART_Config.USART_stopbits){
-	case USART_STOPBIT_1: {
-		// Debemos cargar el valor 0b00 en los dos bits de STOP
-		ptrUsartHandler->ptrUSARTx->CR2 &= ~USART_CR2_STOP;
-		break;
-	}
-	case USART_STOPBIT_0_5: {
-		// Debemos cargar el valor 0b01 en los dos bits de STOP
-		ptrUsartHandler->ptrUSARTx->CR2 |= USART_CR2_STOP & (~USART_CR2_STOP_1);
-		break;
-	}
-	case USART_STOPBIT_2: {
-		// Debemoscargar el valor 0b10 en los dos bits de STOP
-		ptrUsartHandler->ptrUSARTx->CR2 |= USART_CR2_STOP & (~USART_CR2_STOP_0);
-		break;
-	}
-	case USART_STOPBIT_1_5: {
-		// Debemoscargar el valor 0b11 en los dos bits de STOP
-		ptrUsartHandler->ptrUSARTx->CR2 |= USART_CR2_STOP;
-		break;
-	}
-	default: {
-		// En el caso por defecto seleccionamos 1 bit de parada
-		ptrUsartHandler->ptrUSARTx->CR2 &= ~USART_CR2_STOP;
-		break;
-	}
+		case USART_STOPBIT_1: {
+			// Debemos cargar el valor 0b00 en los dos bits de STOP
+			ptrUsartHandler->ptrUSARTx->CR2 &= ~USART_CR2_STOP;
+			break;
+		}
+		case USART_STOPBIT_0_5: {
+			// Debemos cargar el valor 0b01 en los dos bits de STOP
+			ptrUsartHandler->ptrUSARTx->CR2 |= USART_CR2_STOP & (~USART_CR2_STOP_1);
+			break;
+		}
+		case USART_STOPBIT_2: {
+			// Debemoscargar el valor 0b10 en los dos bits de STOP
+			ptrUsartHandler->ptrUSARTx->CR2 |= USART_CR2_STOP & (~USART_CR2_STOP_0);
+			break;
+		}
+		case USART_STOPBIT_1_5: {
+			// Debemoscargar el valor 0b11 en los dos bits de STOP
+			ptrUsartHandler->ptrUSARTx->CR2 |= USART_CR2_STOP;
+			break;
+		}
+		default: {
+			// En el caso por defecto seleccionamos 1 bit de parada
+			ptrUsartHandler->ptrUSARTx->CR2 &= ~USART_CR2_STOP;
+			break;
+		}
 	}
 
 		// 2.5 Configuracion del Baudrate (SFR USART_BRR)
@@ -212,37 +212,37 @@ void USART_Config(USART_Handler_t *ptrUsartHandler){
 
 	// 2.6 Configuramos el modo: TX only, RX only, RXTX, disable
 	switch(ptrUsartHandler->USART_Config.USART_mode){
-	case USART_MODE_TX:
-	{
-		// Activamos la parte del sistema encargada de enviar
-		ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_TE;
-		break;
-	}
-	case USART_MODE_RX:
-	{
-		// Activamos la parte del sistema encargada de recibir
-		ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_RE;
-		break;
-	}
-	case USART_MODE_RXTX:
-	{
-		// Activamos ambas partes, tanto transmision como recepcion
-		ptrUsartHandler->ptrUSARTx->CR1 |= (USART_CR1_TE | USART_CR1_RE);
-		break;
-	}
-	case USART_MODE_DISABLE:
-	{
-		// Desactivamos ambos canales
-		ptrUsartHandler->ptrUSARTx->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
-		break;
-	}
-	
-	default:
-	{
-		// Actuando por defecto, desactivamos ambos canales
-		ptrUsartHandler->ptrUSARTx->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
-		break;
-	}
+		case USART_MODE_TX:
+		{
+			// Activamos la parte del sistema encargada de enviar
+			ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_TE;
+			break;
+		}
+		case USART_MODE_RX:
+		{
+			// Activamos la parte del sistema encargada de recibir
+			ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_RE;
+			break;
+		}
+		case USART_MODE_RXTX:
+		{
+			// Activamos ambas partes, tanto transmision como recepcion
+			ptrUsartHandler->ptrUSARTx->CR1 |= (USART_CR1_TE | USART_CR1_RE);
+			break;
+		}
+		case USART_MODE_DISABLE:
+		{
+			// Desactivamos ambos canales
+			ptrUsartHandler->ptrUSARTx->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
+			break;
+		}
+
+		default:
+		{
+			// Actuando por defecto, desactivamos ambos canales
+			ptrUsartHandler->ptrUSARTx->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
+			break;
+		}
 	}
 
 	// 2.7 Activamos el modulo serial.
@@ -495,6 +495,33 @@ float roundToNDecimals(float number, int n) {
     number /= factor;
 
     return number;
+}
+
+void usart_Set_Priority(USART_Handler_t *ptrUsartHandler, uint8_t newPriority){
+
+	__disable_irq();
+
+
+	if(ptrUsartHandler->ptrUSARTx == USART1){
+				// Seteamos la prioridad en NVIC para la interrupción del USART1
+		__NVIC_SetPriority(USART1_IRQn, newPriority);
+	}
+	else if(ptrUsartHandler->ptrUSARTx == USART2){
+				// Seteamos la prioridad en NVIC para la interrupción del USART2
+		__NVIC_SetPriority(USART2_IRQn, newPriority);
+	}
+	else if(ptrUsartHandler->ptrUSARTx == USART6){
+			// Seteamos la prioridad en NVIC para la interrupción del USART6
+		__NVIC_SetPriority(USART6_IRQn, newPriority);
+	}
+	else{
+			__NOP();
+	}
+
+
+
+	__enable_irq();
+
 }
 
 //	else{

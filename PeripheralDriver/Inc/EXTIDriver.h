@@ -19,11 +19,27 @@ typedef struct
 {
 	GPIO_Handler_t *pGPIOHandler;	// Canal ADC que será utilizado para la conversión ADC
 	uint8_t			edgeType;		// Se selecciona si se desea un tipo de flanco subiendo o bajando
+	uint8_t         priority;
 }EXTI_Config_t;
+
+enum
+{
+	e_EXTI_PRIORITY_6 = 6,
+	e_EXTI_PRIORITY_7,
+	e_EXTI_PRIORITY_8,
+	e_EXTI_PRIORITY_9,
+	e_EXTI_PRIORITY_10,
+	e_EXTI_PRIORITY_11,
+	e_EXTI_PRIORITY_12,
+	e_EXTI_PRIORITY_13,
+	e_EXTI_PRIORITY_14,
+	e_EXTI_PRIORITY_15
+};
 
 
 void extInt_Config(EXTI_Config_t *extiConfig);
 void configExternalTrigger(GPIO_Handler_t *pGPIOHandler);
+void exti_Set_Priority (EXTI_Config_t *extiConfig, uint8_t newPriority);
 
 
 void callback_extInt0(void);
