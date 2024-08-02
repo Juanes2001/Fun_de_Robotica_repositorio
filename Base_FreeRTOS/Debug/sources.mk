@@ -26,9 +26,4 @@ Startup \
 ThirdParty/FreeRTOS \
 ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F \
 ThirdParty/FreeRTOS/portable/MemMang \
-ThirdParty/SEGGER/Config \
-ThirdParty/SEGGER/OS \
-ThirdParty/SEGGER/Rec \
-ThirdParty/SEGGER/SEGGER \
-ThirdParty/SEGGER/SEGGER/Syscalls \
 

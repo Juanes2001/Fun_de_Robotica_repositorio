@@ -42,6 +42,7 @@ uint32_t SystemCoreClock = 100000000;
 /*Cabecera de la funcion de tarea 1 */
 void vTaskLedGreen( void * pvParameters );
 
+
 TaskHandle_t xHandleTask_Led    = NULL;
 TaskHandle_t xHandleTask_Button = NULL;
 
@@ -206,25 +207,58 @@ void vTaskLedGreen( void * pvParameters )
    while(1){
 	   //printf("%s\n",((char*) pvParameters));
 	   if (controlLed){
+		   GPIOxTooglePin(&handlerPinA5);
+
+	   }else{
+		   GPIO_WritePin(&handlerPinA5, RESET);
+	   }
 
 
+	   notifyStatus = xTaskNotifyWait(0,0,NULL,pdMS_TO_TICKS(250));
+
+	   if (notifyStatus == pdTRUE){
+
+		   //Para desactiva	r las interrupciones por un pequeño instante
+		   portENTER_CRITICAL();
+
+		   controlLed = !controlLed;
+
+		   //Las volvemos a activar
+		   portEXIT_CRITICAL();
 	   }
 	   //taskYIELD();
    }
 }
 
-void vTaskTwo( void * pvParameters )
-{
+//void vTaskTwo( void * pvParameters )
+//{
+//
+//   while(1){
+////	   printf("%s\n",((char*) pvParameters));
+//	   vTaskDelay((pdMS_TO_TICKS(10)));
+//	   //GPIO_WritePin(&handlerPinA5, SET);
+//	   //taskYIELD();
+//   }
+//}
 
-   while(1){
-	   printf("%s\n",((char*) pvParameters));
-	   vTaskDelay((pdMS_TO_TICKS(10)));
-	   //GPIO_WritePin(&handlerPinA5, SET);
-	   //taskYIELD();
-   }
+void usart2Rx_Callback(void){
+
+
+
+
 }
 
 
+void callback_extInt13(void){
+
+	BaseType_t pxHiguerPriorityTaskWoken;
+	pxHiguerPriorityTaskWoken = pdFALSE;
+
+	//Notoficamos a la funcion del LED:
+	xTaskNotifyFromISR(xHandleTask_Led,0,eNoAction,&pxHiguerPriorityTaskWoken);
+
+
+}
 
 
 
