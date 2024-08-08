@@ -111,6 +111,18 @@ uint8_t doneTransaction = RESET;
 uint8_t rxData = '\0';
 char cmd[32];
 
+typedef struct{
+	uint8_t payload[10];
+	uint32_t len;
+
+}command_t;
+
+typedef enum {
+	sMainMenu = 0,
+	sLedEffect,
+	sRtcMenu
+}state_t;
+
 unsigned int firstParameter;
 unsigned int secondParameter;
 unsigned int thirdParameter;
@@ -303,35 +315,14 @@ void inSystem (void){
 
 
 
-void vTask_Menu( void * pvParameters ){
+void vTask_Menu( void * pvParameters )
+{
 
-	uint32_t cmd_addr;
-	command_t *cmd;
-	int option;
+   while(1){
 
-	const char* msg_menu = "=========================\n"
-						   "|          MENU         |\n"
-						   "LED effect     ----> 0\n"
-						   "Date and Time  ----> 1\n"
-						   "Exit           ----> 2\n"
-						   "Enter your choice here:";
-
-	while (1){
-
-		// Envia a imprimir en la consola lo que se debe mostrar en el menu
-		xQueueSend(xQueue_Print, &msg_menu, portMAX_DELAY);
-
-		// Se queda esperando a recibir el comando que se debe ejecutar
-		xTaskNotifyWait (0,0,&cmd_addr);
-
-
-	}
-
-
-
-
+	   //taskYIELD();
+   }
 }
-
 
 void vTask_Print( void * pvParameters )
 {
@@ -350,6 +341,16 @@ void vTask_Commands( void * pvParameters )
 	   //taskYIELD();
    }
 }
+//void vTaskTwo( void * pvParameters )
+//{
+//
+//   while(1){
+////	   printf("%s\n",((char*) pvParameters));
+//	   vTaskDelay((pdMS_TO_TICKS(10)));
+//	   //GPIO_WritePin(&handlerPinA5, SET);
+//	   //taskYIELD();
+//   }
+//}
 
 
 //Interripcion USART2
@@ -397,6 +398,25 @@ void usart2Rx_Callback(void){
 }
 
 
+
+//void callback_extInt13(void){
+//
+//	BaseType_t pxHiguerPriorityTaskWoken;
+//	pxHiguerPriorityTaskWoken = pdFALSE;
+//
+//	//Notoficamos a la funcion del LED:
+//	xTaskNotifyFromISR(xHandleTask_Led,0,eNoAction,&pxHiguerPriorityTaskWoken);
+//
+//
+//}
+
+
+
+//void parseCommands(char *stringVector){
+//
+//	sscanf(stringVector, "%s %u %u %u %s", cmd ,&firstParameter, &secondParameter, &thirdParameter, userMsg);
+//
+//}
 
 
 

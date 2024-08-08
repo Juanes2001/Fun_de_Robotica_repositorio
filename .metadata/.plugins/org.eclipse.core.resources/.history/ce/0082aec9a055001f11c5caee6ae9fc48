@@ -111,6 +111,18 @@ uint8_t doneTransaction = RESET;
 uint8_t rxData = '\0';
 char cmd[32];
 
+typedef struct{
+	uint8_t payload[10];
+	uint32_t len;
+
+}command_t;
+
+typedef enum {
+	sMainMenu = 0,
+	sLedEffect,
+	sRtcMenu
+}state_t;
+
 unsigned int firstParameter;
 unsigned int secondParameter;
 unsigned int thirdParameter;
@@ -319,10 +331,7 @@ void vTask_Menu( void * pvParameters ){
 	while (1){
 
 		// Envia a imprimir en la consola lo que se debe mostrar en el menu
-		xQueueSend(xQueue_Print, &msg_menu, portMAX_DELAY);
-
-		// Se queda esperando a recibir el comando que se debe ejecutar
-		xTaskNotifyWait (0,0,&cmd_addr);
+		xQueueSend(xQueue_Print, msg_menu, portMAX_DELAY);
 
 
 	}

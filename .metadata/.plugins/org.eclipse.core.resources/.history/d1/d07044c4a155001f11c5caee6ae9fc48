@@ -321,9 +321,6 @@ void vTask_Menu( void * pvParameters ){
 		// Envia a imprimir en la consola lo que se debe mostrar en el menu
 		xQueueSend(xQueue_Print, &msg_menu, portMAX_DELAY);
 
-		// Se queda esperando a recibir el comando que se debe ejecutar
-		xTaskNotifyWait (0,0,&cmd_addr);
-
 
 	}
 
