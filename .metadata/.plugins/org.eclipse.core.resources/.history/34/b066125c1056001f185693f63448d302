@@ -78,7 +78,7 @@ TimerHandle_t handler_led_timer;
 void inSystem (void);
 void parseCommands(char *stringVector);
 void process_command (command_t *cmd);
-int extract_command (command_t *cmd);
+int extact_command (command_t *cmd);
 
 //Algunos mensajes String necesarios para la comunicacion
 const char *msg_invalid = "\n ////Invalid option /////\n";
@@ -109,7 +109,7 @@ char bufferReception[64];
 uint8_t counterReception = 0;
 uint8_t doneTransaction = RESET;
 uint8_t rxData = '\0';
-//char cmd[32];
+char cmd[32];
 
 unsigned int firstParameter;
 unsigned int secondParameter;
@@ -173,6 +173,15 @@ int main(void)
 
 
 	 configASSERT( xReturned == pdPASS );
+
+//	 xReturned = xTaskCreate(
+//	 	                    vTaskTwo,       /* Function that implements the task. */
+//	 	                    "Task-Button",          /* Text name for the task. */
+//	 	                    STACK_SIZE,      /* Stack size in words, not bytes. */
+//	 	                    "HOLA MUNDO",    /* Parameter passed into the task. */
+//	 	                    3,/* Priority at which the task is created. */
+//	 	                    &xHandleTask_Button );      /* Used to pass out the created task's handle. */
+
 
 	 //Creacion de colas
 	 // Para cada funcion de crear se tiene que definir el largo de la cola,, y el
@@ -416,63 +425,6 @@ void vTask_Commands( void * pvParameters ){
    }
 }
 
-void process_command (command_t *cmd){
-
-	extract_command(cmd);
-
-	switch (next_state) {
-		case sMainMenu:{
-			//Notificamos a la tarea respectiva
-			xTaskNotify(xHandleTask_Menu,(uint32_t)cmd, eSetValueWithOverwrite);
-			break;
-		}case sLedEffect:{
-			//Notificamos a la tarea respectiva
-//			xTaskNotify(xHandleTask_Led,(uint32_t)cmd, eSetValueWithOverwrite);
-			break;
-		}case sRtcMenu:{
-			//Notificamos a la tarea respectiva
-//			xTaskNotify(xHandleTask_Rtc,(uint32_t)cmd, eSetValueWithOverwrite);
-			break;
-		}
-		default:{
-			__NOP();
-			break;
-		}
-	}
-
-
-}
-
-int extract_command (command_t *cmd){
-
-	uint8_t item;
-	uint8_t counter_j = 0;
-	BaseType_t status;
-
-	status = uxQueueMessagesWaitingFromISR(xQueue_InputData);
-	if (status == 0){
-		return -1;
-	}
-
-	do{
-		// Recibimos un elemento y lo montamos en el item ademas no deseamos bloquarlo
-		status = xQueueReceive(xQueue_InputData, &item,0);
-		if(status == pdTRUE){
-
-			//vamos llenando el arreglo del comando
-			cmd->payload[counter_j++] = item;
-
-		}
-	}while(item != '#');
-
-	cmd->payload[counter_j-1] = '\0';
-	cmd->len = counter_j -1; // Longitud de los caracteres del comando
-
-	return 0;
-
-}
-
-
 
 //Interripcion USART2
 void usart2Rx_Callback(void){
@@ -500,9 +452,9 @@ void usart2Rx_Callback(void){
 		if (rxData == '#'){
 
 			xQueueReceiveFromISR(xQueue_InputData,
-								 (void *) &rxData,
-								 NULL);
-			xQueueSendToBackFromISR(xQueue_InputData,
+								(void *) &rxData,
+								NULL);
+			xQueueSendToBackFromISR(xQueue_InputData ,
 									(void *) &rxData
 									,NULL);
 		}

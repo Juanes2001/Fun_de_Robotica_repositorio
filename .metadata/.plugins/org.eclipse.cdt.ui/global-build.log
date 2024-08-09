@@ -1,40 +1,7 @@
-11:17:54 **** Incremental Build of configuration Debug for project Base_FreeRTOS ****
+00:44:49 **** Incremental Build of configuration Debug for project Base_FreeRTOS ****
 make -j12 all 
-arm-none-eabi-gcc "../Src/main2.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DNUCLEO_F411RE -DSTM32 -DSTM32F4 -DSTM32F411RETx -DSTM32F411xE=1 -c -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/FreeRTOS/include" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/SEGGER/Config" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/SEGGER/OS" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/SEGGER/SEGGER" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/Inc" -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Src/main2.d" -MT"Src/main2.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/main2.o"
-In file included from ../Src/main2.c:15:
-../Src/main2.c: In function 'main':
-/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/FreeRTOS/include/timers.h:883:98: warning: passing argument 4 of 'xTimerGenericCommand' makes pointer from integer without a cast [-Wint-conversion]
-  883 |     xTimerGenericCommand( ( xTimer ), tmrCOMMAND_START_FROM_ISR, ( xTaskGetTickCountFromISR() ), ( pxHigherPriorityTaskWoken ), 0U )
-      |                                                                                                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      |                                                                                                  |
-      |                                                                                                  long unsigned int
-../Src/main2.c:207:3: note: in expansion of macro 'xTimerStartFromISR'
-  207 |   xTimerStartFromISR(handler_led_timer, portMAX_DELAY);
-      |   ^~~~~~~~~~~~~~~~~~
-/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/FreeRTOS/include/timers.h:1318:53: note: expected 'BaseType_t * const' {aka 'long int * const'} but argument is of type 'long unsigned int'
- 1318 |                                  BaseType_t * const pxHigherPriorityTaskWoken,
-      |                                  ~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~
-../Src/main2.c: In function 'vTask_Menu':
-../Src/main2.c:325:33: error: macro "xTaskNotifyWait" requires 4 arguments, but only 3 given
-  325 |   xTaskNotifyWait (0,0,&cmd_addr);
-      |                                 ^
-In file included from ../Src/main2.c:13:
-/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/FreeRTOS/include/task.h:2327: note: macro "xTaskNotifyWait" defined here
- 2327 | #define xTaskNotifyWait( ulBitsToClearOnEntry, ulBitsToClearOnExit, pulNotificationValue, xTicksToWait ) \
-      | 
-../Src/main2.c:325:3: error: 'xTaskNotifyWait' undeclared (first use in this function); did you mean 'xTaskGenericNotifyWait'?
-  325 |   xTaskNotifyWait (0,0,&cmd_addr);
-      |   ^~~~~~~~~~~~~~~
-      |   xTaskGenericNotifyWait
-../Src/main2.c:325:3: note: each undeclared identifier is reported only once for each function it appears in
-../Src/main2.c:310:6: warning: unused variable 'option' [-Wunused-variable]
-  310 |  int option;
-      |      ^~~~~~
-../Src/main2.c:309:13: warning: unused variable 'cmd' [-Wunused-variable]
-  309 |  command_t *cmd;
-      |             ^~~
-../Src/main2.c:308:11: warning: unused variable 'cmd_addr' [-Wunused-variable]
-  308 |  uint32_t cmd_addr;
-      |           ^~~~~~~~
-make: *** [Src/subdir.mk:22: Src/main2.o] Error 1
-"make -j12 all" terminated with exit code 2. Build might be incomplete.
+arm-none-eabi-size   Base_FreeRTOS.elf 
+   text	   data	    bss	    dec	    hex	filename
+  24260	    140	  79032	 103432	  19408	Base_FreeRTOS.elf
+Finished building: default.size.stdout
+ 

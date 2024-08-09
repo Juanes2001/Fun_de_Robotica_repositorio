@@ -174,6 +174,15 @@ int main(void)
 
 	 configASSERT( xReturned == pdPASS );
 
+//	 xReturned = xTaskCreate(
+//	 	                    vTaskTwo,       /* Function that implements the task. */
+//	 	                    "Task-Button",          /* Text name for the task. */
+//	 	                    STACK_SIZE,      /* Stack size in words, not bytes. */
+//	 	                    "HOLA MUNDO",    /* Parameter passed into the task. */
+//	 	                    3,/* Priority at which the task is created. */
+//	 	                    &xHandleTask_Button );      /* Used to pass out the created task's handle. */
+
+
 	 //Creacion de colas
 	 // Para cada funcion de crear se tiene que definir el largo de la cola,, y el
 	 // largo de cada elemento de la cola.
@@ -450,7 +459,7 @@ int extract_command (command_t *cmd){
 	BaseType_t status;
 
 	status = uxQueueMessagesWaitingFromISR(xQueue_InputData);
-	if (status == 0){
+	if (status){
 		return -1;
 	}
 
@@ -500,9 +509,9 @@ void usart2Rx_Callback(void){
 		if (rxData == '#'){
 
 			xQueueReceiveFromISR(xQueue_InputData,
-								 (void *) &rxData,
-								 NULL);
-			xQueueSendToBackFromISR(xQueue_InputData,
+								(void *) &rxData,
+								NULL);
+			xQueueSendToBackFromISR(xQueue_InputData ,
 									(void *) &rxData
 									,NULL);
 		}
