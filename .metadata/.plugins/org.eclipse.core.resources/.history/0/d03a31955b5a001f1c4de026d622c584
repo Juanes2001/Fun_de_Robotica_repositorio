@@ -201,7 +201,7 @@ int main(void)
 									 (void *) 1,
 									 led_state_callback);
 
-	 xTimerStart(handler_led_timer, portMAX_DELAY);
+	 xTimerStartFromISR(handler_led_timer, portMAX_DELAY);
 
 	 // Definicion del semaforo para saltar interrupciiones y definir tareas de diferentes prioridades
 
@@ -420,7 +420,7 @@ void vTask_Commands( void * pvParameters ){
 //	   notify_status = xTaskNotifyWait(0,0,NULL,portMAX_DELAY); // Esoerar hasta que la notificacion salte
 
 	   //Cuando es verdadero significa que se recibio una notificacion
-	   if (xSemaphoreTake(xSemaphore_Handle,xMaxExpectedBlockTime) == pdPASS){
+	   if (notify_status == pdTRUE){
 
 		   process_command(&cmd);
 

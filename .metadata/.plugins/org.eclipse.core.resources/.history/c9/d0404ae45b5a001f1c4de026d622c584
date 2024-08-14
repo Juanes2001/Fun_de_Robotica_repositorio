@@ -201,7 +201,7 @@ int main(void)
 									 (void *) 1,
 									 led_state_callback);
 
-	 xTimerStart(handler_led_timer, portMAX_DELAY);
+	 xTimerStartFromISR(handler_led_timer, portMAX_DELAY);
 
 	 // Definicion del semaforo para saltar interrupciiones y definir tareas de diferentes prioridades
 

@@ -91,7 +91,6 @@ const char *msg_option_0= "\n------ Selected Option - 0 ------- \n";
 const char *msg_option_1= "\n------ Selected Option - 1 ------- \n";
 const char *msg_option_2= "\n------ Selected Option - 2 ------- \n";
 const char *msg_option_n= "\n------ Option out of range ------- \n";
-const char *msg_no_smphr= "\n-------Semaphore no activated------\n";
 
 
 //Definición Handlers
@@ -201,7 +200,7 @@ int main(void)
 									 (void *) 1,
 									 led_state_callback);
 
-	 xTimerStart(handler_led_timer, portMAX_DELAY);
+	 xTimerStartFromISR(handler_led_timer, portMAX_DELAY);
 
 	 // Definicion del semaforo para saltar interrupciiones y definir tareas de diferentes prioridades
 
@@ -409,23 +408,19 @@ void vTask_Print( void * pvParameters ){
 
 void vTask_Commands( void * pvParameters ){
 
-//	BaseType_t notify_status = {0};
+	BaseType_t notify_status = {0};
 	command_t cmd = {0};
-
-	const TickType_t xMaxExpectedBlockTime = pdMS_TO_TICKS(1000);
 
    while(1){
 
 	   //Esperamos la notificacion desde la interrupcion
-//	   notify_status = xTaskNotifyWait(0,0,NULL,portMAX_DELAY); // Esoerar hasta que la notificacion salte
+	   notify_status = xTaskNotifyWait(0,0,NULL,portMAX_DELAY); // Esoerar hasta que la notificacion salte
 
 	   //Cuando es verdadero significa que se recibio una notificacion
-	   if (xSemaphoreTake(xSemaphore_Handle,xMaxExpectedBlockTime) == pdPASS){
+	   if (notify_status == pdTRUE){
 
 		   process_command(&cmd);
 
-	   }else{
-		   xQueueSend(xQueue_Print,&msg_no_smphr,portMAX_DELAY);
 	   }
 	   //taskYIELD();
    }
@@ -494,9 +489,9 @@ void usart2Rx_Callback(void){
 
 	rxData = getRxData();
 //
-	BaseType_t xHigerPriorituTaskWoken;
-	(void) xHigerPriorituTaskWoken;
-	xHigerPriorituTaskWoken = pdFALSE;
+//	BaseType_t xHigerPriorituTaskWoken;
+//
+//	xHigerPriorituTaskWoken = pdFALSE;
 
 	//Verificamos que la cola aun no se encuentra llena
 	xReturned = xQueueIsQueueFullFromISR(xQueue_InputData);
@@ -526,12 +521,10 @@ void usart2Rx_Callback(void){
 
 	if (rxData == '#'){
 		// Se manda la notificacion de la tarea que se quiere mover al estado de RUN
-//		xTaskNotifyFromISR(xHandleTask_Commands,
-//						   0,
-//						   eNoAction,
-//						   NULL);
-		xSemaphoreGiveFromISR(xSemaphore_Handle, &xHigerPriorituTaskWoken);
-
+		xTaskNotifyFromISR(xHandleTask_Commands,
+						   0,
+						   eNoAction,
+						   NULL);
 	}
 }
 
