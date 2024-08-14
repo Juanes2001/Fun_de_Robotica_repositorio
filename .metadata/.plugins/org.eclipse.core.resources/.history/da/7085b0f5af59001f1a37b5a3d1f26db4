@@ -1,0 +1,27 @@
+/*
+ * Astar.h
+ *
+ *  Created on: Aug 13, 2024
+ *      Author: juan
+ */
+
+#ifndef ASTAR_H_
+#define ASTAR_H_
+
+
+typedef struct {
+	float parallelDistance;
+	float diagonalDiastance;
+}AStar_distances;
+
+
+typedef struct{
+	float Gcost; // Distancia que hay entre un punto y el punto de partida pasando por el punto de analisis
+	float Fcost; // El costo de la heuristica con el G cost
+}Costs_t;
+
+
+
+
+
+#endif /* ASTAR_H_ */

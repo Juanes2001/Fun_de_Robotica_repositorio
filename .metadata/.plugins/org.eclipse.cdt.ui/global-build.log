@@ -1,7 +1,49 @@
-00:44:49 **** Incremental Build of configuration Debug for project Base_FreeRTOS ****
-make -j12 all 
-arm-none-eabi-size   Base_FreeRTOS.elf 
-   text	   data	    bss	    dec	    hex	filename
-  24260	    140	  79032	 103432	  19408	Base_FreeRTOS.elf
-Finished building: default.size.stdout
+19:21:44 **** Incremental Build of configuration Debug for project PeripheralDriver ****
+make clean all 
+rm -rf ./Src/AdcDriver.d ./Src/AdcDriver.o ./Src/AdcDriver.su ./Src/Astar.d ./Src/Astar.o ./Src/Astar.su ./Src/BasicTimer.d ./Src/BasicTimer.o ./Src/BasicTimer.su ./Src/CaptureFreqDriver.d ./Src/CaptureFreqDriver.o ./Src/CaptureFreqDriver.su ./Src/EXTIDriver.d ./Src/EXTIDriver.o ./Src/EXTIDriver.su ./Src/FPUDriver.d ./Src/FPUDriver.o ./Src/FPUDriver.su ./Src/GPIOxDriver.d ./Src/GPIOxDriver.o ./Src/GPIOxDriver.su ./Src/I2CDriver.d ./Src/I2CDriver.o ./Src/I2CDriver.su ./Src/MPUAccel.d ./Src/MPUAccel.o ./Src/MPUAccel.su ./Src/MotorsDriver.d ./Src/MotorsDriver.o ./Src/MotorsDriver.su ./Src/OLEDDriver.d ./Src/OLEDDriver.o ./Src/OLEDDriver.su ./Src/PIDDriver.d ./Src/PIDDriver.o ./Src/PIDDriver.su ./Src/PwmDriver.d ./Src/PwmDriver.o ./Src/PwmDriver.su ./Src/RCCHunMHz.d ./Src/RCCHunMHz.o ./Src/RCCHunMHz.su ./Src/RTCDriver.d ./Src/RTCDriver.o ./Src/RTCDriver.su ./Src/SPIDriver.d ./Src/SPIDriver.o ./Src/SPIDriver.su ./Src/SysTickDriver.d ./Src/SysTickDriver.o ./Src/SysTickDriver.su ./Src/USARTxDriver.d ./Src/USARTxDriver.o ./Src/USARTxDriver.su ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su ./Src/sysmem.d ./Src/sysmem.o ./Src/sysmem.su
+rm -rf libPeripheralDriver.a
  
+arm-none-eabi-gcc "../Src/AdcDriver.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DNUCLEO_F411RE -DSTM32 -DSTM32F4 -DSTM32F411RETx -DSTM32F411xE -c -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Inc" -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Src/AdcDriver.d" -MT"Src/AdcDriver.o" --specs=nano.specs -mfloat-abi=hard -mthumb -o "Src/AdcDriver.o"
+arm-none-eabi-gcc "../Src/Astar.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DNUCLEO_F411RE -DSTM32 -DSTM32F4 -DSTM32F411RETx -DSTM32F411xE -c -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Inc" -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Src/Astar.d" -MT"Src/Astar.o" --specs=nano.specs -mfloat-abi=hard -mthumb -o "Src/Astar.o"
+In file included from ../Src/Astar.c:8:
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Inc/Astar.h:37:14: error: variably modified 'infoGrid' at file scope
+   37 | extern  char infoGrid[ptr->numberOfRows][ptr->numberOfColumns];
+      |              ^~~~~~~~
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Inc/Astar.h:37:14: error: variably modified 'infoGrid' at file scope
+../Src/Astar.c: In function 'init':
+../Src/Astar.c:21:21: warning: implicit declaration of function 'malloc' [-Wimplicit-function-declaration]
+   21 |     costs = (int **)malloc(M * sizeof(int **));
+      |                     ^~~~~~
+../Src/Astar.c:21:21: warning: incompatible implicit declaration of built-in function 'malloc'
+../Src/Astar.c:9:1: note: include '<stdlib.h>' or provide a declaration of 'malloc'
+    8 | #include "Astar.h"
+  +++ |+#include <stdlib.h>
+    9 | #include <stdio.h>
+../Src/Astar.c:21:28: error: 'M' undeclared (first use in this function)
+   21 |     costs = (int **)malloc(M * sizeof(int **));
+      |                            ^
+../Src/Astar.c:21:28: note: each undeclared identifier is reported only once for each function it appears in
+../Src/Astar.c:23:9: error: 'matrix' undeclared (first use in this function)
+   23 |         matrix[i] = (int **)malloc(N * sizeof(int *));
+      |         ^~~~~~
+../Src/Astar.c:23:36: error: 'N' undeclared (first use in this function)
+   23 |         matrix[i] = (int **)malloc(N * sizeof(int *));
+      |                                    ^
+../Src/Astar.c:25:42: error: 'K' undeclared (first use in this function)
+   25 |             matrix[i][j] = (int *)malloc(K * sizeof(int));
+      |                                          ^
+../Src/Astar.c:52:13: warning: implicit declaration of function 'free' [-Wimplicit-function-declaration]
+   52 |             free(matrix[i][j]);
+      |             ^~~~
+../Src/Astar.c:52:13: warning: incompatible implicit declaration of built-in function 'free'
+../Src/Astar.c:52:13: note: include '<stdlib.h>' or provide a declaration of 'free'
+../Src/Astar.c:54:9: warning: incompatible implicit declaration of built-in function 'free'
+   54 |         free(matrix[i]);
+      |         ^~~~
+../Src/Astar.c:54:9: note: include '<stdlib.h>' or provide a declaration of 'free'
+../Src/Astar.c:56:5: warning: incompatible implicit declaration of built-in function 'free'
+   56 |     free(matrix);
+      |     ^~~~
+../Src/Astar.c:56:5: note: include '<stdlib.h>' or provide a declaration of 'free'
+make: *** [Src/subdir.mk:76: Src/Astar.o] Error 1
+"make clean all" terminated with exit code 2. Build might be incomplete.
