@@ -32,9 +32,8 @@ typedef struct{
 }costChangesAndPos_t;
 
 //Matriz de arrays donde se almacenan respectivamente los valores de G cost, el F cost, y el H cost
-extern	float **costs[3];
-// Matriz donde se almacenaran las filas de String donde esta la informacion de los huecos y los obstaculos
-extern  char infoGrid[ptr->numberOfRows][ptr->numberOfColumns];
+extern	float ***costs;
+
 
 // Funciones a Usar
 
@@ -52,14 +51,16 @@ void findEnd(void *matrixPointFirtsPos, costChangesAndPos_t *ptrChages);
 // Esta funcion define la heuristica de cada cuadro de la cuadricula exceptuando los obstaculos
 void setHeuristic(void *matrixPointFirtsPos, costChangesAndPos_t *ptrChages);
 // Esta función define la matriz que se usara para definir el camino mas corto, traida desde comunicacion serial.
-void buildMatrx(void *matrixEntry);
+char **buildMatrix(AStar_distancesHandler *parameters, char *string[]);
 //Esta funcion me cuenta la cantidad de filas que tiene mi arreglo entrado M
-uint8_t getRows();
+uint8_t getRows(char **matrix);
 // Esta funciom retorna la cantidad de columnas que hay en el arreglo entrado N
-uint8_t getColums();
+uint8_t getColums(char **matrix);
 
 //Esta funcion inicializa los parametros de la estructura AStar_distances
-void init(float parallel, float diagonal, AStar_distancesHandler *distances);
+char* findShorterWay(AStar_distancesHandler *parameters, char** Grid);
+// Con esta funcion liberamos la memoria de matrices con reparticion de memoria dinamica, para mayior eficiencia
+void freeMatrix(int **matrix, int rows);
 
 
 
