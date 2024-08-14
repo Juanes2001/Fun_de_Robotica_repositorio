@@ -40,20 +40,7 @@ char* findShorterWay(AStar_distancesHandler *parameters, char** Grid){
 // con esta funcion seteamos la matriz Heuristica con la cual usaremos la info para buscar la ruta mas corta
 void setHeuristic(void *matrixPointFirtsPos, costChangesAndPos_t *ptrChages){
 
-	// La dinamica sera la siguiente, para cada entrada de la heuristica nos centraremos en recorrer cada entrada y almacenar en la tercera po-
-	//sicion de cada fila y columna el valor de la heuristica dependiendo de donde este el punto de termino o End point
-
-
-}
-
-// En esta funcion nos centraremos en buscar la posicion i,j donde se almacena el punto de inicio del robot
-int* findStart(void *matrixPointFirtsPos, costChangesAndPos_t *ptrChages){
-
-
-
-}
-
-int* findEnd(void *matrixPointFirtsPos, costChangesAndPos_t *ptrChages){
+	s
 
 
 }
@@ -109,10 +96,6 @@ uint8_t getColums(char **matrix){
 
 	return counterColumns;
 }
-
-
-// Función Allocate memory
-
 
 
 // Función liberacion de memoria de las matrices doble puntero

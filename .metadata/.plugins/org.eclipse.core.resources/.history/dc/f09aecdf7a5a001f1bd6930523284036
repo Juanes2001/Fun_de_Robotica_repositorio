@@ -21,6 +21,8 @@ typedef struct {
 	uint8_t numberOfColumns;
 }AStar_distancesHandler;
 
+AStar_distancesHandler *ptr;
+
 
 // Estructura donde se almacenan los costos variables de cada celda quitando la celda de los obstaculos
 typedef struct{
