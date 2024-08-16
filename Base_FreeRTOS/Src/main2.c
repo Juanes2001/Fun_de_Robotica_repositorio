@@ -230,15 +230,15 @@ void inSystem (void){
 	RCC_enableMaxFrequencies();
 
 //	//BLINKY LED
-//	handlerPinA5.pGPIOx = GPIOA;
-//	handlerPinA5.GPIO_PinConfig.GPIO_PinAltFunMode = AF0;
-//	handlerPinA5.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
-//	handlerPinA5.GPIO_PinConfig.GPIO_PinOPType = GPIO_OTYPE_PUSHPULL;
-//	handlerPinA5.GPIO_PinConfig.GPIO_PinNumber = PIN_5;
-//	handlerPinA5.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-//	handlerPinA5.GPIO_PinConfig.GPIO_PinSpeed = GPIO_OSPEEDR_FAST;
-//	GPIO_Config(&handlerPinA5);
-//	GPIO_WritePin(&handlerPinA5, RESET);
+	handlerPinA5.pGPIOx = GPIOA;
+	handlerPinA5.GPIO_PinConfig.GPIO_PinAltFunMode = AF0;
+	handlerPinA5.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
+	handlerPinA5.GPIO_PinConfig.GPIO_PinOPType = GPIO_OTYPE_PUSHPULL;
+	handlerPinA5.GPIO_PinConfig.GPIO_PinNumber = PIN_5;
+	handlerPinA5.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+	handlerPinA5.GPIO_PinConfig.GPIO_PinSpeed = GPIO_OSPEEDR_FAST;
+	GPIO_Config(&handlerPinA5);
+	GPIO_WritePin(&handlerPinA5, RESET);
 
 	//TIMER Blinky
 
