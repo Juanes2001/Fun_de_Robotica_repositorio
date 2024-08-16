@@ -425,7 +425,7 @@ void vTask_Commands( void * pvParameters ){
 		   process_command(&cmd);
 
 	   }else{
-		   xQueueSend(xQueue_Print,&msg_no_smphr,portMAX_DELAY);
+//		   xQueueSend(xQueue_Print,&msg_no_smphr,portMAX_DELAY);
 	   }
 	   //taskYIELD();
    }
