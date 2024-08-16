@@ -1,34 +1,35 @@
-18:51:06 **** Build of configuration Debug for project Base_FreeRTOS ****
-make -j12 all 
-arm-none-eabi-gcc -o "Base_FreeRTOS.elf" @"objects.list"  -lPeripheralDriver -mcpu=cortex-m4 -T"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Base_FreeRTOS.map" -Wl,--gc-sections -static -L/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Debug --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-Finished building target: Base_FreeRTOS.elf
+23:46:28 **** Incremental Build of configuration Debug for project PeripheralDriver ****
+make clean all 
+rm -rf ./Src/AdcDriver.d ./Src/AdcDriver.o ./Src/AdcDriver.su ./Src/Astar.d ./Src/Astar.o ./Src/Astar.su ./Src/BasicTimer.d ./Src/BasicTimer.o ./Src/BasicTimer.su ./Src/CaptureFreqDriver.d ./Src/CaptureFreqDriver.o ./Src/CaptureFreqDriver.su ./Src/EXTIDriver.d ./Src/EXTIDriver.o ./Src/EXTIDriver.su ./Src/FPUDriver.d ./Src/FPUDriver.o ./Src/FPUDriver.su ./Src/GPIOxDriver.d ./Src/GPIOxDriver.o ./Src/GPIOxDriver.su ./Src/I2CDriver.d ./Src/I2CDriver.o ./Src/I2CDriver.su ./Src/MPUAccel.d ./Src/MPUAccel.o ./Src/MPUAccel.su ./Src/MotorsDriver.d ./Src/MotorsDriver.o ./Src/MotorsDriver.su ./Src/OLEDDriver.d ./Src/OLEDDriver.o ./Src/OLEDDriver.su ./Src/PIDDriver.d ./Src/PIDDriver.o ./Src/PIDDriver.su ./Src/PwmDriver.d ./Src/PwmDriver.o ./Src/PwmDriver.su ./Src/RCCHunMHz.d ./Src/RCCHunMHz.o ./Src/RCCHunMHz.su ./Src/RTCDriver.d ./Src/RTCDriver.o ./Src/RTCDriver.su ./Src/SPIDriver.d ./Src/SPIDriver.o ./Src/SPIDriver.su ./Src/SysTickDriver.d ./Src/SysTickDriver.o ./Src/SysTickDriver.su ./Src/USARTxDriver.d ./Src/USARTxDriver.o ./Src/USARTxDriver.su ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su ./Src/sysmem.d ./Src/sysmem.o ./Src/sysmem.su
+rm -rf libPeripheralDriver.a
  
-arm-none-eabi-size   Base_FreeRTOS.elf 
-arm-none-eabi-objdump -h -S  Base_FreeRTOS.elf  > "Base_FreeRTOS.list"
-   text	   data	    bss	    dec	    hex	filename
-  25228	    144	  79032	 104404	  197d4	Base_FreeRTOS.elf
-Finished building: default.size.stdout
- 
-Finished building: Base_FreeRTOS.list
- 
-18:51:18 **** Incremental Build of configuration Debug for project Base_FreeRTOS ****
-make -j12 all 
-arm-none-eabi-size   Base_FreeRTOS.elf 
-   text	   data	    bss	    dec	    hex	filename
-  25228	    144	  79032	 104404	  197d4	Base_FreeRTOS.elf
-Finished building: default.size.stdout
- 
-18:54:02 **** Incremental Build of configuration Debug for project Base_FreeRTOS ****
-make -j12 all 
-arm-none-eabi-gcc "../Src/main2.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DNUCLEO_F411RE -DSTM32 -DSTM32F4 -DSTM32F411RETx -DSTM32F411xE=1 -c -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/FreeRTOS/include" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/SEGGER/Config" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/SEGGER/OS" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/SEGGER/SEGGER" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/Inc" -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Src/main2.d" -MT"Src/main2.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/main2.o"
-arm-none-eabi-gcc -o "Base_FreeRTOS.elf" @"objects.list"  -lPeripheralDriver -mcpu=cortex-m4 -T"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Base_FreeRTOS.map" -Wl,--gc-sections -static -L/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Debug --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-Finished building target: Base_FreeRTOS.elf
- 
-arm-none-eabi-size   Base_FreeRTOS.elf 
-arm-none-eabi-objdump -h -S  Base_FreeRTOS.elf  > "Base_FreeRTOS.list"
-   text	   data	    bss	    dec	    hex	filename
-  25196	    140	  79032	 104368	  197b0	Base_FreeRTOS.elf
-Finished building: default.size.stdout
- 
-Finished building: Base_FreeRTOS.list
- 
+arm-none-eabi-gcc "../Src/AdcDriver.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DNUCLEO_F411RE -DSTM32 -DSTM32F4 -DSTM32F411RETx -DSTM32F411xE -c -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Inc" -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Src/AdcDriver.d" -MT"Src/AdcDriver.o" --specs=nano.specs -mfloat-abi=hard -mthumb -o "Src/AdcDriver.o"
+arm-none-eabi-gcc "../Src/Astar.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DNUCLEO_F411RE -DSTM32 -DSTM32F4 -DSTM32F411RETx -DSTM32F411xE -c -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Inc" -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Src/Astar.d" -MT"Src/Astar.o" --specs=nano.specs -mfloat-abi=hard -mthumb -o "Src/Astar.o"
+../Src/Astar.c:48:6: error: conflicting types for 'findStart'
+   48 | int* findStart(void *matrixPointFirtsPos, costChangesAndPos_t *ptrChages){
+      |      ^~~~~~~~~
+In file included from ../Src/Astar.c:8:
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Inc/Astar.h:48:6: note: previous declaration of 'findStart' was here
+   48 | void findStart(void *matrixPointFirtsPos, costChangesAndPos_t *ptrChages);
+      |      ^~~~~~~~~
+../Src/Astar.c:54:6: error: conflicting types for 'findEnd'
+   54 | int* findEnd(void *matrixPointFirtsPos, costChangesAndPos_t *ptrChages){
+      |      ^~~~~~~
+In file included from ../Src/Astar.c:8:
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Inc/Astar.h:50:6: note: previous declaration of 'findEnd' was here
+   50 | void findEnd(void *matrixPointFirtsPos, costChangesAndPos_t *ptrChages);
+      |      ^~~~~~~
+../Src/Astar.c: In function 'findShorterWay':
+../Src/Astar.c:36:1: warning: control reaches end of non-void function [-Wreturn-type]
+   36 | }
+      | ^
+../Src/Astar.c: In function 'findStart':
+../Src/Astar.c:52:1: warning: control reaches end of non-void function [-Wreturn-type]
+   52 | }
+      | ^
+../Src/Astar.c: In function 'findEnd':
+../Src/Astar.c:57:1: warning: control reaches end of non-void function [-Wreturn-type]
+   57 | }
+      | ^
+make: *** [Src/subdir.mk:76: Src/Astar.o] Error 1
+"make clean all" terminated with exit code 2. Build might be incomplete.

@@ -9308,3 +9308,24 @@ java.lang.NullPointerException
 	at org.eclipse.equinox.launcher.Main.basicRun(Main.java:596)
 	at org.eclipse.equinox.launcher.Main.run(Main.java:1467)
 	at org.eclipse.equinox.launcher.Main.main(Main.java:1440)
+!SESSION 2024-08-15 21:41:36.310 -----------------------------------------------
+eclipse.buildId=Version 1.10.1
+java.version=11.0.14.1
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=linux, ARCH=x86_64, WS=gtk, NL=en_US
+Command-line arguments:  -os linux -ws gtk -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2024-08-15 21:41:42.365
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2024-08-15 21:41:42.420
+!MESSAGE Log4j initialized with config file /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/.metadata/.log4j.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2024-08-15 21:41:46.510
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-08-15 23:45:16.226
+!MESSAGE Indexed 'PeripheralDriver' (20 sources, 75 headers) in 0.984 sec: 3,764 declarations; 7,316 references; 21 unresolved inclusions; 2 syntax errors; 1,812 unresolved names (14%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-08-15 23:45:18.907
+!MESSAGE Indexed 'PeripheralDriver' (20 sources, 85 headers) in 1.32 sec: 4,861 declarations; 14,180 references; 0 unresolved inclusions; 2 syntax errors; 3 unresolved names (0.016%)

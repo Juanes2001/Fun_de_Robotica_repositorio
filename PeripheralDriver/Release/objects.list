@@ -1,4 +1,5 @@
 "./Src/AdcDriver.o"
+"./Src/Astar.o"
 "./Src/BasicTimer.o"
 "./Src/CaptureFreqDriver.o"
 "./Src/EXTIDriver.o"
@@ -6,6 +7,7 @@
 "./Src/GPIOxDriver.o"
 "./Src/I2CDriver.o"
 "./Src/MPUAccel.o"
+"./Src/MotorsDriver.o"
 "./Src/OLEDDriver.o"
 "./Src/PIDDriver.o"
 "./Src/PwmDriver.o"
