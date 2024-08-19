@@ -19,6 +19,7 @@ typedef struct {
 	float diagonalDiastance;
 	uint8_t numberOfRows;
 	uint8_t numberOfColumns;
+	char *shorterWay;
 }AStar_distancesHandler;
 
 
@@ -26,7 +27,12 @@ typedef struct {
 typedef struct{
 	float Gcost;  // Distancia que hay entre un punto y el punto de partida pasando por el punto de analisis
 	float Fcost;  // El costo de la heuristica con el G cost
-	int pos[1][2]; // Posicion elemento i, j de la matriz de posiciones,
+	int posAnalisis[2]; // Posicion elemento i, j de la matriz de posiciones, en estado de analisis,
+	int posOpen[2]; // Posicion elemento i, j de la matriz de posiciones, en estado de abierto,
+	int posClosed[2]; // Posicion elemento i, j de la matriz de posiciones, en estado de cerrado,
+	char parent[2]; // Este sera la posicion i,j que se le asignara a cada una de las posiciones estudiadas a partir del punto de analisis
+	int startPos[2];// Posicion i,j del comienzo
+	int endPos[2]; //Posicion i,j del final
 }costChangesAndPos_t;
 
 //Matriz de arrays donde se almacenan respectivamente los valores de G cost, el F cost, y el H cost
@@ -45,11 +51,11 @@ void updateGcost(void *matrixPointFirtsPos, costChangesAndPos_t *ptrChages);
 // Esta funcion renueva el costo F del punto desde el punto de analisis.
 void uptdateFcost(void *matrixPointFirtsPos, costChangesAndPos_t *ptrChages);
 // Esta función Busca el punto inicial de la cuadricula entregada.
-void findStart(void *matrixPointFirtsPos, costChangesAndPos_t *ptrChages);
+int findStart(char **Grid, AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges);
 // Esta funcion busca el punto final o punto de llegada.
-void findEnd(void *matrixPointFirtsPos, costChangesAndPos_t *ptrChages);
+int findEnd(char **Grid, AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges);
 // Esta funcion define la heuristica de cada cuadro de la cuadricula exceptuando los obstaculos
-void setHeuristic(void *matrixPointFirtsPos, costChangesAndPos_t *ptrChages);
+int setHeuristic(AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges);
 // Esta función define la matriz que se usara para definir el camino mas corto, traida desde comunicacion serial.
 char **buildMatrixCopy(AStar_distancesHandler *parameters, char *string[]);
 // Con esta funcion allocamos la supermatriz donde se almacenaran los datos numericos de la heuristica el G cost y el F cost
@@ -59,7 +65,7 @@ uint8_t getRows(char **matrix);
 // Esta funciom retorna la cantidad de columnas que hay en el arreglo entrado N
 uint8_t getColums(char **matrix);
 //Esta funcion inicializa los parametros de la estructura AStar_distances
-char* findShorterWay(AStar_distancesHandler *parameters, char** Grid);
+char* findShorterWay(char** Grid, AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges);
 
 
 
