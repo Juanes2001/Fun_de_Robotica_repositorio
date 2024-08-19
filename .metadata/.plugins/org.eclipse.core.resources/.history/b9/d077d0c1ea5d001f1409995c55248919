@@ -18,7 +18,6 @@ char* findShorterWay(char** Grid, AStar_distancesHandler *parameters, costChange
 	int counterRow   = -1;
 	int conterColumn = -1;
 	char nineSlotsMatriz[3][3]; // matriz que tomara una parte de redeableGrid para analisis
-	uint8_t shorterWayFound = RESET;
 
 	// Primero seteamos dentro de los valores de los parametros cuales son los valores de las filas y las columnas
 	parameters->numberOfRows    = getRows(Grid);
@@ -67,7 +66,7 @@ char* findShorterWay(char** Grid, AStar_distancesHandler *parameters, costChange
     ptrChanges->posOpen[1] =  ptrChanges->startPos[1];
 
 
-    while(shorterWayFound){
+    while(){
 
     	// este while actuara como un while de recorrido circular, donde se busca analizar las posiciones i,j de los aledaños dando un circulo
     	// al punto de analisis
@@ -81,38 +80,18 @@ char* findShorterWay(char** Grid, AStar_distancesHandler *parameters, costChange
     	for(uint8_t i = 0; i < 3; i++){
     		for (uint8_t j = 0; j < 3; j++){
 
-    			if 	  ((ptrChanges->posAnalisis[0] + i - 1) < 0
-    			    || (ptrChanges->posAnalisis[1] + j - 1) < 0) {
+    			if ( (ptrChanges->posAnalisis[0] + i - 1) < 0  || (ptrChanges->posAnalisis[1] + j - 1) < 0) {
     				// El primer caso seria cuando el puntero que estudia la matriz esta por fuera del rango , especificamente por detras del rango
     				// donde el indice seria negativo
     				nineSlotsMatriz[i][j] = '0';
 
     			}else if ((ptrChanges->posAnalisis[0] + i - 1) > parameters->numberOfRows - 1
-    				||    (ptrChanges->posAnalisis[1] + j - 1) > parameters->numberOfColumns - 1){
-    				// El segundo caso seria cuando el puntero que estudia la matriz esta por fuera del rango, especificamente por delante
-    				// del rango donde el indice seria mayor al limite superior del numero de filas o columnas restado uno.
-    				nineSlotsMatriz[i][j] = '0';
-    			}else if ((ptrChanges->posAnalisis[0] + i - 1) == ptrChanges->posClosed[0]
-					||    (ptrChanges->posAnalisis[1] + j - 1) == ptrChanges->posClosed[1]){
-    				// Este tercer caso estudia si el puntero que estudia la matriz esta ya cerrado, por lo que la posicion correspondiente
-    				// se manejara como una 'D' tipo char, para ya saber que esa posicion ha sido estudiada y cerrada
-    				nineSlotsMatriz[i][j] = 'D';
-    			}else if ((ptrChanges->posAnalisis[0] + i - 1) == ptrChanges->posClosed[0]
-					||    (ptrChanges->posAnalisis[1] + j - 1) == ptrChanges->posClosed[1]){
-    				// En este cuarto caso se estudia si el puntero que estudia la matri esta ya abierto, por lo que la posicion correspondiente
-    				// Se manejara como una 'O'
-    				nineSlotsMatriz[i][j] = 'O';
-    			}else{
-    				// Este ultimo caso donde no se cumple lo anterior  simplemente copiamos exactamente lo mismo que aparece en la matriz de caracteres
-    				nineSlotsMatriz[i][j] = readableGrid[ptrChanges->posAnalisis[0] + i - 1][ptrChanges->posAnalisis[1] + j - 1];
+    					|| (ptrChanges->posAnalisis[1] + j - 1) < 0){
+
+
     			}
     		}
     	}
-
-    	// Estando aqui ya tendremos la matriz 3x3 correctamente constituida donde se tiene la informacion tanto del punto de analisis
-    	// (posicion central) como de sus aledanios, de ella se puede aplicar correctamente el algoritmo.
-
-    	// Lo que sigue
 
     	// Primero nos aseguramos que sus aledaños no sean obstaculos, por lo que son posiciones que no nos interesan
     	if (){
@@ -295,7 +274,7 @@ uint8_t getRows(char **matrix){
 
 	}
 
-	return counterRows;
+	return counterRows - 1;
 }
 
 //Se define la funcion de tomar cantidad de columnas recorriendo el string hasta encontrar el elemento nulo char
@@ -308,7 +287,7 @@ uint8_t getColums(char **matrix){
 
 	}
 
-	return counterColumns;
+	return counterColumns - 1;
 }
 
 

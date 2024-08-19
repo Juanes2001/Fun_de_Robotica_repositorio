@@ -1,4 +1,4 @@
-00:09:31 **** Incremental Build of configuration Debug for project PeripheralDriver ****
+00:45:32 **** Incremental Build of configuration Debug for project PeripheralDriver ****
 make clean all 
 rm -rf ./Src/AdcDriver.d ./Src/AdcDriver.o ./Src/AdcDriver.su ./Src/Astar.d ./Src/Astar.o ./Src/Astar.su ./Src/BasicTimer.d ./Src/BasicTimer.o ./Src/BasicTimer.su ./Src/CaptureFreqDriver.d ./Src/CaptureFreqDriver.o ./Src/CaptureFreqDriver.su ./Src/EXTIDriver.d ./Src/EXTIDriver.o ./Src/EXTIDriver.su ./Src/FPUDriver.d ./Src/FPUDriver.o ./Src/FPUDriver.su ./Src/GPIOxDriver.d ./Src/GPIOxDriver.o ./Src/GPIOxDriver.su ./Src/I2CDriver.d ./Src/I2CDriver.o ./Src/I2CDriver.su ./Src/MPUAccel.d ./Src/MPUAccel.o ./Src/MPUAccel.su ./Src/MotorsDriver.d ./Src/MotorsDriver.o ./Src/MotorsDriver.su ./Src/OLEDDriver.d ./Src/OLEDDriver.o ./Src/OLEDDriver.su ./Src/PIDDriver.d ./Src/PIDDriver.o ./Src/PIDDriver.su ./Src/PwmDriver.d ./Src/PwmDriver.o ./Src/PwmDriver.su ./Src/RCCHunMHz.d ./Src/RCCHunMHz.o ./Src/RCCHunMHz.su ./Src/RTCDriver.d ./Src/RTCDriver.o ./Src/RTCDriver.su ./Src/SPIDriver.d ./Src/SPIDriver.o ./Src/SPIDriver.su ./Src/SysTickDriver.d ./Src/SysTickDriver.o ./Src/SysTickDriver.su ./Src/USARTxDriver.d ./Src/USARTxDriver.o ./Src/USARTxDriver.su ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su ./Src/sysmem.d ./Src/sysmem.o ./Src/sysmem.su
 rm -rf libPeripheralDriver.a
@@ -6,11 +6,8 @@ rm -rf libPeripheralDriver.a
 arm-none-eabi-gcc "../Src/AdcDriver.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DNUCLEO_F411RE -DSTM32 -DSTM32F4 -DSTM32F411RETx -DSTM32F411xE -c -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Inc" -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Src/AdcDriver.d" -MT"Src/AdcDriver.o" --specs=nano.specs -mfloat-abi=hard -mthumb -o "Src/AdcDriver.o"
 arm-none-eabi-gcc "../Src/Astar.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DNUCLEO_F411RE -DSTM32 -DSTM32F4 -DSTM32F411RETx -DSTM32F411xE -c -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Inc" -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Src/Astar.d" -MT"Src/Astar.o" --specs=nano.specs -mfloat-abi=hard -mthumb -o "Src/Astar.o"
 ../Src/Astar.c: In function 'findShorterWay':
-../Src/Astar.c:69:11: error: expected expression before ')' token
-   69 |     while(){
-      |           ^
-../Src/Astar.c:97:10: error: expected expression before ')' token
-   97 |      if (){
+../Src/Astar.c:118:10: error: expected expression before ')' token
+  118 |      if (){
       |          ^
 ../Src/Astar.c:20:7: warning: variable 'nineSlotsMatriz' set but not used [-Wunused-but-set-variable]
    20 |  char nineSlotsMatriz[3][3]; // matriz que tomara una parte de redeableGrid para analisis
@@ -21,11 +18,11 @@ arm-none-eabi-gcc "../Src/Astar.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DNUCL
 ../Src/Astar.c:18:6: warning: unused variable 'counterRow' [-Wunused-variable]
    18 |  int counterRow   = -1;
       |      ^~~~~~~~~~
-../Src/Astar.c:110:1: warning: control reaches end of non-void function [-Wreturn-type]
-  110 | }
+../Src/Astar.c:131:1: warning: control reaches end of non-void function [-Wreturn-type]
+  131 | }
       | ^
 make: *** [Src/subdir.mk:76: Src/Astar.o] Error 1
 "make clean all" terminated with exit code 2. Build might be incomplete.
 
-00:09:32 Build Failed. 3 errors, 4 warnings. (took 550ms)
+00:45:32 Build Failed. 2 errors, 4 warnings. (took 502ms)
 
