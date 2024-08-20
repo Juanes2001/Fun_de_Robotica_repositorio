@@ -636,7 +636,7 @@ void findLesserValue(costChangesAndPos_t*ptrChanges, float ***matrixCosts){
 				// de todas, tambien guardamos el valor mas pequeño, si este se repite, se sabra gracias a la bandera
 				ptrChanges->lesserHcostPosition[0] = counterRow;
 				ptrChanges->lesserHcostPosition[1] = counterColumn;
-				ptrChanges->lesserHcost = costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][2];
+				ptrChanges->lesserHcost = costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][1];
 				IfoundIt = SET;
 			}else{
 				if (counterColumn == 2){

@@ -32,11 +32,8 @@ typedef struct{
 	volatile char parent[2]; // Este sera la posicion i,j que se le asignara a cada una de las posiciones estudiadas a partir del punto de analisis
 	int startPos[2];// Posicion i,j del comienzo
 	int endPos[2];//Posicion i,j del final
-	volatile int lesserFcostPosition[2]; // En este arreglo podemos subir la posicion del Fcost mas pequeño que queramos para usarla despues
-	volatile int lesserHcostPosition[2]; // En este arreglo podemos subir la posicion del Hcost mas pequeño que queramos para usarla despues
-	uint8_t equalFcost;// Esta es una bandera que se usara si existen F cost iguales dentro de un arreglo, esto nos ayudara a desempatar
-	float lesserFcost; // Con este valor podemos almacenar el valor del Fcost mas pequeño
-	float lesserHcost; // Con este valor podemos almacenar el valor del Hcost mas pequeño
+	volatile int arbitraryPosition[2];
+	volatile uint8_t equalFcost;
 }costChangesAndPos_t;
 
 //Matriz de arrays donde se almacenan respectivamente los valores de G cost, el F cost, y el H cost, posicion i del parent y posicion j del parent
@@ -78,7 +75,7 @@ uint8_t getRows(char **terminalGrid);
 // Esta funciom retorna la cantidad de columnas que hay en el arreglo entrado N
 uint8_t getColums(char **terminalGrid);
 // Esta funcion halla la posicion del valor mas pequeño más pequeño dentro de un conjunto de valores
-void findLesserValue(costChangesAndPos_t*ptrChanges, float ***matrixCosts);
+void findLesserValue(char*typeCost ,costChangesAndPos_t*ptrChanges, float ***matrixCosts);
 //Esta funcion inicializa los parametros de la estructura AStar_distances
 char* findShorterWay(char** terminalGrid, AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges);
 

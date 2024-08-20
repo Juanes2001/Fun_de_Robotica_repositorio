@@ -550,7 +550,7 @@ void findLesserValue(costChangesAndPos_t*ptrChanges, float ***matrixCosts){
 						ptrChanges->equalFcost = SET;
 					}else{
 						// Si estamos aqui es porque el programa hallo almenos un valor menor al analizado, por lo que no nos sirve
-						// Se resetea la bandera que decia que habia un vakor igual, esto debe de ser solo cierto si el valor que es
+						// Se resetea la bandera que decia que habia un vakor igual, esto debe de ser solo sierto si el valor que es
 						// igual es el menor de la matriz
 						ptrChanges->equalFcost = RESET;
 						falseAlarm = SET;
@@ -570,8 +570,8 @@ void findLesserValue(costChangesAndPos_t*ptrChanges, float ***matrixCosts){
 		if (i == 3 && j == 3){
 			// Si entramos aqui es porque se logro analizar toda la matriz y se encontro la posicion que corresponde con la posicion mas pequeña
 			// de todas, tambien guardamos el valor mas pequeño, si este se repite, se sabra gracias a la bandera
-			ptrChanges->lesserFcostPosition[0] = counterRow;
-			ptrChanges->lesserFcostPosition[1] = counterColumn;
+			ptrChanges->arbitraryPosition[0] = counterRow;
+			ptrChanges->arbitraryPosition[1] = counterColumn;
 			ptrChanges->lesserFcost = costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][1];
 			IfoundIt = SET;
 		}else{
@@ -585,70 +585,7 @@ void findLesserValue(costChangesAndPos_t*ptrChanges, float ***matrixCosts){
 
 	}//Terminacion del ciclo while
 
-	// Ahora hallaremos el valor mas pequeño de H cost, solo en el caso de que la bandera correspondiente se haya levantado
-	if (ptrChanges->equalFcost){
-		// Si estamos aqui es porque si hay mas de un valor de F cost que corresponde con el valor mas pequeño, desempatamos buscando el Hcost mas pequeño
-		// Para ello recorreremos la matriz a analizar de nuevo pero esta vez solo buscando aquellos valores que correspondan con el valor hallado de Fcost
-		counterRow = 0;
-		counterColumn = 0;
-		falseAlarm = RESET;
-		IfoundIt = RESET;
-		// reseteamos las variables locales y volvemos a empezar pero esta vez solo buscando aquellos casos donde se tenga el valor encontrado
-		while (!IfoundIt){
 
-			for(i = 0; i<3 ; i++){
-				for(j = 0; j<3 ; j++){
-					value = costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][1] / ptrChanges->lesserFcost;
-					if ((ptrChanges->posAnalisis[0] + counterRow - 1) == (ptrChanges->posAnalisis[0] + i - 1)
-					&&  (ptrChanges->posAnalisis[1] + counterColumn - 1) == (ptrChanges->posAnalisis[1] + j - 1)){
-						// Si estamos aqui es porque estamos analizando el punto de analisis, por lo que lo ignoramos
-						__NOP();
-					}else if (value == 1){
-						// Si estamos aca es porque podemos hacer la comparación pero esta vez con la matriz heuristica
-						if (costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][2]
-						  <= costs[ptrChanges->posAnalisis[0] + i - 1][ptrChanges->posAnalisis[1] + j - 1][2]){
-							// Si estamos aca es porque efectivamente el Hcost es menor o igual al resto de Hcost
-							__NOP();
-						}else{
-							// Si estamos aqui es porque el programa hallo almenos un valor menor al analizado, por lo que no nos sirve
-							falseAlarm = SET;
-							break;
-						}
-					}
-					else{
-						// Estamos en un valor que no nos interesa evaluar, por lo que lo ignoramos y salimos
-						falseAlarm = SET;
-						break;
-					}
-
-				}//Terminacion de un for
-
-				// Este condicional es solo para acabar el ciclo for de las filas y se continue a que se compare la siguiente posición
-				if (falseAlarm){
-					falseAlarm = RESET;
-					break;
-				}
-
-			}//Terminacion del otro for
-
-			if (i == 3 && j == 3){
-				// Si entramos aqui es porque se logro analizar toda la matriz y se encontro la posicion que corresponde con la posicion mas pequeña
-				// de todas, tambien guardamos el valor mas pequeño, si este se repite, se sabra gracias a la bandera
-				ptrChanges->lesserHcostPosition[0] = counterRow;
-				ptrChanges->lesserHcostPosition[1] = counterColumn;
-				ptrChanges->lesserHcost = costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][2];
-				IfoundIt = SET;
-			}else{
-				if (counterColumn == 2){
-					counterRow++;
-					counterColumn = 0;
-				}else{
-					counterColumn++;
-				}
-			}
-
-		}//Terminacion del ciclo while
-	}
 
 
 }

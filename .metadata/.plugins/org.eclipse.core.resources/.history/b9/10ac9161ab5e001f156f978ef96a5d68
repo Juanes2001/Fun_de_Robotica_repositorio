@@ -550,7 +550,7 @@ void findLesserValue(costChangesAndPos_t*ptrChanges, float ***matrixCosts){
 						ptrChanges->equalFcost = SET;
 					}else{
 						// Si estamos aqui es porque el programa hallo almenos un valor menor al analizado, por lo que no nos sirve
-						// Se resetea la bandera que decia que habia un vakor igual, esto debe de ser solo cierto si el valor que es
+						// Se resetea la bandera que decia que habia un vakor igual, esto debe de ser solo sierto si el valor que es
 						// igual es el menor de la matriz
 						ptrChanges->equalFcost = RESET;
 						falseAlarm = SET;
@@ -570,8 +570,8 @@ void findLesserValue(costChangesAndPos_t*ptrChanges, float ***matrixCosts){
 		if (i == 3 && j == 3){
 			// Si entramos aqui es porque se logro analizar toda la matriz y se encontro la posicion que corresponde con la posicion mas pequeña
 			// de todas, tambien guardamos el valor mas pequeño, si este se repite, se sabra gracias a la bandera
-			ptrChanges->lesserFcostPosition[0] = counterRow;
-			ptrChanges->lesserFcostPosition[1] = counterColumn;
+			ptrChanges->arbitraryPosition[0] = counterRow;
+			ptrChanges->arbitraryPosition[1] = counterColumn;
 			ptrChanges->lesserFcost = costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][1];
 			IfoundIt = SET;
 		}else{
@@ -606,23 +606,26 @@ void findLesserValue(costChangesAndPos_t*ptrChanges, float ***matrixCosts){
 					}else if (value == 1){
 						// Si estamos aca es porque podemos hacer la comparación pero esta vez con la matriz heuristica
 						if (costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][2]
-						  <= costs[ptrChanges->posAnalisis[0] + i - 1][ptrChanges->posAnalisis[1] + j - 1][2]){
-							// Si estamos aca es porque efectivamente el Hcost es menor o igual al resto de Hcost
-							__NOP();
+						  < costs[ptrChanges->posAnalisis[0] + i - 1][ptrChanges->posAnalisis[1] + j - 1][2]){
+							// Si estamos aca es porque efectivamente el Fcost es menor o igual al resto de Fcost
+						}else if (costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][2]
+							   == costs[ptrChanges->posAnalisis[0] + i - 1][ptrChanges->posAnalisis[1] + j - 1][2]){
+							// Si estamos aqui es porque el programa encontro mas minimo un valor igual al analizado
+							ptrChanges->equalFcost = SET;
 						}else{
 							// Si estamos aqui es porque el programa hallo almenos un valor menor al analizado, por lo que no nos sirve
+							// Se resetea la bandera que decia que habia un vakor igual, esto debe de ser solo sierto si el valor que es
+							// igual es el menor de la matriz
+							ptrChanges->equalFcost = RESET;
 							falseAlarm = SET;
 							break;
 						}
 					}
 					else{
-						// Estamos en un valor que no nos interesa evaluar, por lo que lo ignoramos y salimos
-						falseAlarm = SET;
-						break;
+
 					}
 
 				}//Terminacion de un for
-
 				// Este condicional es solo para acabar el ciclo for de las filas y se continue a que se compare la siguiente posición
 				if (falseAlarm){
 					falseAlarm = RESET;
@@ -634,9 +637,9 @@ void findLesserValue(costChangesAndPos_t*ptrChanges, float ***matrixCosts){
 			if (i == 3 && j == 3){
 				// Si entramos aqui es porque se logro analizar toda la matriz y se encontro la posicion que corresponde con la posicion mas pequeña
 				// de todas, tambien guardamos el valor mas pequeño, si este se repite, se sabra gracias a la bandera
-				ptrChanges->lesserHcostPosition[0] = counterRow;
-				ptrChanges->lesserHcostPosition[1] = counterColumn;
-				ptrChanges->lesserHcost = costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][2];
+				ptrChanges->arbitraryPosition[0] = counterRow;
+				ptrChanges->arbitraryPosition[1] = counterColumn;
+				ptrChanges->lesserFcost = costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][1];
 				IfoundIt = SET;
 			}else{
 				if (counterColumn == 2){

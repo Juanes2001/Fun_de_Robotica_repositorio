@@ -570,8 +570,8 @@ void findLesserValue(costChangesAndPos_t*ptrChanges, float ***matrixCosts){
 		if (i == 3 && j == 3){
 			// Si entramos aqui es porque se logro analizar toda la matriz y se encontro la posicion que corresponde con la posicion mas pequeña
 			// de todas, tambien guardamos el valor mas pequeño, si este se repite, se sabra gracias a la bandera
-			ptrChanges->lesserFcostPosition[0] = counterRow;
-			ptrChanges->lesserFcostPosition[1] = counterColumn;
+			ptrChanges->arbitraryPosition[0] = counterRow;
+			ptrChanges->arbitraryPosition[1] = counterColumn;
 			ptrChanges->lesserFcost = costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][1];
 			IfoundIt = SET;
 		}else{
@@ -634,9 +634,9 @@ void findLesserValue(costChangesAndPos_t*ptrChanges, float ***matrixCosts){
 			if (i == 3 && j == 3){
 				// Si entramos aqui es porque se logro analizar toda la matriz y se encontro la posicion que corresponde con la posicion mas pequeña
 				// de todas, tambien guardamos el valor mas pequeño, si este se repite, se sabra gracias a la bandera
-				ptrChanges->lesserHcostPosition[0] = counterRow;
-				ptrChanges->lesserHcostPosition[1] = counterColumn;
-				ptrChanges->lesserHcost = costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][2];
+				ptrChanges->arbitraryPosition[0] = counterRow;
+				ptrChanges->arbitraryPosition[1] = counterColumn;
+				ptrChanges->lesserFcost = costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][1];
 				IfoundIt = SET;
 			}else{
 				if (counterColumn == 2){

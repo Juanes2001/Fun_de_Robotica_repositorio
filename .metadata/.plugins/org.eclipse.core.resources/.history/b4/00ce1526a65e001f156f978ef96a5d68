@@ -518,7 +518,7 @@ uint8_t getColums(char **terminalGrid){
 // esta funcion nos almacena en uno de los arrays volatiles de la estructura costChangesAndPos_t la posicion del valor Fcost o H cost mas pequeño,
 // Se debe identificar con un string si se quiere hallar el Fcost mas pequeño o el Hcost mas pequeño, asi, "Fcost" si se quiere hallar el F cost o
 // "Hcost" si se quiere hallar el H cost
-void findLesserValue(costChangesAndPos_t*ptrChanges, float ***matrixCosts){
+void findLesserValue(char* typeCost ,costChangesAndPos_t*ptrChanges, float ***matrixCosts){
 	// seteamos las variables locales
 	uint8_t counterRow = 0;
 	uint8_t counterColumn = 0;
@@ -526,103 +526,41 @@ void findLesserValue(costChangesAndPos_t*ptrChanges, float ***matrixCosts){
 	uint8_t j;
 	uint8_t falseAlarm = RESET;
 	uint8_t IfoundIt = RESET;
-	float value = 0;
+	// Primero preguntamos si el puntero a char typeCost cual string es
 
+	if (strcmp(typeCost , "Fcost") == 0){
+		// Si estamos aqui es porque queremos hallar de la matiz de costos la posicion del valor mas pequeño de los F costs
 
-	// El algoritmo que se usará es que se recorrerá cada una de las posiciones y se analizara con las demas , excpliyendo obviamente
-	// la posicion central
-	while (!IfoundIt){
-
-		for(i = 0; i<3 ; i++){
-			for(j = 0; j<3 ; j++){
-				if ((ptrChanges->posAnalisis[0] + counterRow - 1) == (ptrChanges->posAnalisis[0] + i - 1)
-				&&  (ptrChanges->posAnalisis[1] + counterColumn - 1) == (ptrChanges->posAnalisis[1] + j - 1)){
-					// Si estamos aqui es porque estamos analizando el punto de analisis, por lo que lo ignoramos
-					__NOP();
-				}else{
-					// Si estamos aca es porque podemos hacer la comparación
-					if (costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][1]
-					  < costs[ptrChanges->posAnalisis[0] + i - 1][ptrChanges->posAnalisis[1] + j - 1][1]){
-						// Si estamos aca es porque efectivamente el Fcost es menor o igual al resto de Fcost
-					}else if (costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][1]
-						   == costs[ptrChanges->posAnalisis[0] + i - 1][ptrChanges->posAnalisis[1] + j - 1][1]){
-						// Si estamos aqui es porque el programa encontro mas minimo un valor igual al analizado
-						ptrChanges->equalFcost = SET;
-					}else{
-						// Si estamos aqui es porque el programa hallo almenos un valor menor al analizado, por lo que no nos sirve
-						// Se resetea la bandera que decia que habia un vakor igual, esto debe de ser solo cierto si el valor que es
-						// igual es el menor de la matriz
-						ptrChanges->equalFcost = RESET;
-						falseAlarm = SET;
-						break;
-					}
-				}
-
-			}//Terminacion de un for
-			// Este condicional es solo para acabar el ciclo for de las filas y se continue a que se compare la siguiente posición
-			if (falseAlarm){
-				falseAlarm = RESET;
-				break;
-			}
-
-		}//Terminacion del otro for
-
-		if (i == 3 && j == 3){
-			// Si entramos aqui es porque se logro analizar toda la matriz y se encontro la posicion que corresponde con la posicion mas pequeña
-			// de todas, tambien guardamos el valor mas pequeño, si este se repite, se sabra gracias a la bandera
-			ptrChanges->lesserFcostPosition[0] = counterRow;
-			ptrChanges->lesserFcostPosition[1] = counterColumn;
-			ptrChanges->lesserFcost = costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][1];
-			IfoundIt = SET;
-		}else{
-			if (counterColumn == 2){
-				counterRow++;
-				counterColumn = 0;
-			}else{
-				counterColumn++;
-			}
-		}
-
-	}//Terminacion del ciclo while
-
-	// Ahora hallaremos el valor mas pequeño de H cost, solo en el caso de que la bandera correspondiente se haya levantado
-	if (ptrChanges->equalFcost){
-		// Si estamos aqui es porque si hay mas de un valor de F cost que corresponde con el valor mas pequeño, desempatamos buscando el Hcost mas pequeño
-		// Para ello recorreremos la matriz a analizar de nuevo pero esta vez solo buscando aquellos valores que correspondan con el valor hallado de Fcost
-		counterRow = 0;
-		counterColumn = 0;
-		falseAlarm = RESET;
-		IfoundIt = RESET;
-		// reseteamos las variables locales y volvemos a empezar pero esta vez solo buscando aquellos casos donde se tenga el valor encontrado
+		// El algoritmo que se usará es que se recorrerá cada una de las posiciones y se analizara con las demas , excpliyendo obviamente
+		// la posicion central
 		while (!IfoundIt){
 
 			for(i = 0; i<3 ; i++){
 				for(j = 0; j<3 ; j++){
-					value = costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][1] / ptrChanges->lesserFcost;
 					if ((ptrChanges->posAnalisis[0] + counterRow - 1) == (ptrChanges->posAnalisis[0] + i - 1)
 					&&  (ptrChanges->posAnalisis[1] + counterColumn - 1) == (ptrChanges->posAnalisis[1] + j - 1)){
 						// Si estamos aqui es porque estamos analizando el punto de analisis, por lo que lo ignoramos
 						__NOP();
-					}else if (value == 1){
-						// Si estamos aca es porque podemos hacer la comparación pero esta vez con la matriz heuristica
-						if (costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][2]
-						  <= costs[ptrChanges->posAnalisis[0] + i - 1][ptrChanges->posAnalisis[1] + j - 1][2]){
-							// Si estamos aca es porque efectivamente el Hcost es menor o igual al resto de Hcost
-							__NOP();
+					}else{
+						// Si estamos aca es porque podemos hacer la comparación
+						if (costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][1]
+						  < costs[ptrChanges->posAnalisis[0] + i - 1][ptrChanges->posAnalisis[1] + j - 1][1]){
+							// Si estamos aca es porque efectivamente el Fcost es menor o igual al resto de Fcost
+						}else if (costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][1]
+							   == costs[ptrChanges->posAnalisis[0] + i - 1][ptrChanges->posAnalisis[1] + j - 1][1]){
+							// Si estamos aqui es porque el programa encontro mas minimo un valor igual al analizado
+							ptrChanges->equalFcost = SET;
 						}else{
 							// Si estamos aqui es porque el programa hallo almenos un valor menor al analizado, por lo que no nos sirve
+							// Se resetea la bandera que decia que habia un vakor igual, esto debe de ser solo sierto si el valor que es
+							// igual es el menor de la matriz
+							ptrChanges->equalFcost = RESET;
 							falseAlarm = SET;
 							break;
 						}
 					}
-					else{
-						// Estamos en un valor que no nos interesa evaluar, por lo que lo ignoramos y salimos
-						falseAlarm = SET;
-						break;
-					}
 
 				}//Terminacion de un for
-
 				// Este condicional es solo para acabar el ciclo for de las filas y se continue a que se compare la siguiente posición
 				if (falseAlarm){
 					falseAlarm = RESET;
@@ -633,10 +571,9 @@ void findLesserValue(costChangesAndPos_t*ptrChanges, float ***matrixCosts){
 
 			if (i == 3 && j == 3){
 				// Si entramos aqui es porque se logro analizar toda la matriz y se encontro la posicion que corresponde con la posicion mas pequeña
-				// de todas, tambien guardamos el valor mas pequeño, si este se repite, se sabra gracias a la bandera
-				ptrChanges->lesserHcostPosition[0] = counterRow;
-				ptrChanges->lesserHcostPosition[1] = counterColumn;
-				ptrChanges->lesserHcost = costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][2];
+				// de todas
+				ptrChanges->arbitraryPosition[0] = counterRow;
+				ptrChanges->arbitraryPosition[1] = counterColumn;
 				IfoundIt = SET;
 			}else{
 				if (counterColumn == 2){
@@ -648,8 +585,61 @@ void findLesserValue(costChangesAndPos_t*ptrChanges, float ***matrixCosts){
 			}
 
 		}//Terminacion del ciclo while
-	}
 
+	}else if (strcmp(typeCost , "Hcost") == 0){
+		// Si estamos aqui es porque queremos hallar de la matiz de costos la posicion del valor mas pequeño para los H costs
+		// Esta opcion se usara en el caso de que se quiera desempatar entre varos Fcosts iguales, se selecciona aquel que tenga menor
+		// Hcost
+
+		// En este algoritmo se recorrerra cada posicion de la matriz de analisis pero obviando la posicion central ya que corresponde con el
+		// punto de analisis, por lo que solo nos interesara aquellas posiciones donde ya se obtuvo
+		while (!IfoundIt){
+
+			for(i = 0; i<3 ; i++){
+				for(j = 0; j<3 ; j++){
+					if ((ptrChanges->posAnalisis[0] + counterRow - 1) == (ptrChanges->posAnalisis[0] + i - 1)
+					&&  (ptrChanges->posAnalisis[1] + counterColumn - 1) == (ptrChanges->posAnalisis[1] + j - 1)){
+						// Si estamos aqui es porque estamos analizando el punto de analisis, por lo que lo ignoramos
+						__NOP();
+					}else{
+						// Si estamos aca es porque podemos hacer la comparación
+						if (costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][1]
+						  <= costs[ptrChanges->posAnalisis[0] + i - 1][ptrChanges->posAnalisis[1] + j - 1][1]){
+							// Si estamos aca es porque efectivamente el Fcost es menor o igual al resto de Fcost
+						}else{
+							falseAlarm = SET;
+							break;
+						}
+					}
+
+				}//Terminacion de un for
+				// Este condicional es solo para acabar el ciclo for de las filas y se continue a que se compare la siguiente posición
+				if (falseAlarm){
+					falseAlarm = RESET;
+					break;
+				}
+
+			}//Terminacion del otro for
+
+			if (i == 3 && j == 3){
+				// Si entramos aqui es porque se logro analizar toda la matriz y se encontro la posicion que corresponde con la posicion mas pequeña
+				// de todas
+				ptrChanges->arbitraryPosition[0] = counterRow;
+				ptrChanges->arbitraryPosition[1] = counterColumn;
+				IfoundIt = SET;
+			}else{
+				if (counterColumn == 2){
+					counterRow++;
+					counterColumn = 0;
+				}else{
+					counterColumn++;
+				}
+			}
+
+		}//Terminacion del ciclo while
+
+
+	}
 
 }
 
