@@ -57,6 +57,19 @@ typedef struct
 	uint8_t     channelVector[]; // Vector de canales
 }ADC_Config_t;
 
+enum {
+	e_USART_PRIORITY_6 =6,
+	e_USART_PRIORITY_7,
+	e_USART_PRIORITY_8,
+	e_USART_PRIORITY_9,
+	e_USART_PRIORITY_10,
+	e_USART_PRIORITY_11,
+	e_USART_PRIORITY_12,
+	e_USART_PRIORITY_13,
+	e_USART_PRIORITY_14,
+	e_USART_PRIORITY_15
+};
+
 void adc_Config(ADC_Config_t *adcConfig);
 void configAnalogPin(uint8_t adcChannel);
 void adcComplete_Callback(void);
@@ -65,6 +78,7 @@ void startContinousADC(void);
 uint16_t getADC(void);
 void adcExternalEXTIConfig ();
 void adcTimerEventConfig();
+void adc_Set_Priority(ADC_Config_t *ptrAdcConfig, uint8_t newPriority);
 
 void ADC_ConfigMultichannel (ADC_Config_t *adcConfig, uint8_t numeroDeCanales);
 

@@ -465,3 +465,18 @@ void ADC_ConfigMultichannel (ADC_Config_t *adcConfig, uint8_t numeroDeCanales){
 
 
 }
+
+
+void adc_Set_Priority(ADC_Config_t *ptrAdcConfig, uint8_t newPriority){
+
+	/* 10. Desactivamos las interrupciones globales */
+	__disable_irq();
+
+	/* 11b. Configuramos la prioridad para la interrupción ADC */
+	__NVIC_SetPriority(ADC_IRQn, newPriority);
+
+	/* 13. Activamos las interrupciones globales */
+	__enable_irq();
+
+
+}

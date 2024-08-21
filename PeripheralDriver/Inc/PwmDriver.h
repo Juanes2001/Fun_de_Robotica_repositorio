@@ -52,6 +52,9 @@ typedef struct
 	PWM_Config_t	config;	    // Configuración inicial del PWM
 }PWM_Handler_t;
 
+extern uint16_t periodo;
+
+
 /* Prototipos de las funciones */
 void pwm_Config(PWM_Handler_t *ptrPwmHandler);
 void setFrequency(PWM_Handler_t *ptrPwmHandler);

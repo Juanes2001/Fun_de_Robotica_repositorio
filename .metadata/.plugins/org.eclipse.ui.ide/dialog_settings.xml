@@ -14,4 +14,8 @@
 			<item value="/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Blinky"/>
 		</list>
 	</section>
+	<section name="ChooseWorkspaceDialogSettings">
+		<item key="DIALOG_X_ORIGIN" value="628"/>
+		<item key="DIALOG_Y_ORIGIN" value="264"/>
+	</section>
 </section>

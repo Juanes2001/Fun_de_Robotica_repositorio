@@ -5,8 +5,8 @@
  *      Author: namontoy
  */
 #include "PwmDriver.h"
-
-uint16_t periodo = 0;
+#include "assert.h"
+#include <math.h>
 
 /**/
 void pwm_Config(PWM_Handler_t *ptrPwmHandler){
@@ -246,25 +246,25 @@ void setDuttyCycle(PWM_Handler_t *ptrPwmHandler){
 	// Seleccionamos el canal para configurar su dutty
 	switch(ptrPwmHandler->config.channel){
 	case PWM_CHANNEL_1:{
-		double op = (ptrPwmHandler->config.duttyCicle) * (ptrPwmHandler->config.periodo);
+		double op = (ptrPwmHandler->config.duttyCicle) * periodo;
 		ptrPwmHandler->ptrTIMx->CCR1 = (op)/100;
 		break;
 	}
 
 	case PWM_CHANNEL_2:{
-		double op = (ptrPwmHandler->config.duttyCicle) * (ptrPwmHandler->config.periodo);
+		double op = (ptrPwmHandler->config.duttyCicle) * periodo;
 		ptrPwmHandler->ptrTIMx->CCR2 = (op)/100;
 		break;
 	}
 
 	case PWM_CHANNEL_3:{
-		double op = (ptrPwmHandler->config.duttyCicle) * (ptrPwmHandler->config.periodo);
+		double op = (ptrPwmHandler->config.duttyCicle) * periodo;
 		ptrPwmHandler->ptrTIMx->CCR3 = (op)/100;
 		break;
 	}
 
 	case PWM_CHANNEL_4:{
-		double op = (ptrPwmHandler->config.duttyCicle) * (ptrPwmHandler->config.periodo);
+		double op = (ptrPwmHandler->config.duttyCicle) * periodo;
 		ptrPwmHandler->ptrTIMx->CCR4 = (op)/100;
 		break;
 	}

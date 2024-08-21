@@ -72,8 +72,8 @@ char bufferMsg[64];
 
 int main(void)
 {
-
-
+	//Activamos la FPU
+	SCB -> CPACR |= (0xF << 20);
 
 	inSystem ();
 
@@ -131,14 +131,19 @@ void inSystem (void){
 
 	handlerPWM_pulse_10ns.ptrTIMx            = TIM5;
 	handlerPWM_pulse_10ns.config.channel     = PWM_CHANNEL_1;
-	handlerPWM_pulse_10ns.config.duttyCicle  = 0;
+	handlerPWM_pulse_10ns.config.duttyCicle  = 50;
 	handlerPWM_pulse_10ns.config.periodo     = 40; // se maneja 25 hz por testeo
 	handlerPWM_pulse_10ns.config.prescaler   = PWM_SPEED_100MHz_1us;
 	handlerPWM_pulse_10ns.config.polarity    = PWM_DISABLE_POLARITY;
 	handlerPWM_pulse_10ns.config.optocoupler = PWM_DISABLE_OPTOCOUPLER;
 	pwm_Config(&handlerPWM_pulse_10ns);
 	startPwmSignal(&handlerPWM_pulse_10ns);
+	enableOutput(&handlerPWM_pulse_10ns);
 
+}
+
+void BasicTimer3_Callback(void){
+	GPIOxTooglePin(&handlerPinA5);
 }
 
 
@@ -151,12 +156,6 @@ void parseCommands(char *stringVector){
 
 	if (strcmp(cmd, "help") == 0){
 
-		writeMsg(&handlerUSART1, "HELP MENU CMD : \n");
-		writeMsg(&handlerUSART1, "1)  start #setPoint #dir --- setPoint de 0 a 9 ---  dir 0 CW 1 CCW \n");
-		writeMsg(&handlerUSART1, "2)  goTo #dutty #dir #distance  -----dutty de 0 a 100 ||  dir 0 CW 1 CCW || Distancia en mm \n" );
-		writeMsg(&handlerUSART1, "3)  off \n");
-		writeMsg(&handlerUSART1, "4)  gyro \n");
-		writeMsg(&handlerUSART1, " \n");
 
 	}
 
