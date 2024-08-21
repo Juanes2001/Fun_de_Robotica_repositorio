@@ -20,4 +20,8 @@
 		<item key="DIALOG_HEIGHT" value="430"/>
 		<item key="DIALOG_FONT_NAME" value="1|Ubuntu|10.0|0|GTK|1|"/>
 	</section>
+	<section name="org.eclipse.ui.texteditor.GotoLineAction$GotoLineDialog_dialogBounds">
+		<item key="DIALOG_X_ORIGIN" value="725"/>
+		<item key="DIALOG_Y_ORIGIN" value="368"/>
+	</section>
 </section>
