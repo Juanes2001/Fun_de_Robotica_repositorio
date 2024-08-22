@@ -147,4 +147,18 @@ void BasicTimer3_Callback(void){
 }
 
 
+void parseCommands(char *stringVector){
+
+	sscanf(stringVector, "%s %u %u %u %s", cmd ,&firstParameter, &secondParameter, &thirdParameter, userMsg);
+
+
+
+
+	if (strcmp(cmd, "help") == 0){
+
+
+	}
+
+}
+
 

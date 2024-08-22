@@ -21,7 +21,7 @@
 #define PWM_SPEED_16MHz_100us	1600
 #define PWM_SPEED_16MHz_1ms	    16000
 
-#define PWM_SPEED_100MHz_10ns   1
+
 #define PWM_SPEED_100MHz_1us    100
 #define PWM_SPEED_100MHz_10us   1000
 #define PWM_SPEED_100MHz_100us  10000

@@ -227,9 +227,6 @@ void setFrequency(PWM_Handler_t *ptrPwmHandler){
 
 		ptrPwmHandler->ptrTIMx->ARR = periodo - 1;
 
-	}else{
-
-
 	}
 
 }

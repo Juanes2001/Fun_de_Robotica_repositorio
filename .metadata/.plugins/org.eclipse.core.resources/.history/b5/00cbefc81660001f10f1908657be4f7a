@@ -8,9 +8,6 @@
 #include "assert.h"
 #include <math.h>
 
-uint16_t periodo = 0;
-
-
 /**/
 void pwm_Config(PWM_Handler_t *ptrPwmHandler){
 
@@ -226,9 +223,6 @@ void setFrequency(PWM_Handler_t *ptrPwmHandler){
 		periodo = ptrPwmHandler->config.periodo   ;
 
 		ptrPwmHandler->ptrTIMx->ARR = periodo - 1;
-
-	}else{
-
 
 	}
 
