@@ -1,10 +1,17 @@
-18:41:11 **** Incremental Build of configuration Debug for project Pulse_width_10ns ****
+16:58:11 **** Incremental Build of configuration Debug for project Pulse_width_10ns ****
 make -j12 all 
+arm-none-eabi-gcc "../Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DNUCLEO_F411RE -DSTM32 -DSTM32F4 -DSTM32F411RETx -DSTM32F411xE=1 -c -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Pulse_width_10ns/ThirdParty/FreeRTOS/include" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Pulse_width_10ns/ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Pulse_width_10ns/ThirdParty/SEGGER/Config" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Pulse_width_10ns/ThirdParty/SEGGER/OS" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Pulse_width_10ns/ThirdParty/SEGGER/SEGGER" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Pulse_width_10ns/Inc" -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Src/main.d" -MT"Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/main.o"
+arm-none-eabi-gcc -o "Pulse_width_10ns.elf" @"objects.list"  -lPeripheralDriver -mcpu=cortex-m4 -T"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Pulse_width_10ns/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Pulse_width_10ns.map" -Wl,--gc-sections -static -L/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Debug --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Pulse_width_10ns.elf
+ 
 arm-none-eabi-size   Pulse_width_10ns.elf 
+arm-none-eabi-objdump -h -S  Pulse_width_10ns.elf  > "Pulse_width_10ns.list"
    text	   data	    bss	    dec	    hex	filename
-  20100	    472	   1656	  22228	   56d4	Pulse_width_10ns.elf
+  25504	    476	   1840	  27820	   6cac	Pulse_width_10ns.elf
 Finished building: default.size.stdout
  
+Finished building: Pulse_width_10ns.list
+ 
 
-18:41:11 Build Finished. 0 errors, 0 warnings. (took 334ms)
+16:58:12 Build Finished. 0 errors, 0 warnings. (took 589ms)
 

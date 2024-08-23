@@ -67,6 +67,7 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 
 	ptrBTimerHandler->ptrTIMx->PSC = ptrBTimerHandler->TIMx_Config.TIMx_speed;
 
+
 	/* 3. Configuramos la dirección del counter (up/down)*/
 	if(ptrBTimerHandler->TIMx_Config.TIMx_mode == BTIMER_MODE_UP){
 
@@ -127,7 +128,10 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 	ptrBTimerHandler->ptrTIMx->DIER |= TIM_DIER_UIE;
 
 	/* 6. Activamos el canal del sistema NVIC para que lea la interrupción*/
-	if(ptrBTimerHandler->ptrTIMx == TIM2){
+	if(ptrBTimerHandler->ptrTIMx == TIM1){
+		// Activando en NVIC para la interrupción del TIM1 , Especificamente la interrucion que habilita
+		NVIC_EnableIRQ(TIM2_IRQn);
+	}else if(ptrBTimerHandler->ptrTIMx == TIM2){
 		// Activando en NVIC para la interrupción del TIM2
 		NVIC_EnableIRQ(TIM2_IRQn);
 	}
@@ -149,6 +153,13 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 
 	/* 7. Volvemos a activar las interrupciones del sistema */
 	__enable_irq();
+}
+
+__attribute__((weak)) void BasicTimer1_Callback(void){
+	  /* NOTE : This function should not be modified, when the callback is needed,
+	            the BasicTimerX_Callback could be implemented in the main file
+	   */
+	__NOP();
 }
 
 __attribute__((weak)) void BasicTimer2_Callback(void){

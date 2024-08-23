@@ -10,6 +10,7 @@
 
 #include "stm32f4xx.h"
 
+
 #define BTIMER_MODE_UP		0
 #define BTIMER_MODE_DOWN	1
 
@@ -17,12 +18,12 @@
 #define BTIMER_SPEED_16MHz_100us    1600
 #define BTIMER_SPEED_16MHz_1ms	    16000
 
-
+#define BTIMER_SPEED_100MHz_10ns	1
 #define BTIMER_SPEED_100MHz_10us	1000
 #define BTIMER_SPEED_100MHz_100us	10000
 
-#define BTIMER_ENABLE_INTERRUPT  1
 #define BTIMER_DISABLE_INTERRUPT 0
+#define BTIMER_ENABLE_INTERRUPT  1
 
 
 /* Estructura que contiene la configuración mínima necesaria para el manejo del Timer.*/
@@ -42,22 +43,28 @@ typedef struct
 }BasicTimer_Handler_t;
 
 void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler);
+
+void BasicTimer1_Callback(void);
 void BasicTimer2_Callback(void); /* Esta función debe ser sobre-escrita en el main para que el sistema funcione*/
 void BasicTimer3_Callback(void);
 void BasicTimer4_Callback(void);
 void BasicTimer5_Callback(void);
+
 void Capture_TIM2_Ch1_Callback(void);
 void Capture_TIM2_Ch2_Callback(void);
 void Capture_TIM2_Ch3_Callback(void);
 void Capture_TIM2_Ch4_Callback(void);
+
 void Capture_TIM3_Ch1_Callback(void);
 void Capture_TIM3_Ch2_Callback(void);
 void Capture_TIM3_Ch3_Callback(void);
 void Capture_TIM3_Ch4_Callback(void);
+
 void Capture_TIM4_Ch1_Callback(void);
 void Capture_TIM4_Ch2_Callback(void);
 void Capture_TIM4_Ch3_Callback(void);
 void Capture_TIM4_Ch4_Callback(void);
+
 void Capture_TIM5_Ch1_Callback(void);
 void Capture_TIM5_Ch2_Callback(void);
 void Capture_TIM5_Ch3_Callback(void);
