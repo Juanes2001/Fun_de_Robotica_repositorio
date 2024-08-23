@@ -38,7 +38,8 @@ typedef struct{
 	float lesserHcost; // Con este valor podemos almacenar el valor del Hcost mas pequeño
 }costChangesAndPos_t;
 
-//Matriz de arrays donde se almacenan respectivamente los valores de G cost, el F cost, y el H cost, posicion i del parent y posicion j del parent
+//Matriz de arrays donde se almacenan respectivamente los valores de G cost, el F cost, y el H cost, posicion i del parent y posicion j del parent,
+// Y al final la posicion counter que corresponde con la posicion de la fila de la posicion guardada
 extern float ***costs;
 // Matriz donde se copiará la matriz que se inserta desde la terminal.
 extern char **readableGrid;
@@ -79,9 +80,9 @@ uint8_t getRows(char **terminalGrid);
 // Esta funciom retorna la cantidad de columnas que hay en el arreglo entrado N
 uint8_t getColums(char **terminalGrid);
 // Esta funcion halla la posicion del valor mas pequeño más pequeño dentro de un conjunto de valores
-void findLesserValue(costChangesAndPos_t*ptrChanges, float ***matrixCosts);
+void findLesserValue(costChangesAndPos_t*ptrChanges, float ***matrixCosts, float decisionMtrx[100][4], uint8_t counter);
 //Esta funcion inicializa los parametros de la estructura AStar_distances
-char* findShorterWay(char** terminalGrid,char**Gridcopy,float***matrixCosts, AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges);
+char* findShorterWay(char** terminalGrid, char**Gridcopy, float***matrixCosts, AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges);
 
 
 
