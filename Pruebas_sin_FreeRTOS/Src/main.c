@@ -338,7 +338,7 @@ int main(void)
 
 				rxData = '\0';
 
-			}
+		}
 
 		if (doneTransaction){
 			parseCommands(bufferReception);

@@ -1,0 +1,10 @@
+01:06:05 **** Incremental Build of configuration Debug for project Prueba_Astar ****
+make -j12 all 
+arm-none-eabi-size   Prueba_Astar.elf 
+   text	   data	    bss	    dec	    hex	filename
+  33728	    480	   4832	  39040	   9880	Prueba_Astar.elf
+Finished building: default.size.stdout
+ 
+
+01:06:05 Build Finished. 0 errors, 0 warnings. (took 364ms)
+

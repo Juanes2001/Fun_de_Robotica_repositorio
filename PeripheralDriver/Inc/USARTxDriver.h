@@ -103,7 +103,7 @@ typedef struct
 /* Definicion de los prototipos para las funciones del USART */
 void USART_Config(USART_Handler_t *ptrUsartHandler);
 void writeChar(USART_Handler_t *ptrUsartHandler, int dataToSend );
-void writeMsg(USART_Handler_t *ptrUsartHandler, char* msgToSend);
+void writeMsg(USART_Handler_t *ptrUsartHandler, const char* msgToSend);
 uint32_t brrCalculus (USART_Handler_t *ptrUsartHandler, uint32_t MCUvelocity);
 uint8_t getRxData(void);
 float roundToNDecimals(float number, int n);

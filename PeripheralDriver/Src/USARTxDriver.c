@@ -416,7 +416,7 @@ void writeChar(USART_Handler_t *ptrUsartHandler, int dataToSend ){
 }
 
 
-void writeMsg(USART_Handler_t *ptrUsartHandler, char* msgToSend){
+void writeMsg(USART_Handler_t *ptrUsartHandler, const char* msgToSend){
 
 	while(*msgToSend != '\0'){
 		writeChar(ptrUsartHandler, *msgToSend);

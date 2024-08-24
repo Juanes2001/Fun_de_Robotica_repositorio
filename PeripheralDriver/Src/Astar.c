@@ -6,6 +6,7 @@
  */
 
 #include "Astar.h"
+#include "USARTxDriver.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,7 +14,8 @@
 #include "math.h"
 
 
-char* findShorterWay(char** terminalGrid,char**Gridcopy, float*** matrixCosts , AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges){
+int findShorterWay(char terminalGrid[10][10],char Gridcopy[10][10], float matrixCosts[10][10][6] ,
+		AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, int shorterWay[20][2]){
 
 	// seteamos las variables locales a usar
 	char nineSlotsMatriz[3][3]; // matriz que tomara una parte de redeableGrid para analisis
@@ -22,7 +24,6 @@ char* findShorterWay(char** terminalGrid,char**Gridcopy, float*** matrixCosts , 
 	uint8_t j = 0;
 	int position[2];
 	uint8_t numberOfPositions = 0;
-	char character = '\0';
 	uint8_t counter = 0;
 	//matriz donde se almacenaran en orden ascendente los F cost de las posiciones en estado de Open, esta si tendra un valor maximo y dos columnas, donde
 	// Se almacenara el F cost en la primera y el Hcost en la segunda,
@@ -41,16 +42,13 @@ char* findShorterWay(char** terminalGrid,char**Gridcopy, float*** matrixCosts , 
 	// fijo Se tendra entonces una matriz de arrays donde se almacenaran
 	// los valores como siguen, [Gcost, Fcost, Hcost]
 
-    // Allocate memory for the matrix (Array of pointers)
-	buildMatrixCosts(parameters, matrixCosts);
-
     //Cuarto, seteamos la matriz heuristica, la cual es la ultima matriz de el bloque de tres de la matriz de costos
     if (setHeuristic(parameters, ptrChanges, matrixCosts, Gridcopy)){
     	// Si estamos aqui todo salio correctamente, el programa puede seguir su curso
     	__NOP();
     }else{
     	// Si estamos aqui es porque no se encontro el punto final en el redeableGrid.
-    	return (char *) NULL;
+    	return 0;
     }
 
     // Seteada la heuristica AQUI COMIENZA EL ALGORITMO A TRABAJAR, seteamos el punto de inicio y lo guardamos dentro de la estructura
@@ -61,7 +59,7 @@ char* findShorterWay(char** terminalGrid,char**Gridcopy, float*** matrixCosts , 
     }else{
 
     	// Si estamos aqui no hay punto de inicio y no se puede realizar el algoritmo
-    	return (char *) NULL;
+    	return 0;
     }
 
     // Comenzamos analizando los vecinos del punto de inicio, calculando para cada uno de ellos (incluyendo el punto de inicio) el Gcosto
@@ -167,7 +165,7 @@ char* findShorterWay(char** terminalGrid,char**Gridcopy, float*** matrixCosts , 
 							updateParent(ptrChanges, position, matrixCosts);
 
 							// Si si actualizamos la posicion abierta respectiva, tambien se debe actualizar en la matriz de decisión el F cost
-							decisionMatrix[matrixCosts[ptrChanges->posAnalisis[0] + i - 1][ptrChanges->posAnalisis[1] + j - 1][5]][0] =
+							decisionMatrix[(int) matrixCosts[ptrChanges->posAnalisis[0] + i - 1][ptrChanges->posAnalisis[1] + j - 1][5]][0] =
 									       matrixCosts[ptrChanges->posAnalisis[0] + i - 1][ptrChanges->posAnalisis[1] + j - 1][1]; // La segunda matriz son los F costs
 
 						}
@@ -213,7 +211,7 @@ char* findShorterWay(char** terminalGrid,char**Gridcopy, float*** matrixCosts , 
 					}
 					default:{
 						// Si se llega hasta aca es porque hay un caracter no permitido dentro de la malla y se debe parar la ejecucion del programa
-						return (char*) NULL;
+						return 0;
 						break;
 					}
 				}// Termino del switch case
@@ -235,70 +233,106 @@ char* findShorterWay(char** terminalGrid,char**Gridcopy, float*** matrixCosts , 
     	// Esta funcion almacena dentro de la estructura costChangesAndPos_t los valores de la pisicion del F cost mas pequeño, en el caso de que haya
     	// mas de uno igual, se alzará una bandera que indica que esto ocurrio, por lo que internamente el tambien analiza cual es la heuristica
     	if (!shorterWayFound){
-			findLesserValue(ptrChanges, matrixCosts, decisionMatrix, counter + 1);
+			if (findLesserValue(ptrChanges, matrixCosts, decisionMatrix, counter + 1)){
+				// A partir de aqui tendriamos la posicion del F cost mas pequeño, pero primero se compueba de que si depronto hubo un F cost igual
+				if (ptrChanges->equalFcost){
+					// Si estamos aqui es porque si hubo mas de un Fcost igual , por lo que se busca es la posicion del Hcost mas pequeño como la nueva posicion
+					// que tomara el nuevo papel de punto de analisis, y el que fue el punto de analisis sera ahor aun estado Done o 'D'
+					// Llevamos la posicion de analisis al estado cerrado
+					ptrChanges->posClosed[0] = ptrChanges->posAnalisis[0];
+					ptrChanges->posClosed[1] = ptrChanges->posAnalisis[1];
 
-			// A partir de aqui ya tendriamos la posicion del F cost mas pequeño, pero primero se compueba de que si depronto hubo un F cost igual
-			if (ptrChanges->equalFcost){
-				// Si estamos aqui es porque si hubo mas de un Fcost igual , por lo que se busca es la posicion del Hcost mas pequeño como la nueva posicion
-				// que tomara el nuevo papel de punto de analisis, y el que fue el punto de analisis sera ahor aun estado Done o 'D'
-				// Llevamos la posicion de analisis al estado cerrado
-				ptrChanges->posClosed[0] = ptrChanges->posAnalisis[0];
-				ptrChanges->posClosed[1] = ptrChanges->posAnalisis[1];
+					// Convertimos el estado estudiado en un estado Done acualizando el redeableGrid, excepto cuando se trata del punto de start
+					if (Gridcopy[ptrChanges->posAnalisis[0]][ptrChanges->posAnalisis[1]] == 's'){
+						// Dejamos el char de start tal cual como esta
+						__NOP();
+					}else{
+						// Si no se trata del caracter de Start si actualizamos con el caracter de Done 'D'
+						Gridcopy[ptrChanges->posAnalisis[0]][ptrChanges->posAnalisis[1]] = 'D';
+					}
 
-				// Convertimos el estado estudiado en un estado Done acualizando el redeableGrid, excepto cuando se trata del punto de start
-				if (Gridcopy[ptrChanges->posAnalisis[0]][ptrChanges->posAnalisis[1]] == 's'){
-					// Dejamos el char de start tal cual como esta
-					__NOP();
-				}else{
-					// Si no se trata del caracter de Start si actualizamos con el caracter de Done 'D'
-					Gridcopy[ptrChanges->posAnalisis[0]][ptrChanges->posAnalisis[1]] = 'D';
+					//Actualizamos el punto de analisis con la posicion de la heuristica mas pequeña, usando la matriz de decision entregamos la posicion
+					// respectiva que contiene la caracteristica deseada
+					ptrChanges->posAnalisis[0] = decisionMatrix[ptrChanges->lesserHcostPosition][2]; // Posicion i del valor de la Heuristica mas corta
+					ptrChanges->posAnalisis[1] = decisionMatrix[ptrChanges->lesserHcostPosition][3]; // Posicion j del valor de la heuristica mas corta
+
+					//Colocamos en estado de open el nuevo estado a estudiar
+					ptrChanges->posOpen[0] = ptrChanges->posAnalisis[0];
+					ptrChanges->posOpen[1] = ptrChanges->posAnalisis[1];
+
 				}
-
-				//Actualizamos el punto de analisis con la posicion de la heuristica mas pequeña
-				ptrChanges->posAnalisis[0] = ptrChanges->lesserHcostPosition[0];
-				ptrChanges->posAnalisis[1] = ptrChanges->lesserHcostPosition[1];
-
-				//Colocamos en estado de open el nuevo estado a estudiar
-				ptrChanges->posOpen[0] = ptrChanges->posAnalisis[0];
-				ptrChanges->posOpen[1] = ptrChanges->posAnalisis[1];
 
 			}else{
-				// Si el programa no entra en este if quiere decir uqe ya se encontro la ruta mas corta y ya es hora de construir la matriz de posiciones
-				// donde se almacenara la ruta mas corta y se devuelve como return
-				//buscamos cuantos elementos deberia de tener el arreglo para ello usaremos el siguiente while donde recorreremos desde el end hasta el
-				//start
-				i = ptrChanges->endPos[0];
-				j = ptrChanges->endPos[1];
-				while(Gridcopy[i][j] != 's'){
-					// Actualizamos a la nueva posición
-					i = matrixCosts[i][j][3];
-					j = matrixCosts[i][j][4];
-					// incrementamos en uno la cantidad de posiciones a guardar
-					numberOfPositions++;
-				}
+				return 0; // Si llegamos aca es porque hubo un error al encontrar el valor pas pequeño dentro de la matriz de decision, por lo que el
+						  // programa debe de parar
 			}
-    	}
+
+    	}else{
+			// Si el programa entra en esta condicion quiere decir que ya se encontro la ruta mas corta y ya es hora de construir la matriz de posiciones
+			// donde se almacenara la ruta mas corta
+			//buscamos cuantos elementos deberia de tener el arreglo para ello usaremos el siguiente while donde recorreremos desde el end hasta el
+			//start
+			i = ptrChanges->endPos[0];
+			j = ptrChanges->endPos[1];
+			while(Gridcopy[i][j] != 's'){
+				// Actualizamos a la nueva posición
+				i = matrixCosts[i][j][3];
+				j = matrixCosts[i][j][4];
+				// incrementamos en uno la cantidad de posiciones a guardar
+				numberOfPositions++;
+			}
+		}
+
 
     }// final del ciclo While
 
     // estando aqui ya solo queda almacenar toda las posiciones parent comenzando desde el end hasta el start, siguendo el parent de cada uno se asegura
     // que lo que se esta almacenando es la ruta mas corta
 
-
-    // Seteamos primero la memoria de el arreglo de posiciones
-    buildArrayShorterWay(numElements, shorterWayArray);
-
+    //Almacenamos dentro de una de las variables del arreglo AStar_distancesHandler la cantidad de elementos que tiene la matriz de la ruta mas corta
+    parameters->numberOfElements = numberOfPositions + 1 ; // Le sumamos uno mas para incluir el punto de inicio
 
 
+    i = ptrChanges->endPos[0];
+	j = ptrChanges->endPos[1];
+
+    // Recorremos la matriz e iremos almacenando dentro de este comenzando desde la posicion final y terminando en la posicion inicial
+    for (uint8_t  k = 0 ; k < numberOfPositions + 1 ; k++){
+    	//Cambiamos la matriz redeableGrid, las posiciones que corresponden a la ruta mas corta por un char 'I',
+    	if (Gridcopy[i][j] == 'e'){
+    		// Si estamos aqui es porque no queremos cambiar el char de finalización
+    		__NOP();
+    	}else if (Gridcopy[i][j] == 's'){
+    		// Si estamos aqui es porque no queremos cambiar el char de inicio
+    		__NOP();
+    	}else{
+    		// Si estamos aqui es porque estamos dentro del camino a seguir, por lo cambiamos a una 'I'
+    		Gridcopy[i][j] = 'I';
+    	}
 
 
+    	// Almacenamos en la matriz de ruta mas corta
+		shorterWay[k][0] = i;
+		shorterWay[k][1] = j;
 
+    	// comenzamos almacenando las posiciones en orden desde el final al punto inicial
+		// Actualizamos a la nueva posición
+		i = matrixCosts[i][j][3];
+		j = matrixCosts[i][j][4];
+    }
+
+    // A partir de aqui habremos logrado despues de un largo camino hallar la ruta mas corta entre dos puntos , el robot ya con esa informacion
+    // sabra hacia donde moverse y cuanto moverse
+
+    // Si llegamos hasta aca, con exito hemos logrado todo lo cometido, ¡Felicidades!
+
+    return 1;
 
 
 }
 
 // esta funcion actuazliza en la matriz de costs el parent correspondiente
-void updateParent(costChangesAndPos_t *ptrChanges, int posIJ[2],float*** matrixCosts){
+void updateParent(costChangesAndPos_t *ptrChanges, int posIJ[2], float matrixCosts[10][10][6]){
 	setParents(ptrChanges, posIJ);
 
 	matrixCosts[ptrChanges->posAnalisis[0] + posIJ[0] - 1][ptrChanges->posAnalisis[1] + posIJ[1] - 1][3] = ptrChanges->parent[0]; //Posicion i del parent
@@ -307,14 +341,14 @@ void updateParent(costChangesAndPos_t *ptrChanges, int posIJ[2],float*** matrixC
 }
 
 // esta funcion actualiz el Gcost correspondiente
-void updateGcost(AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, int posIJ[2],float*** matrixCosts ){
+void updateGcost(AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, int posIJ[2], float matrixCosts[10][10][6] ){
 	//Por ultimo se setea en la pisicion de la heuristica correspondiente a la matriz ultima de la super matriz
 	// de costos
 	matrixCosts[ptrChanges->posAnalisis[0] + posIJ[0] -1][ptrChanges->posAnalisis[1] + posIJ[1] -1][0] = setGcost(parameters, ptrChanges, posIJ);
 }
 
 // Esta función actualiza el Fcost correspondiente
-void updateFcost(costChangesAndPos_t *ptrChanges, int posIJ[2],float*** matrixCosts ){
+void updateFcost(costChangesAndPos_t *ptrChanges, int posIJ[2], float matrixCosts[10][10][6] ){
 	//Por ultimo se setea en la pisicion de la heuristica correspondiente a la matriz ultima de la super matriz
 	// de costos
 	matrixCosts[ptrChanges->posAnalisis[0] + posIJ[0] -1][ptrChanges->posAnalisis[1] + posIJ[1] -1][1] = setFcost(ptrChanges, posIJ, matrixCosts);
@@ -322,7 +356,7 @@ void updateFcost(costChangesAndPos_t *ptrChanges, int posIJ[2],float*** matrixCo
 }
 
 // con esta funcion seteamos la matriz Heuristica con la cual usaremos la info para buscar la ruta mas corta
-int setHeuristic(AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges,float*** matrixCosts , char** Gridcopy){
+int setHeuristic(AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, float matrixCosts[10][10][6] , char Gridcopy[10][10]){
 
 	// definimos variables locales
 	int distRows     = 0;
@@ -441,7 +475,7 @@ float setGcost (AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChan
 }
 
 // Con esta funcion seteamos el F cost en la matriz 2 de la posicion correspondiente
-float setFcost (costChangesAndPos_t *ptrChanges, int posIJ[2], float*** matrixCosts){
+float setFcost (costChangesAndPos_t *ptrChanges, int posIJ[2], float matrixCosts[10][10][6]){
 
 	// Esta funcion es simple ya que solo tenemos que calcular de la matriz 3x3 de analisis y sumar el H cost y el G cost para tener el F cost
 	ptrChanges->Fcost = matrixCosts[ptrChanges->posAnalisis[0]+ posIJ[0] -1][ptrChanges->posAnalisis[1]+ posIJ[1] -1][0]  // Gcost
@@ -469,7 +503,7 @@ void setParents (costChangesAndPos_t *ptrChanges, int posIJ[2]){
 }
 
 // En esta funcion nos centraremos en buscar la posicion i,j donde se almacena el punto de inicio del robot
-int findStart(char **Gridcopy, AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges){
+int findStart(char Gridcopy[10][10], AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges){
 
 	// Buscamos dentro de la matriz Grid que corresponde con la copia que le hacemos a la matriz de strings de entrada
 	// en la terminal
@@ -493,7 +527,7 @@ int findStart(char **Gridcopy, AStar_distancesHandler *parameters, costChangesAn
 
 
 }
-int findEnd(char **Gridcopy, AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges){
+int findEnd(char Gridcopy[10][10], AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges){
 
 
 	// Buscamos dentro de la matriz Grid que corresponde con la copia que le hacemos a la matriz de strings de entrada
@@ -518,32 +552,30 @@ int findEnd(char **Gridcopy, AStar_distancesHandler *parameters, costChangesAndP
 }
 
 // Con esta funcion se reparte la memoria para el arreglo de entrada, para almacenar asi la ruta mas corta
-void buildArrayShorterWay(int numElements, char **shorterWayArray){
-
-	//Repartimos la memoria teniendo en cuenta el numero de elementos que corresponden a la ruta mas corta seguida, cada entrada
-	// almacenará las posiciones que debe de seguir el robot incluyendo el punto de inicio y final
-	shorterWayArray = (char ** ) malloc(numElements * sizeof(char *));
-	for (uint8_t i = 0 ; i < numElements; i++){
-		shorterWayArray [i] = (char *)malloc(2 *sizeof(char));
-	}
-
-}
+//void buildArrayShorterWay(AStar_distancesHandler *parameters, int **shorterWayArray){
+//
+//	//Repartimos la memoria teniendo en cuenta el numero de elementos que corresponden a la ruta mas corta seguida, cada entrada
+//	// almacenará las posiciones que debe de seguir el robot incluyendo el punto de inicio y final
+//	shorterWayArray = (int ** ) malloc(parameters->numberOfElements * sizeof(int *));
+//	for (uint8_t i = 0 ; i < parameters->numberOfElements; i++){
+//		shorterWayArray [i] = (int *)malloc(2 *sizeof(int));
+//	}
+//
+//}
 
 //Con esta funcion se reparte la memoria para la matriz de entrada desde la terminal serial
 
-void buildMatrixCopy(AStar_distancesHandler *parameters, char **terminalGrid, char** Gridcopy){
+void buildMatrixCopy(AStar_distancesHandler *parameters, char terminalGrid[10][10], char Gridcopy[10][10]){
 
-	// Matriz donde se almacenaran las filas de String donde esta la informacion de los espacios libres y los obstaculos
-	Gridcopy = (char ** ) malloc(parameters->numberOfRows * sizeof(char *));
-	for (uint8_t i = 0 ; i < parameters->numberOfRows; i++){
-		Gridcopy [i] = (char *)malloc(parameters->numberOfColumns + 1 *sizeof(char));
-	}
 
 	// Seteamos los valores dentro de la matriz infoGrid de la entrada respectiva
 	for (uint8_t i = 0; i < parameters->numberOfRows; i++){
-		for(uint8_t j = 0; j < parameters->numberOfColumns + 1; j++){
+		for(uint8_t j = 0; j < parameters->numberOfColumns + 2; j++){
 
 			if (j == parameters->numberOfColumns){
+				// Agregamos al a la posicion penultima, agregamos una terminacion de salto de linea para ipresion en consola
+				Gridcopy[i][j] = '\r';
+			}else if (j == parameters->numberOfColumns + 1){
 				// Agregamos al final la terminacion nula para que cada fila sea un string completo
 				Gridcopy[i][j] = '\0';
 			}else{
@@ -555,27 +587,29 @@ void buildMatrixCopy(AStar_distancesHandler *parameters, char **terminalGrid, ch
 }
 
 //Con esta funcion repartimos la memoria para la matriz de costos
-void buildMatrixCosts(AStar_distancesHandler *parameters, float ***matrixCosts){
-
-	matrixCosts = (float***) malloc(parameters->numberOfRows * sizeof(float**));
-	for (int i = 0; i < parameters->numberOfRows; i++) {
-		matrixCosts[i] = (float **)malloc(parameters->numberOfColumns * sizeof(float*));
-		for (int j = 0; j < parameters->numberOfColumns; i++) {
-			matrixCosts[i][j] = (float *)malloc(6 * sizeof(float));
-		}
-	}
-
-}
+//void buildMatrixCosts(AStar_distancesHandler *parameters, float ***matrixCosts){
+//
+//	matrixCosts = (float***) malloc(parameters->numberOfRows * sizeof(float**));
+//	for (int i = 0; i < parameters->numberOfRows; i++) {
+//		matrixCosts[i] = (float **)malloc(parameters->numberOfColumns * sizeof(float*));
+//		for (int j = 0; j < parameters->numberOfColumns; i++) {
+//			matrixCosts[i][j] = (float *)malloc(6 * sizeof(float));
+//		}
+//	}
+//
+//}
 
 
 
 // Se define la funcion de tomar cantidad de filas recorriendo la cantidad de String que tenga el puntero de arreglos matrix hasta que se
 // encuentre con el puntero nulo.
-uint8_t getRows(char **terminalGrid){
+uint8_t getRows(char terminalGrid[10][10]){
 
 	uint8_t counterRows = 0;
-	while(terminalGrid[counterRows] != NULL){
-
+	char letter = '\0';
+	(void)letter;
+	while(terminalGrid[counterRows][0] != '\0'){
+		letter = terminalGrid[counterRows][0];
 		counterRows++;
 
 	}
@@ -584,7 +618,7 @@ uint8_t getRows(char **terminalGrid){
 }
 
 //Se define la funcion de tomar cantidad de columnas recorriendo el string hasta encontrar el elemento nulo char
-uint8_t getColums(char **terminalGrid){
+uint8_t getColums(char terminalGrid[10][10]){
 
 	uint8_t counterColumns = 0;
 	while(terminalGrid[0][counterColumns] != '\0'){
@@ -599,15 +633,10 @@ uint8_t getColums(char **terminalGrid){
 // esta funcion nos almacena en uno de los arrays volatiles de la estructura costChangesAndPos_t la posicion del valor Fcost o H cost mas pequeño,
 // Se debe identificar con un string si se quiere hallar el Fcost mas pequeño o el Hcost mas pequeño, asi, "Fcost" si se quiere hallar el F cost o
 // "Hcost" si se quiere hallar el H cost
-void findLesserValue(costChangesAndPos_t *ptrChanges, float ***matrixCosts, float decisionMtrx[100][4], uint8_t counter){
+int findLesserValue(costChangesAndPos_t *ptrChanges, float costs[10][10][6], float decisionMtrx[100][4], uint8_t counter){
 	// seteamos las variables locales
-	uint8_t counterRow = 0;
-	uint8_t counterColumn = 0;
-	uint8_t contadorDM = 0;
 	uint8_t i;
 	uint8_t j;
-	uint8_t falseAlarm = RESET;
-	uint8_t IfoundIt = RESET;
 	float value = 0;
 
 	// counter es la entrada que nos representa la cantidad de posiciones regristradas en la matriz de decision hasta ahora
@@ -615,135 +644,139 @@ void findLesserValue(costChangesAndPos_t *ptrChanges, float ***matrixCosts, floa
 
 	// El algoritmo que se usará es que se recorrerá cada una de las posiciones y se analizara con las demas , excpliyendo obviamente
 	// la posicion central
-	while (!IfoundIt){
 
 
-
-		while(contadorDM < counter){
-
-			for(i = 0; i<3 ; i++){
-				for(j = 0; j<3 ; j++){
-					if ((ptrChanges->posAnalisis[0] + counterRow - 1) == (ptrChanges->posAnalisis[0] + i - 1)
-					&&  (ptrChanges->posAnalisis[1] + counterColumn - 1) == (ptrChanges->posAnalisis[1] + j - 1)){
-						// Si estamos aqui es porque estamos analizando el punto de analisis, por lo que lo ignoramos
-						__NOP();
-					}else{
-						// Si estamos aca es porque podemos hacer la comparación
-						if (matrixCosts[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][1]
-						  < matrixCosts[ptrChanges->posAnalisis[0] + i - 1][ptrChanges->posAnalisis[1] + j - 1][1]){
-							// Si estamos aca es porque efectivamente el Fcost es menor o igual al resto de Fcost
-						}else if (matrixCosts[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][1]
-							   == matrixCosts[ptrChanges->posAnalisis[0] + i - 1][ptrChanges->posAnalisis[1] + j - 1][1]){
-							// Si estamos aqui es porque el programa encontro mas minimo un valor igual al analizado
-							ptrChanges->equalFcost = SET;
-						}else{
-							// Si estamos aqui es porque el programa hallo almenos un valor menor al analizado, por lo que no nos sirve
-							// Se resetea la bandera que decia que habia un vakor igual, esto debe de ser solo cierto si el valor que es
-							// igual es el menor de la matriz
-							ptrChanges->equalFcost = RESET;
-							falseAlarm = SET;
-							break;
-						}
-					}
-
-				}//Terminacion de un for
-				// Este condicional es solo para acabar el ciclo for de las filas y se continue a que se compare la siguiente posición
-				if (falseAlarm){
-					falseAlarm = RESET;
-					break;
-				}
-
-			}//Terminacion del otro for
-
-			if (i == 3 && j == 3){
-				// Si entramos aqui es porque se logro analizar toda la matriz y se encontro la posicion que corresponde con la posicion mas pequeña
-				// de todas, tambien guardamos el valor mas pequeño, si este se repite, se sabra gracias a la bandera
-				ptrChanges->lesserFcostPosition[0] = counterRow;
-				ptrChanges->lesserFcostPosition[1] = counterColumn;
-				ptrChanges->lesserFcost = matrixCosts[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][1];
-				IfoundIt = SET;
+	for(i = 0; i<counter ; i++){
+		for(j = 0; j<counter ; j++){
+			if (i == j){
+				// Si estamos aqui es porque estamos analizando el mismo punto, y nosotros queremos es analizar a sus compañeros solamente
+				__NOP();
+			}else if (decisionMtrx[i][0]
+					< decisionMtrx[j][0]){
+				// Si estamos aca es porque podemos hacer la comparación
+				// Si estamos aca es porque efectivamente el Fcost es menor, Solo dejamos pasar el ciclo para asegurarnos de que el j
+				// pueda llegar hasta su valor final permitido
+			}else if (decisionMtrx[i][0]
+				   == decisionMtrx[j][0]){
+				// Si estamos aqui es porque el programa encontro mas de un  minimo un valor igual al analizado
+				ptrChanges->equalFcost = SET;
 			}else{
-				if (counterColumn == 2){
-					counterRow++;
-					counterColumn = 0;
-				}else{
-					counterColumn++;
-				}
+				// Si estamos aqui es porque el programa hallo almenos un valor menor al analizado, por lo que no nos sirve
+				// Se resetea la bandera que decia que habia un vakor igual, esto debe de ser solo cierto si el valor que es
+				// igual es el menor de la matriz
+				ptrChanges->equalFcost = RESET;
+				break;
 			}
 
-		}//Terminación del ciclo while
+		}//Terminacion de un for
 
-	}//Terminacion del ciclo while
+	}//Terminacion del otro for
+
+	if (j == counter){
+		// Si entramos en esta condicion es porque el contador j logro llegar a su posicion final
+		// Si entramos aqui es porque se logro analizar todo el arreglo y se encontro la posicion que corresponde con el Fcost mas pequeño
+		// de todos, tambien guardamos el valor mas pequeño, si este se repite, se sabra gracias a la bandera
+		// La posicion mas pequeña del F cost corresponde con la que se etsaba analizando en la posición i
+		ptrChanges->lesserFcostPosition = i;
+		// Almacenamos en lesserFcost el valor de ese Fcost mas pequeño que se hallo
+		ptrChanges->lesserFcost = decisionMtrx[i][0];
+	}else{
+		return 0; // Acabamos el programa ya que el ciclo no encontro el valor mas pequeño, por lo que hubo un error
+	}
 
 	// Ahora hallaremos el valor mas pequeño de H cost, solo en el caso de que la bandera correspondiente se haya levantado
 	if (ptrChanges->equalFcost){
 		// Si estamos aqui es porque si hay mas de un valor de F cost que corresponde con el valor mas pequeño, desempatamos buscando el Hcost mas pequeño
 		// Para ello recorreremos la matriz a analizar de nuevo pero esta vez solo buscando aquellos valores que correspondan con el valor hallado de Fcost
-		counterRow = 0;
-		counterColumn = 0;
-		falseAlarm = RESET;
-		IfoundIt = RESET;
-		// reseteamos las variables locales y volvemos a empezar pero esta vez solo buscando aquellos casos donde se tenga el valor encontrado
-		while (!IfoundIt){
 
-			for(i = 0; i<3 ; i++){
-				for(j = 0; j<3 ; j++){
-					value = costs[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][1] / ptrChanges->lesserFcost;
-					if ((ptrChanges->posAnalisis[0] + counterRow - 1) == (ptrChanges->posAnalisis[0] + i - 1)
-					&&  (ptrChanges->posAnalisis[1] + counterColumn - 1) == (ptrChanges->posAnalisis[1] + j - 1)){
-						// Si estamos aqui es porque estamos analizando el punto de analisis, por lo que lo ignoramos
+		for(i = 0; i<counter ; i++){
+			for(j = 0; j<counter ; j++){
+				value = decisionMtrx[j][0] / ptrChanges->lesserFcost;
+				if (i == j){
+					// Si estamos aqui es porque estamos analizando la posición de analisis, por lo que lo ignoramos
+					__NOP();
+				}else if (value == 1 && i !=  j){
+					// Si estamos aca es porque podemos hacer la comparación pero esta vez con la matriz heuristica
+					if (decisionMtrx[i][1] <= decisionMtrx[j][1]){
+						// Si estamos aca es porque efectivamente el Hcost es menor o igual al resto de Hcost
 						__NOP();
-					}else if (value == 1){
-						// Si estamos aca es porque podemos hacer la comparación pero esta vez con la matriz heuristica
-						if (matrixCosts[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][2]
-						  <= matrixCosts[ptrChanges->posAnalisis[0] + i - 1][ptrChanges->posAnalisis[1] + j - 1][2]){
-							// Si estamos aca es porque efectivamente el Hcost es menor o igual al resto de Hcost
-							__NOP();
-						}else{
-							// Si estamos aqui es porque el programa hallo almenos un valor menor al analizado, por lo que no nos sirve
-							falseAlarm = SET;
-							break;
-						}
-					}
-					else{
-						// Estamos en un valor que no nos interesa evaluar, por lo que lo ignoramos y salimos
-						falseAlarm = SET;
+					}else{
+						// Si estamos aqui es porque el programa hallo almenos un valor menor al analizado, por lo que no nos sirve
 						break;
 					}
-
-				}//Terminacion de un for
-
-				// Este condicional es solo para acabar el ciclo for de las filas y se continue a que se compare la siguiente posición
-				if (falseAlarm){
-					falseAlarm = RESET;
+				}
+				else{
+					// Estamos en un valor que no nos interesa evaluar, por lo que lo ignoramos y salimos
 					break;
 				}
 
-			}//Terminacion del otro for
+			}//Terminacion de un for
 
-			if (i == 3 && j == 3){
-				// Si entramos aqui es porque se logro analizar toda la matriz y se encontro la posicion que corresponde con la posicion mas pequeña
-				// de todas, tambien guardamos el valor mas pequeño, si este se repite, se sabra gracias a la bandera
-				ptrChanges->lesserHcostPosition[0] = counterRow;
-				ptrChanges->lesserHcostPosition[1] = counterColumn;
-				ptrChanges->lesserHcost = matrixCosts[ptrChanges->posAnalisis[0] + counterRow - 1][ptrChanges->posAnalisis[1] + counterColumn - 1][2];
-				IfoundIt = SET;
-			}else{
-				if (counterColumn == 2){
-					counterRow++;
-					counterColumn = 0;
-				}else{
-					counterColumn++;
-				}
-			}
+		}//Terminacion del otro for
 
-		}//Terminacion del ciclo while
+		if (j == counter){
+			// Si entramos aqui es porque se logro analizar toda la matriz y se encontro la posicion que corresponde con la posicion mas pequeña
+			// de todas, tambien guardamos el valor mas pequeño, es muy poco probable, por no decir imposible que tengamos una misma heuristica
+			//repetida
+			ptrChanges->lesserHcostPosition = i;
+			//Almacenamos en lesserHcost el valor del Hcost mas pequeño encontrado
+			ptrChanges->lesserHcost = decisionMtrx[i][1];
+		}else{
+			return 0; // Si llegamos hasta aca es porque salio algo mal en el ciclo for y habra que salir del programa
+		}
+
 	}else{
 		// Si estamos aca es porque no se alzo la bandera que indica que hay mas de un F cost igual por lo que no hacemos nada
 		__NOP();
 	}
 
+	return 1;
+}
+
+// Con esta funcion liberamos la memoria utilizada por la super matriz de costos
+void freeCosts(AStar_distancesHandler *parameters, float***matrixCosts){
+
+	// Liberamos cada columna
+	for (int i = 0; i < parameters->numberOfRows; i++) {
+		for (int j = 0; j < parameters->numberOfColumns; j++) {
+			free(matrixCosts[i][j]);
+		}
+	}
+
+	// Liberamos cada fila
+	for (int i = 0; i < parameters->numberOfRows; i++) {
+				free(matrixCosts[i]);
+	}
+
+	// Liberamos el arreglo de punteros
+	free(matrixCosts);
+
 
 }
 
+// Con esta funcion liberamos la memoria utilizada por la matriz que almacena la copia de los strings ingresados
+void freeReadableGrid(AStar_distancesHandler *parameters, char Gridcopy[10][10]){
+
+	// Liberamos cada fila
+	for (int i = 0; i < parameters->numberOfRows; i++) {
+				free(Gridcopy[i]);
+	}
+
+	// Liberamos el arreglo de punteros
+	free(Gridcopy);
+
+}
+
+// con esta funcion liberamos la memoria utilizada por la matriz que almacena la ruta mas corta
+void freeShorterWay(AStar_distancesHandler *parameters, int **shorterWayArray){
+
+	// Liberamos cada fila
+	for (int i = 0; i < parameters->numberOfElements; i++) {
+				free(shorterWayArray[i]);
+	}
+
+	// Liberamos el arreglo de punteros
+	free(shorterWayArray);
+
+}
 

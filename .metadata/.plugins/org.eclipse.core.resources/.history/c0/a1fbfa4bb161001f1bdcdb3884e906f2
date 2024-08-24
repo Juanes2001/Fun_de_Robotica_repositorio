@@ -1,0 +1,13 @@
+../Src/main.c:193:5:main	72	static
+../Src/main.c:530:6:inSystem	8	static
+../Src/main.c:803:6:parseCommands	32	static,ignoring_inline_asm
+../Src/main.c:984:8:distanceM1	16	static
+../Src/main.c:993:8:distanceM2	16	static
+../Src/main.c:1004:6:usart2Rx_Callback	8	static
+../Src/main.c:1011:6:BasicTimer4_Callback	4	static
+../Src/main.c:1019:6:BasicTimer3_Callback	8	static
+../Src/main.c:1028:6:BasicTimer2_Callback	4	static
+../Src/main.c:1037:6:callback_extInt1	4	static
+../Src/main.c:1043:6:callback_extInt3	4	static
+../Src/main.c:1052:6:breakMotor	8	static,ignoring_inline_asm
+../Src/main.c:1093:7:calibracionGyros	40	static
