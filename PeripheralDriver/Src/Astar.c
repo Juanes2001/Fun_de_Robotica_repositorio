@@ -7,6 +7,7 @@
 
 #include "Astar.h"
 #include "USARTxDriver.h"
+#include "GPIOxDriver.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,8 +15,20 @@
 #include "math.h"
 
 
+const char* msg_ItWorks = "\n---------Te amo mi Nally <3--------\n";
+USART_Handler_t handlerAstarUsart = {0};
+
+GPIO_Handler_t handlerAstarPinRx = {0};
+GPIO_Handler_t handlerAstarPinTx = {0};
+
+char buffer[64] = {0};
+
+
+
 int findShorterWay(char terminalGrid[10][10],char Gridcopy[10][10], float matrixCosts[10][10][6] ,
 		AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, int shorterWay[20][2]){
+
+	writeMsg(&handlerAstarUsart, msg_ItWorks);
 
 	// seteamos las variables locales a usar
 	char nineSlotsMatriz[3][3]; // matriz que tomara una parte de redeableGrid para analisis
@@ -25,6 +38,7 @@ int findShorterWay(char terminalGrid[10][10],char Gridcopy[10][10], float matrix
 	int position[2];
 	uint8_t numberOfPositions = 0;
 	uint8_t counter = 0;
+	uint8_t counterStudy = 0;
 	//matriz donde se almacenaran en orden ascendente los F cost de las posiciones en estado de Open, esta si tendra un valor maximo y dos columnas, donde
 	// Se almacenara el F cost en la primera y el Hcost en la segunda,
 	float decisionMatrix[100][4];
@@ -36,6 +50,10 @@ int findShorterWay(char terminalGrid[10][10],char Gridcopy[10][10], float matrix
 
 	//Segundo construimos nuestra matriz dinamicamente repartida
 	buildMatrixCopy(parameters, terminalGrid, Gridcopy);
+
+	for (uint8_t i = 0; i< parameters->numberOfRows; i++){
+		writeMsg(&handlerAstarUsart, Gridcopy[i]);
+	}
 
 	//Tercero seteamos nuetsra matriz que almacenara los datos de Gcost F cost, los costos
 	//Variables que dependen del analisis respectivo,y el H cost que es la heuristica el cual es un valor
@@ -116,6 +134,32 @@ int findShorterWay(char terminalGrid[10][10],char Gridcopy[10][10], float matrix
     	// Lo que sigue sera volver a recorrer tal matriz repitiendo las condiciones , pero esta vez leyendo directamente el contenido de
     	// Esta matriz, Se estudiaran los siguientes casos:
 
+    	// Imprimimos la matriz a estudiar
+
+    	// Imprimimos el mensaje de el estudio en el que estamos
+    	sprintf (buffer,"\n__________ESTUDIO NUMERO %u__________", counterStudy);
+    	writeMsg(&handlerAstarUsart, buffer);
+
+    	// Imprimimos la matriz 3x3 a estudiar
+    	for(i = 0; i < 3; i++){
+			for (j = 0; j < 3; j++){
+				writeChar(&handlerAstarUsart, nineSlotsMatriz[i][j]);
+			}
+			writeChar(&handlerAstarUsart, '\n');
+    	}
+
+    	// Imprimimos el estado actual de la matriz copia
+    	for (uint8_t i = 0; i< parameters->numberOfRows; i++){
+    			writeMsg(&handlerAstarUsart, Gridcopy[i]);
+		}
+    	// Escribimos enter para tener todo bien espaciado
+    	writeChar(&handlerAstarUsart, '\r');
+
+
+
+    	///////////////////////////////////////// HASTA ACA CODIGO RECTIFICADO Y FUNCIONAL ///////////////////////////////////////////
+
+
     	for(i = 0; i < 3; i++){
 			for (j = 0; j < 3; j++){
 				switch (nineSlotsMatriz[i][j]) {
@@ -173,6 +217,8 @@ int findShorterWay(char terminalGrid[10][10],char Gridcopy[10][10], float matrix
 					}case '*':{
 						// El séptimo caso seria cuando el puntero que estudia la matriz corresponde con un punto '*' que corresponde con un
 						// espacio no estudiado, por lo que simplemente se setea sobre estos nuevos puntos su Gcost y su Fcost, incluyendo el parent
+						position[0] = i;
+						position[1] = j;
 						updateGcost(parameters, ptrChanges, position, matrixCosts);
 						updateFcost(ptrChanges, position, matrixCosts);
 						updateParent(ptrChanges, position, matrixCosts);
@@ -282,6 +328,8 @@ int findShorterWay(char terminalGrid[10][10],char Gridcopy[10][10], float matrix
 				numberOfPositions++;
 			}
 		}
+
+    	counterStudy++;
 
 
     }// final del ciclo While
@@ -779,4 +827,36 @@ void freeShorterWay(AStar_distancesHandler *parameters, int **shorterWayArray){
 	free(shorterWayArray);
 
 }
+// Con las siguientes funciones inicializamos a los handler necesarios para poder usar la comunicacion serial desde aqui y no desde el main
+void initSerialComunication (USART_Handler_t *ptrHandlerUsart, GPIO_Handler_t *ptrHandlerRx, GPIO_Handler_t *ptrHandlerTx){
 
+	// Inicializamos para el modulo Usart, no se necesita configurar ya que ya en el main se configuro con el handler específico
+	handlerAstarUsart.ptrUSARTx                      = ptrHandlerUsart->ptrUSARTx;
+	handlerAstarUsart.USART_Config.USART_MCUvelocity = ptrHandlerUsart->USART_Config.USART_MCUvelocity;
+	handlerAstarUsart.USART_Config.USART_baudrate    = ptrHandlerUsart->USART_Config.USART_baudrate;
+	handlerAstarUsart.USART_Config.USART_enableInTx  = ptrHandlerUsart->USART_Config.USART_enableInTx;
+	handlerAstarUsart.USART_Config.USART_mode        = ptrHandlerUsart->USART_Config.USART_mode;
+	handlerAstarUsart.USART_Config.USART_parity      = ptrHandlerUsart->USART_Config.USART_parity;
+	handlerAstarUsart.USART_Config.USART_stopbits    = ptrHandlerUsart->USART_Config.USART_stopbits;
+	handlerAstarUsart.USART_Config.USART_datasize    = ptrHandlerUsart->USART_Config.USART_datasize;
+
+	// Hacemos lo mismo con los pines Rx y Tx del GPIO
+	handlerAstarPinRx.pGPIOx                             = ptrHandlerRx->pGPIOx;
+	handlerAstarPinRx.GPIO_PinConfig.GPIO_PinAltFunMode  = ptrHandlerRx->GPIO_PinConfig.GPIO_PinAltFunMode;
+	handlerAstarPinRx.GPIO_PinConfig.GPIO_PinMode        = ptrHandlerRx->GPIO_PinConfig.GPIO_PinMode;
+	handlerAstarPinRx.GPIO_PinConfig.GPIO_PinOPType      = ptrHandlerRx->GPIO_PinConfig.GPIO_PinOPType;
+	handlerAstarPinRx.GPIO_PinConfig.GPIO_PinNumber      = ptrHandlerRx->GPIO_PinConfig.GPIO_PinNumber;
+	handlerAstarPinRx.GPIO_PinConfig.GPIO_PinPuPdControl = ptrHandlerRx->GPIO_PinConfig.GPIO_PinPuPdControl;
+	handlerAstarPinRx.GPIO_PinConfig.GPIO_PinSpeed       = ptrHandlerRx->GPIO_PinConfig.GPIO_PinSpeed;
+
+	handlerAstarPinTx.pGPIOx                             = ptrHandlerTx->pGPIOx;
+	handlerAstarPinTx.GPIO_PinConfig.GPIO_PinAltFunMode  = ptrHandlerTx->GPIO_PinConfig.GPIO_PinAltFunMode;
+	handlerAstarPinTx.GPIO_PinConfig.GPIO_PinMode        = ptrHandlerTx->GPIO_PinConfig.GPIO_PinMode;
+	handlerAstarPinTx.GPIO_PinConfig.GPIO_PinOPType      = ptrHandlerTx->GPIO_PinConfig.GPIO_PinOPType;
+	handlerAstarPinTx.GPIO_PinConfig.GPIO_PinNumber      = ptrHandlerTx->GPIO_PinConfig.GPIO_PinNumber;
+	handlerAstarPinTx.GPIO_PinConfig.GPIO_PinPuPdControl = ptrHandlerTx->GPIO_PinConfig.GPIO_PinPuPdControl;
+	handlerAstarPinTx.GPIO_PinConfig.GPIO_PinSpeed       = ptrHandlerTx->GPIO_PinConfig.GPIO_PinSpeed;
+
+	// Ya seteados estos handler en teoria podriamos mandar por terminarl serial desde este .c
+
+}

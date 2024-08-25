@@ -1,3 +1,9 @@
 tiempo
 flagGyro
 bufferReception
+rxData
+stringMatrix
+handler
+handlerAstarParameters
+stringColumn
+stringRow

@@ -26,7 +26,6 @@
 #include <stdlib.h>
 #include <string.h>  // for usleep
 
-#include "main.h"
 
 #include "GPIOxDriver.h"
 #include "BasicTimer.h"
@@ -286,7 +285,7 @@ void parseCommands(char *stringVector){
 		handlerAstarParameters.parallelDistance  = firstParameter;
 		handlerAstarParameters.diagonalDiastance = secondParameter;
 		writeMsg(&handlerUSART, msg_InsertGrid);
-
+		initSerialComunication(&handlerUSART, &handlerPinRx, &handlerPinTx);
 		flagAstar = SET;
 
 	}
