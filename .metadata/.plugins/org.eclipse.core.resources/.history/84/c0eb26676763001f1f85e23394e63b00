@@ -151,25 +151,25 @@ void inSystem (void){
 
 	// PWM handler del GPIO y el PWM
 
-	handlerPinPwm_pulse_10ns.pGPIOx                             = GPIOA;
-	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinAltFunMode  = AF1;
-	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
-	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
-	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinNumber      = PIN_8;
-	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
-	GPIO_Config(&handlerPinPwm_pulse_10ns);
-
-	handlerPWM_pulse_10ns.ptrTIMx            = TIM1;
-	handlerPWM_pulse_10ns.config.channel     = PWM_CHANNEL_1;
-	handlerPWM_pulse_10ns.config.duttyCicle  = 50;
-	handlerPWM_pulse_10ns.config.periodo     = 40; // se maneja 25 hz por testeo
-	handlerPWM_pulse_10ns.config.prescaler   = PWM_SPEED_100MHz_1us;
-	handlerPWM_pulse_10ns.config.polarity    = PWM_DISABLE_POLARITY;
-	handlerPWM_pulse_10ns.config.optocoupler = PWM_DISABLE_OPTOCOUPLER;
-	pwm_Config(&handlerPWM_pulse_10ns);
-	startPwmSignal(&handlerPWM_pulse_10ns);
-	enableOutput(&handlerPWM_pulse_10ns);
+//	handlerPinPwm_pulse_10ns.pGPIOx                             = GPIOA;
+//	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinAltFunMode  = AF1;
+//	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
+//	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
+//	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinNumber      = PIN_8;
+//	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+//	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
+//	GPIO_Config(&handlerPinPwm_pulse_10ns);
+//
+//	handlerPWM_pulse_10ns.ptrTIMx            = TIM1;
+//	handlerPWM_pulse_10ns.config.channel     = PWM_CHANNEL_1;
+//	handlerPWM_pulse_10ns.config.duttyCicle  = 50;
+//	handlerPWM_pulse_10ns.config.periodo     = 40; // se maneja 25 hz por testeo
+//	handlerPWM_pulse_10ns.config.prescaler   = PWM_SPEED_100MHz_1us;
+//	handlerPWM_pulse_10ns.config.polarity    = PWM_DISABLE_POLARITY;
+//	handlerPWM_pulse_10ns.config.optocoupler = PWM_DISABLE_OPTOCOUPLER;
+//	pwm_Config(&handlerPWM_pulse_10ns);
+//	startPwmSignal(&handlerPWM_pulse_10ns);
+//	enableOutput(&handlerPWM_pulse_10ns);
 
 
 	//Comunicacion serial
