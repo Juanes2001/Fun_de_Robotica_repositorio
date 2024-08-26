@@ -75,14 +75,8 @@ char userMsg[64];
 char bufferMsg[64];
 
 // Definición de la matriz de string que almacenará
-char stringMatrix[10][10];
-//Matriz de arrays donde se almacenan respectivamente los valores de G cost, el F cost, y el H cost, posicion i del parent y posicion j del parent,
-// Y al final la posicion counter que corresponde con la posicion de la fila de la posicion guardada
-float costs[10][10][6];
-// Matriz donde se copiará la matriz que se inserta desde la terminal.
-char readableGrid[10][10];
-// Matriz donde se almacenara las posicones de la ruta mas corta
-int shorterWay[20][2];
+char stringMatrix[52][52];
+
 uint8_t stringColumn = 0;
 uint8_t stringRow = 0;
 
@@ -101,9 +95,6 @@ int main(void)
 
 	//Activamos el FPU o la unidad de punto flotante
  	SCB -> CPACR |= (0xF << 20);
-
- 	printf("si funciona");
-
 
 
 	inSystem ();
@@ -140,6 +131,7 @@ int main(void)
 				parseCommands(bufferReception);
 				doneTransaction = RESET;
 			}
+
 		}else{
 			// Si estamos aqui es porque se aplicara el mismo metodo para guardar cada fila de strings
 
@@ -182,13 +174,17 @@ int main(void)
 				}else{
 					writeMsg(&handlerUSART, msg_NotWorking);
 				}
+				memset(stringMatrix, 0, sizeof(stringMatrix));
+				stringRow    = 0;
+				stringColumn = 0;
+				writeMsg(&handlerUSART, "\n------String Vaciado-----\n \r");
 
+				flagAstar = RESET;
 
 				doneTransaction = RESET;
 			}
-
 		}
-	}
+	}// FIN DEL LOOP
 }
 
 
@@ -308,11 +304,6 @@ void BasicTimer3_Callback(void){
 
 	GPIOxTooglePin(&handlerPinA5);
 
-}
-
-int __io_putchar(int ch) {
-    ITM_SendChar(ch);
-    return ch;
 }
 
 

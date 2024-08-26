@@ -1,10 +1,16 @@
-01:28:35 **** Incremental Build of configuration Debug for project Prueba_Astar ****
+23:45:40 **** Incremental Build of configuration Debug for project Prueba_Astar ****
 make -j12 all 
+arm-none-eabi-gcc -o "Prueba_Astar.elf" @"objects.list"  -lPeripheralDriver -mcpu=cortex-m4 -T"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Prueba_Astar/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Prueba_Astar.map" -Wl,--gc-sections -static -L/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Debug --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: Prueba_Astar.elf
+ 
 arm-none-eabi-size   Prueba_Astar.elf 
+arm-none-eabi-objdump -h -S  Prueba_Astar.elf  > "Prueba_Astar.list"
    text	   data	    bss	    dec	    hex	filename
-  34088	    484	   5008	  39580	   9a9c	Prueba_Astar.elf
+  37432	    480	  73416	 111328	  1b2e0	Prueba_Astar.elf
 Finished building: default.size.stdout
  
+Finished building: Prueba_Astar.list
+ 
 
-01:28:35 Build Finished. 0 errors, 0 warnings. (took 386ms)
+23:45:41 Build Finished. 0 errors, 0 warnings. (took 438ms)
 
