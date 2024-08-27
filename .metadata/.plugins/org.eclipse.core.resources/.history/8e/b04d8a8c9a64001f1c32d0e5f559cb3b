@@ -92,8 +92,12 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 
 
 
-		}else{
+		}else if ((speed == PWM_SPEED_100MHz_10ns )){
 
+			// En este caso el periodo estaria en nanosegundos, se multiplica por 10 para tener la cantidad de cuentas, y se carga en el ARR
+			period = ptrBTimerHandler->TIMx_Config.TIMx_period * 10;
+
+			ptrBTimerHandler->ptrTIMx->ARR = period - 1;
 
 		}
 

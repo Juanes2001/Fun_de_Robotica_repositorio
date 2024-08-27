@@ -8,3 +8,6 @@ handlerAstarParameters
 stringColumn
 stringRow
 costs
+readableGrid
+shorterWay
+handlerCostsAstar

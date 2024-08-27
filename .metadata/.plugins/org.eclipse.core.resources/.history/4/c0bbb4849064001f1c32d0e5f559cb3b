@@ -92,8 +92,11 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 
 
 
-		}else{
+		}else if ((speed == BTIMER_SPEED_16MHz_1ms )){
 
+			period = ptrBTimerHandler->TIMx_Config.TIMx_period    ;
+
+			ptrBTimerHandler->ptrTIMx->ARR = period - 1;
 
 		}
 
@@ -125,8 +128,10 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 	ptrBTimerHandler->ptrTIMx->DIER |= TIM_DIER_UIE;
 
 	/* 6. Activamos el canal del sistema NVIC para que lea la interrupción*/
-
-	if(ptrBTimerHandler->ptrTIMx == TIM2){
+	if(ptrBTimerHandler->ptrTIMx == TIM1){
+		// Activando en NVIC para la interrupción del TIM1 , Especificamente la interrucion que habilita
+		NVIC_EnableIRQ(TIM2_IRQn);
+	}else if(ptrBTimerHandler->ptrTIMx == TIM2){
 		// Activando en NVIC para la interrupción del TIM2
 		NVIC_EnableIRQ(TIM2_IRQn);
 	}

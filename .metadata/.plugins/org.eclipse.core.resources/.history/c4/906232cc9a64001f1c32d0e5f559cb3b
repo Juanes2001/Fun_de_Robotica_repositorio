@@ -273,9 +273,9 @@ void setFrequency(PWM_Handler_t *ptrPwmHandler){
 	}else if ((speed == PWM_SPEED_100MHz_10ns )){
 
 		// En este caso el periodo estaria en nanosegundos, multiplicamos por 10 para tener la cantidad de cuentas finales que debe de hacer el timer
-		periodo = ptrPwmHandler->config.periodo * 10;
+		periodo = ptrPwmHandler->config.periodo *10;
 
-		ptrPwmHandler->ptrTIMx->ARR = periodo - 1;
+		ptrPwmHandler->ptrTIMx->ARR = period - 1;
 
 	}
 

@@ -1,7 +1,7 @@
 LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/arch=x86_64
 LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/name=Local
 LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/os=linux
-configDescList=
+configDescList=org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:EjemploLED_FreeRTOS Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:Pruebas_sin_FreeRTOS Debug,org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:Pulse_width_10ns
 eclipse.preferences.version=1
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:Base_FreeRTOS\ Debug/activeLaunchMode=debug
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:Base_FreeRTOS\ Debug/activeLaunchTarget=null\:---
