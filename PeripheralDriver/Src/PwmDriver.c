@@ -34,6 +34,9 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler){
 		__NOP();
 	}
 
+	//Dejamos una relacion 1 a 1 para la velocidad de conteo del timer
+	ptrPwmHandler->ptrTIMx->CR1 &= ~(TIM_CR1_CKD);
+
 
 
 	// preguntamos si se estan usando optoacopladores
@@ -272,8 +275,8 @@ void setFrequency(PWM_Handler_t *ptrPwmHandler){
 
 	}else if ((speed == PWM_SPEED_100MHz_10ns )){
 
-		// En este caso el periodo estaria en nanosegundos, multiplicamos por 10 para tener la cantidad de cuentas finales que debe de hacer el timer
-		periodo = ptrPwmHandler->config.periodo * 10;
+		// En este caso el periodo estaria en nanosegundos, dividimos por 10 para tener la cantidad de cuentas finales que debe de hacer el timer
+		periodo = ptrPwmHandler->config.periodo / 10;
 
 		ptrPwmHandler->ptrTIMx->ARR = periodo - 1;
 

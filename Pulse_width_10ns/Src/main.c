@@ -162,9 +162,9 @@ void inSystem (void){
 
 	handlerPWM_pulse_10ns.ptrTIMx            = TIM1;
 	handlerPWM_pulse_10ns.config.channel     = PWM_CHANNEL_1;
-	handlerPWM_pulse_10ns.config.duttyCicle  = 70;
+	handlerPWM_pulse_10ns.config.duttyCicle  = 50;
 	handlerPWM_pulse_10ns.config.periodo     = 10000; // se maneja 100kHz por testeo
-	handlerPWM_pulse_10ns.config.prescaler   = PWM_SPEED_100MHz_10us;
+	handlerPWM_pulse_10ns.config.prescaler   = PWM_SPEED_100MHz_10ns;
 	handlerPWM_pulse_10ns.config.polarity    = PWM_DISABLE_POLARITY;
 	handlerPWM_pulse_10ns.config.optocoupler = PWM_DISABLE_OPTOCOUPLER;
 	pwm_Config(&handlerPWM_pulse_10ns);
