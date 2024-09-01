@@ -43,7 +43,12 @@ typedef struct{
 typedef enum {
 	sMainMenu = 0,
 	sLedEffect,
-	sRtcMenu
+	sRtcMenu,
+	sColectGrid,
+	sGo,
+	sStop,
+	sMeasureDistance,
+	sMeasurePID
 }state_t;
 
 
