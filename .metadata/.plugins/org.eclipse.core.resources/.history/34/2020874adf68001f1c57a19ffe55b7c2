@@ -61,7 +61,7 @@ typedef enum {
 // Velocidad del MCU
 uint32_t SystemCoreClock = 100000000;
 
-// Definicion de la variable xReturned donde se almacenara el estado de todas las tareas creadas
+// Definicion
 BaseType_t xReturned;
 /*Cabecera de la funcion de tarea 1 */
 void vTask_Menu( void * pvParameters );

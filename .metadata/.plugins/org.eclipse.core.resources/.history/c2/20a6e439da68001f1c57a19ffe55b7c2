@@ -33,35 +33,32 @@
 
 
 
-// Definicion de algunas estructuras, con estas podemos almacenar el estado que queremos entrar dependiendo del comando que se seleccione
+// Definicion de algunas estructuras
 typedef struct{
 	uint8_t payload[10];
 	uint32_t len;
 
 }command_t;
 
-// En esta estructura enumerada se tendran todos los estados posibles, donde mediante comandos nos iremos a un estado u otro
 typedef enum {
 	sMainMenu = 0,
+	sLedEffect,
+	sRtcMenu,
+	sColectGrid,
 	sGo,
-	sGoTo,
 	sStop,
-	sRoll,
-	sRollTo,
-	sAstar,
-	sSquare
+	sMeasureDistance,
+	sMeasurePID
 }state_t;
 
 
 /*definicion de variables del sistema*/
 
-// Aqui designamos al heap cada tarea cuanta memoria en words almacenará
+
 #define STACK_SIZE 200
 
-// Velocidad del MCU
 uint32_t SystemCoreClock = 100000000;
 
-// Definicion de la variable xReturned donde se almacenara el estado de todas las tareas creadas
 BaseType_t xReturned;
 /*Cabecera de la funcion de tarea 1 */
 void vTask_Menu( void * pvParameters );
