@@ -1,0 +1,30 @@
+/*
+ * RCCHunMHz.h
+ *
+ *  Created on: 21/11/2022
+ *      Author: ALEJANDRA MARIA
+ */
+
+#ifndef RCCHUNMHZ_H_
+#define RCCHUNMHZ_H_
+
+#include "stm32f4xx.h"
+#include "GPIOxDriver.h"
+
+
+#define MCO1 0
+#define MCO2 1
+
+typedef struct{
+
+
+}RCC_handler_config;
+
+
+void RCC_enableMaxFrequencies(void);
+void RCC_disableMaxFrequencies(void);
+void show_MaxFreq (uint8_t outputType, uint8_t div);
+
+
+
+#endif /* RCCHUNMHZ_H_ */

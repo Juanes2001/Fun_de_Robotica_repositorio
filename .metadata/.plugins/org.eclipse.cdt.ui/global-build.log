@@ -1,4 +1,4 @@
-12:52:44 **** Incremental Build of configuration Debug for project PeripheralDriver ****
+12:58:22 **** Incremental Build of configuration Debug for project PeripheralDriver ****
 make clean all 
 rm -rf ./Src/AdcDriver.d ./Src/AdcDriver.o ./Src/AdcDriver.su ./Src/Astar.d ./Src/Astar.o ./Src/Astar.su ./Src/BasicTimer.d ./Src/BasicTimer.o ./Src/BasicTimer.su ./Src/CaptureFreqDriver.d ./Src/CaptureFreqDriver.o ./Src/CaptureFreqDriver.su ./Src/EXTIDriver.d ./Src/EXTIDriver.o ./Src/EXTIDriver.su ./Src/FPUDriver.d ./Src/FPUDriver.o ./Src/FPUDriver.su ./Src/GPIOxDriver.d ./Src/GPIOxDriver.o ./Src/GPIOxDriver.su ./Src/I2CDriver.d ./Src/I2CDriver.o ./Src/I2CDriver.su ./Src/MPUAccel.d ./Src/MPUAccel.o ./Src/MPUAccel.su ./Src/MotorsDriver.d ./Src/MotorsDriver.o ./Src/MotorsDriver.su ./Src/OLEDDriver.d ./Src/OLEDDriver.o ./Src/OLEDDriver.su ./Src/PIDDriver.d ./Src/PIDDriver.o ./Src/PIDDriver.su ./Src/PwmDriver.d ./Src/PwmDriver.o ./Src/PwmDriver.su ./Src/RCCHunMHz.d ./Src/RCCHunMHz.o ./Src/RCCHunMHz.su ./Src/RTCDriver.d ./Src/RTCDriver.o ./Src/RTCDriver.su ./Src/SPIDriver.d ./Src/SPIDriver.o ./Src/SPIDriver.su ./Src/SysTickDriver.d ./Src/SysTickDriver.o ./Src/SysTickDriver.su ./Src/USARTxDriver.d ./Src/USARTxDriver.o ./Src/USARTxDriver.su ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su ./Src/sysmem.d ./Src/sysmem.o ./Src/sysmem.su
 rm -rf libPeripheralDriver.a
@@ -26,17 +26,4 @@ arm-none-eabi-gcc "../Src/sysmem.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DNUC
 arm-none-eabi-ar -r  "libPeripheralDriver.a" @"objects.list"  
 arm-none-eabi-ar: creating libPeripheralDriver.a
 Finished building target: libPeripheralDriver.a
- 
-12:53:14 **** Incremental Build of configuration Debug for project Pulse_width_10ns ****
-make -j12 all 
-arm-none-eabi-gcc -o "Pulse_width_10ns.elf" @"objects.list"  -lPeripheralDriver -mcpu=cortex-m4 -T"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Pulse_width_10ns/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Pulse_width_10ns.map" -Wl,--gc-sections -static -L/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Debug --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
-Finished building target: Pulse_width_10ns.elf
- 
-arm-none-eabi-size   Pulse_width_10ns.elf 
-arm-none-eabi-objdump -h -S  Pulse_width_10ns.elf  > "Pulse_width_10ns.list"
-   text	   data	    bss	    dec	    hex	filename
-  27192	    476	   1848	  29516	   734c	Pulse_width_10ns.elf
-Finished building: default.size.stdout
- 
-Finished building: Pulse_width_10ns.list
  

@@ -42,14 +42,14 @@ void parseCommands(char *stringVector);
 //Definición Handlers
 //GPIO
 //Pin del User blinky
-GPIO_Handler_t handlerPinA5         = {0};
+GPIO_Handler_t handlerPinA5 = {0};
 
 
 //Pin PWM que controla el pulso a 10 ns
 GPIO_Handler_t handlerPinPwm_pulse_10ns  = {0};
 
 //Pin para visualizar la velocidad del micro
-GPIO_Handler_t handlerMCO2Show      = {0};
+GPIO_Handler_t handlerMCOShow      = {0};
 
 // Pines RX y TX USART
 GPIO_Handler_t handlerRxPin = {0};
@@ -120,14 +120,17 @@ void inSystem (void){
 
 
 	// Activamos la maxima velocidad del microcontrolador
-	RCC_enableMaxFrequencies();
+	show_MaxFreq(MCO1,1);
+//	RCC_disableMaxFrequencies();
+//	RCC_enableMaxFrequencies();
+
 	//Config del pin A8 salida de la velocidad del micro
 
-//	handlerMCO2Show.pGPIOx                             = GPIOC;
-//	handlerMCO2Show.GPIO_PinConfig.GPIO_PinNumber      = PIN_9 ;
-//	handlerMCO2Show.GPIO_PinConfig.GPIO_PinAltFunMode  = AF0;
-//	handlerMCO2Show.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
-//	GPIO_Config(&handlerMCO2Show);
+	handlerMCOShow.pGPIOx                             = GPIOA;
+	handlerMCOShow.GPIO_PinConfig.GPIO_PinNumber      = PIN_8 ;
+	handlerMCOShow.GPIO_PinConfig.GPIO_PinAltFunMode  = AF0;
+	handlerMCOShow.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
+	GPIO_Config(&handlerMCOShow);
 
 	//BLINKY LED
 
@@ -144,32 +147,32 @@ void inSystem (void){
 	handlerTimerBlinky.ptrTIMx                           = TIM3;
 	handlerTimerBlinky.TIMx_Config.TIMx_interruptEnable  = BTIMER_ENABLE_INTERRUPT;
 	handlerTimerBlinky.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
-	handlerTimerBlinky.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_100us;
-	handlerTimerBlinky.TIMx_Config.TIMx_period           = 250;
+	handlerTimerBlinky.TIMx_Config.TIMx_speed            = BTIMER_SPEED_16MHz_1ms;
+	handlerTimerBlinky.TIMx_Config.TIMx_period           = 1000;
 	BasicTimer_Config(&handlerTimerBlinky);
 	startTimer(&handlerTimerBlinky);
 
 	// PWM handler del GPIO y el PWM
 
-	handlerPinPwm_pulse_10ns.pGPIOx                             = GPIOA;
-	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinAltFunMode  = AF1;
-	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
-	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
-	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinNumber      = PIN_8;
-	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
-	GPIO_Config(&handlerPinPwm_pulse_10ns);
+//	handlerPinPwm_pulse_10ns.pGPIOx                             = GPIOA;
+//	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinAltFunMode  = AF1;
+//	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
+//	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
+//	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinNumber      = PIN_8;
+//	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+//	handlerPinPwm_pulse_10ns.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
+//	GPIO_Config(&handlerPinPwm_pulse_10ns);
 
-	handlerPWM_pulse_10ns.ptrTIMx            = TIM1;
-	handlerPWM_pulse_10ns.config.channel     = PWM_CHANNEL_1;
-	handlerPWM_pulse_10ns.config.duttyCicle  = 50;
-	handlerPWM_pulse_10ns.config.periodo     = 10000; // se maneja 100kHz por testeo
-	handlerPWM_pulse_10ns.config.prescaler   = PWM_SPEED_100MHz_10ns;
-	handlerPWM_pulse_10ns.config.polarity    = PWM_DISABLE_POLARITY;
-	handlerPWM_pulse_10ns.config.optocoupler = PWM_DISABLE_OPTOCOUPLER;
-	pwm_Config(&handlerPWM_pulse_10ns);
-	startPwmSignal(&handlerPWM_pulse_10ns);
-	enableOutput(&handlerPWM_pulse_10ns);
+//	handlerPWM_pulse_10ns.ptrTIMx            = TIM1;
+//	handlerPWM_pulse_10ns.config.channel     = PWM_CHANNEL_1;
+//	handlerPWM_pulse_10ns.config.duttyCicle  = 50;
+//	handlerPWM_pulse_10ns.config.periodo     = 10000; // se maneja 100kHz por testeo
+//	handlerPWM_pulse_10ns.config.prescaler   = PWM_SPEED_100MHz_10ns;
+//	handlerPWM_pulse_10ns.config.polarity    = PWM_DISABLE_POLARITY;
+//	handlerPWM_pulse_10ns.config.optocoupler = PWM_DISABLE_OPTOCOUPLER;
+//	pwm_Config(&handlerPWM_pulse_10ns);
+//	startPwmSignal(&handlerPWM_pulse_10ns);
+//	enableOutput(&handlerPWM_pulse_10ns);
 
 
 	//Comunicacion serial

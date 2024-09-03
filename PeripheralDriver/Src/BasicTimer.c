@@ -94,6 +94,9 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 
 		}else{
 
+			period = ptrBTimerHandler->TIMx_Config.TIMx_period ;
+
+			ptrBTimerHandler->ptrTIMx->ARR = period - 1;
 
 		}
 
