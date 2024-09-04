@@ -9,6 +9,7 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include Src/STMpointCsSources/subdir.mk
 -include Src/subdir.mk
 -include Inc/subdir.mk
 -include objects.mk

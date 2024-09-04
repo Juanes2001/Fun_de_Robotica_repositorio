@@ -28,7 +28,6 @@
 
 
 void RCC_enableMaxFrequencies(uint8_t frequency);
-void RCC_disableMaxFrequencies(void);
 void show_MaxFreq (uint8_t outputType, uint8_t div);
 
 

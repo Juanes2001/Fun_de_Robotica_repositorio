@@ -121,8 +121,7 @@ void inSystem (void){
 
 	// Activamos la maxima velocidad del microcontrolador
 	show_MaxFreq(MCO1,1);
-//	RCC_disableMaxFrequencies();
-//	RCC_enableMaxFrequencies();
+	RCC_enableMaxFrequencies(RCC_20MHz);
 
 	//Config del pin A8 salida de la velocidad del micro
 

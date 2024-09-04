@@ -35,6 +35,23 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 			RCC->PLLCFGR |= (120 << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR &= ~(0b11 << RCC_PLLCFGR_PLLP_Pos);
 			RCC->PLLCFGR |= (0b10 << RCC_PLLCFGR_PLLP_Pos); // Division por 6 en el pllP
+
+
+			//Seleccionamos los preescalers adecuados para los AHB y APBx en el registro RCC_CFGR No se divide nada en este caso
+			RCC->CFGR &= ~(0b1000 << 4); // Division del AHB por 1
+			RCC->CFGR &= ~(0b100 << 13); // division del APB2 por 1
+			RCC->CFGR &= ~(0b100 << 10); // Division del APB1 por 1
+
+			//Configurado el PLL para salida de 100MHz entonces ya podemos activar el PLL
+			RCC->CR |= RCC_CR_PLLON;
+			while (!(RCC->CR & RCC_CR_PLLRDY)){
+				__NOP();
+			}
+
+			//Antes de configurar el PLL del RCC, debemos cambiar la velocidad de lectura de la memoria flash
+			FLASH->ACR &= ~(0xF << FLASH_ACR_LATENCY_Pos);
+			FLASH->ACR |= (0b000 << FLASH_ACR_LATENCY_Pos);
+
 			break;
 		}case RCC_30MHz:{
 			//freqsys = 16MHz * (120/(16*4)) =  30MHz
@@ -42,6 +59,22 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 			RCC->PLLCFGR |= (120 << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR &= ~(0b11 << RCC_PLLCFGR_PLLP_Pos);
 			RCC->PLLCFGR |= (0b01 << RCC_PLLCFGR_PLLP_Pos); // Division por 4 en el pllP
+
+			//Seleccionamos los preescalers adecuados para los AHB y APBx en el registro RCC_CFGR No se divide nada en este caso
+			RCC->CFGR &= ~(0b1000 << 4); // Division del AHB por 1
+			RCC->CFGR &= ~(0b100 << 13); // division del APB2 por 1
+			RCC->CFGR &= ~(0b100 << 10); // Division del APB1 por 1
+
+			//Configurado el PLL para salida de 100MHz entonces ya podemos activar el PLL
+			RCC->CR |= RCC_CR_PLLON;
+			while (!(RCC->CR & RCC_CR_PLLRDY)){
+				__NOP();
+			}
+
+			//Antes de configurar el PLL del RCC, debemos cambiar la velocidad de lectura de la memoria flash
+			FLASH->ACR &= ~(0xF << FLASH_ACR_LATENCY_Pos);
+			FLASH->ACR |= (0b000 << FLASH_ACR_LATENCY_Pos);
+
 			break;
 		}case RCC_40MHz:{
 			//freqsys = 16MHz * (240/(16*6)) =  40MHz
@@ -49,6 +82,23 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 			RCC->PLLCFGR |= (240 << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR &= ~(0b11 << RCC_PLLCFGR_PLLP_Pos);
 			RCC->PLLCFGR |= (0b10 << RCC_PLLCFGR_PLLP_Pos); // Division por 6 en el pllP
+
+			//Seleccionamos los preescalers adecuados para los AHB y APBx en el registro RCC_CFGR No se divide nada en este caso
+			RCC->CFGR &= ~(0b1000 << 4); // Division del AHB por 1
+			RCC->CFGR &= ~(0b100 << 13); // division del APB2 por 1
+			RCC->CFGR &= ~(0b100 << 10); // Division del APB1 por 1
+
+			//Configurado el PLL para salida de 100MHz entonces ya podemos activar el PLL
+			RCC->CR |= RCC_CR_PLLON;
+			while (!(RCC->CR & RCC_CR_PLLRDY)){
+				__NOP();
+			}
+
+			//Antes de configurar el PLL del RCC, debemos cambiar la velocidad de lectura de la memoria flash
+			FLASH->ACR &= ~(0xF << FLASH_ACR_LATENCY_Pos);
+			FLASH->ACR |= (0b001 << FLASH_ACR_LATENCY_Pos);
+
+
 			break;
 		}case RCC_50MHz:{
 			//freqsys = 16MHz * (100/(16*2)) =  50MHz
@@ -56,6 +106,22 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 			RCC->PLLCFGR |= (100 << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR &= ~(0b11 << RCC_PLLCFGR_PLLP_Pos);
 			RCC->PLLCFGR |= (0b00 << RCC_PLLCFGR_PLLP_Pos); // Division por 2 en el pllP
+
+			//Seleccionamos los preescalers adecuados para los AHB y APBx en el registro RCC_CFGR No se divide nada en este caso
+			RCC->CFGR &= ~(0b1000 << 4); // Division del AHB por 1
+			RCC->CFGR &= ~(0b100 << 13); // division del APB2 por 1
+			RCC->CFGR &= ~(0b100 << 10); // Division del APB1 por 1
+
+			//Configurado el PLL para salida de 100MHz entonces ya podemos activar el PLL
+			RCC->CR |= RCC_CR_PLLON;
+			while (!(RCC->CR & RCC_CR_PLLRDY)){
+				__NOP();
+			}
+
+			//Antes de configurar el PLL del RCC, debemos cambiar la velocidad de lectura de la memoria flash
+			FLASH->ACR &= ~(0xF << FLASH_ACR_LATENCY_Pos);
+			FLASH->ACR |= (0b001 << FLASH_ACR_LATENCY_Pos);
+
 			break;
 		}case RCC_60MHz:{
 			//freqsys = 16MHz * (120/(16*2)) =  60MHz
@@ -63,6 +129,22 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 			RCC->PLLCFGR |= (120 << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR &= ~(0b11 << RCC_PLLCFGR_PLLP_Pos);
 			RCC->PLLCFGR |= (0b00 << RCC_PLLCFGR_PLLP_Pos); // Division por 2 en el pllP
+
+			//Seleccionamos los preescalers adecuados para los AHB y APBx en el registro RCC_CFGR
+			RCC->CFGR &= ~(0b1000 << 4); // Division del AHB por 1
+			RCC->CFGR &= ~(0b100 << 13); // division del APB2 por 1
+			RCC->CFGR |= (0b100 << 10); // Division del APB1 por 2
+
+			//Configurado el PLL para salida de 100MHz entonces ya podemos activar el PLL
+			RCC->CR |= RCC_CR_PLLON;
+			while (!(RCC->CR & RCC_CR_PLLRDY)){
+				__NOP();
+			}
+
+			//Antes de configurar el PLL del RCC, debemos cambiar la velocidad de lectura de la memoria flash
+			FLASH->ACR &= ~(0xF << FLASH_ACR_LATENCY_Pos);
+			FLASH->ACR |= (0b001 << FLASH_ACR_LATENCY_Pos);
+
 			break;
 		}case RCC_70MHz:{
 			//freqsys = 16MHz * (140/(16*2)) =  70MHz
@@ -70,6 +152,22 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 			RCC->PLLCFGR |= (140 << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR &= ~(0b11 << RCC_PLLCFGR_PLLP_Pos);
 			RCC->PLLCFGR |= (0b00 << RCC_PLLCFGR_PLLP_Pos); // Division por 2 en el pllP
+
+			//Seleccionamos los preescalers adecuados para los AHB y APBx en el registro RCC_CFGR
+			RCC->CFGR &= ~(0b1000 << 4); // Division del AHB por 1
+			RCC->CFGR &= ~(0b100 << 13); // division del APB2 por 1
+			RCC->CFGR |= (0b100 << 10); // Division del APB1 por 2
+
+			//Configurado el PLL para salida de 100MHz entonces ya podemos activar el PLL
+			RCC->CR |= RCC_CR_PLLON;
+			while (!(RCC->CR & RCC_CR_PLLRDY)){
+				__NOP();
+			}
+
+			//Antes de configurar el PLL del RCC, debemos cambiar la velocidad de lectura de la memoria flash
+			FLASH->ACR &= ~(0xF << FLASH_ACR_LATENCY_Pos);
+			FLASH->ACR |= (0b010 << FLASH_ACR_LATENCY_Pos);
+
 			break;
 		}case RCC_80MHz:{
 			//freqsys = 16MHz * (160/(16*2)) =  80MHz
@@ -77,6 +175,22 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 			RCC->PLLCFGR |= (160 << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR &= ~(0b11 << RCC_PLLCFGR_PLLP_Pos);
 			RCC->PLLCFGR |= (0b00 << RCC_PLLCFGR_PLLP_Pos); // Division por 2 en el pllP
+
+			//Seleccionamos los preescalers adecuados para los AHB y APBx en el registro RCC_CFGR
+			RCC->CFGR &= ~(0b1000 << 4); // Division del AHB por 1
+			RCC->CFGR &= ~(0b100 << 13); // division del APB2 por 1
+			RCC->CFGR |= (0b100 << 10); // Division del APB1 por 2
+
+			//Configurado el PLL para salida de 100MHz entonces ya podemos activar el PLL
+			RCC->CR |= RCC_CR_PLLON;
+			while (!(RCC->CR & RCC_CR_PLLRDY)){
+				__NOP();
+			}
+
+			//Antes de configurar el PLL del RCC, debemos cambiar la velocidad de lectura de la memoria flash
+			FLASH->ACR &= ~(0xF << FLASH_ACR_LATENCY_Pos);
+			FLASH->ACR |= (0b010 << FLASH_ACR_LATENCY_Pos);
+
 			break;
 		}case RCC_90MHz:{
 			//freqsys = 16MHz * (180/(16*2)) =  90MHz
@@ -84,6 +198,22 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 			RCC->PLLCFGR |= (180 << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR &= ~(0b11 << RCC_PLLCFGR_PLLP_Pos);
 			RCC->PLLCFGR |= (0b00 << RCC_PLLCFGR_PLLP_Pos); // Division por 2 en el pllP
+
+			//Seleccionamos los preescalers adecuados para los AHB y APBx en el registro RCC_CFGR
+			RCC->CFGR &= ~(0b1000 << 4); // Division del AHB por 1
+			RCC->CFGR &= ~(0b100 << 13); // division del APB2 por 1
+			RCC->CFGR |= (0b100 << 10); // Division del APB1 por 2
+
+			//Configurado el PLL para salida de 100MHz entonces ya podemos activar el PLL
+			RCC->CR |= RCC_CR_PLLON;
+			while (!(RCC->CR & RCC_CR_PLLRDY)){
+				__NOP();
+			}
+
+			//Antes de configurar el PLL del RCC, debemos cambiar la velocidad de lectura de la memoria flash
+			FLASH->ACR &= ~(0xF << FLASH_ACR_LATENCY_Pos);
+			FLASH->ACR |= (0b010 << FLASH_ACR_LATENCY_Pos);
+
 			break;
 		}case RCC_100MHz:{
 			//freqsys = 16MHz * (180/(16*2)) =  90MHz
@@ -91,27 +221,28 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 			RCC->PLLCFGR |= (100 << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR &= ~(0b11 << RCC_PLLCFGR_PLLP_Pos);
 			RCC->PLLCFGR |= (0b00 << RCC_PLLCFGR_PLLP_Pos); // Division por 2 en el pllP
+
+			//Seleccionamos los preescalers adecuados para los AHB y APBx en el registro RCC_CFGR
+			RCC->CFGR &= ~(0b1000 << 4); // Division del AHB por 1
+			RCC->CFGR &= ~(0b100 << 13); // division del APB2 por 1
+			RCC->CFGR |= (0b100 << 10); // Division del APB1 por 2
+
+			//Configurado el PLL para salida de 100MHz entonces ya podemos activar el PLL
+			RCC->CR |= RCC_CR_PLLON;
+			while (!(RCC->CR & RCC_CR_PLLRDY)){
+				__NOP();
+			}
+
+			//Antes de configurar el PLL del RCC, debemos cambiar la velocidad de lectura de la memoria flash
+			FLASH->ACR &= ~(0xF << FLASH_ACR_LATENCY_Pos);
+			FLASH->ACR |= (0b011 << FLASH_ACR_LATENCY_Pos);
+
 			break;
 		}
 		default:{
 			break;
 		}
 	}
-
-	//Configurado el PLL para salida de 100MHz entonces ya podemos activar el PLL
-	RCC->CR |= RCC_CR_PLLON;
-	while (!(RCC->CR & RCC_CR_PLLRDY)){
-		__NOP();
-	}
-
-	//Seleccionamos los preescalers adecuados para los AHB y APBx en el registro RCC_CFGR
-	RCC->CFGR &= ~(0b111 << 13);
-	RCC->CFGR |= (0b100 << 10);
-	RCC->CFGR &= ~(0xF << 4);
-
-	//Antes de configurar el PLL del RCC, debemos cambiar la velocidad de lectura de la memoria flash
-	FLASH->ACR &= ~(0xF << FLASH_ACR_LATENCY_Pos);
-	FLASH->ACR |= (0b011 << FLASH_ACR_LATENCY_Pos);
 
 
 	// Se configura como system clock al PLL
@@ -121,28 +252,7 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 		__NOP();
 	}
 
-
-
-}
-
-void RCC_disableMaxFrequencies(void){
-
-	//Nos aseguramos que el PLL esta apagado
-	RCC->CR &= ~(RCC_CR_PLLON);
-	//Activamos el PWR parapoder activar el uso de 16MHz de velocidad
-	RCC->APB1ENR &= ~RCC_APB1ENR_PWREN;
-	//Le damos la opcion al PWR de permitir al MCU para correr una frecuencia de 16MHz
-	PWR->CR &= ~(0b01 << 14);
-
-	//Antes de configurar el PLL del RCC, debemos cambiar la velocidad de lectura de la memoria flash
-	FLASH->ACR &= ~(0xF << FLASH_ACR_LATENCY_Pos);
-
-	// Se configura como system clock al HSI
-	RCC->CFGR &= ~(0b11 << 0);
-
-	while(!(RCC->CFGR & RCC_CFGR_SWS_HSI)){
-		__NOP();
-	}
+	SystemCoreClockUpdate();
 
 }
 

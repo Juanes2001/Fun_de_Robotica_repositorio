@@ -78,13 +78,31 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 		speed = ptrBTimerHandler->TIMx_Config.TIMx_speed;
 
 		/* 3b. Configuramos el Auto-reload. Este es el "limite" hasta donde el CNT va a contar */
-		if ((speed == BTIMER_SPEED_16MHz_10us )  ||(speed == BTIMER_SPEED_100MHz_10us)){
+		if ((speed == BTIMER_SPEED_16MHz_10us )
+		  ||(speed == BTIMER_SPEED_20MHz_10us)
+		  ||(speed == BTIMER_SPEED_30MHz_10us)
+		  ||(speed == BTIMER_SPEED_40MHz_10us)
+		  ||(speed == BTIMER_SPEED_50MHz_10us)
+		  ||(speed == BTIMER_SPEED_60MHz_10us)
+		  ||(speed == BTIMER_SPEED_70MHz_10us)
+		  ||(speed == BTIMER_SPEED_80MHz_10us)
+		  ||(speed == BTIMER_SPEED_90MHz_10us)
+		  ||(speed == BTIMER_SPEED_100MHz_10us)){
 
 			period = ptrBTimerHandler->TIMx_Config.TIMx_period * 100 ;
 
 			ptrBTimerHandler->ptrTIMx->ARR = period - 1;
 
-		}else if ((speed == BTIMER_SPEED_16MHz_100us ) || (speed == BTIMER_SPEED_100MHz_100us)){
+		}else if ((speed == BTIMER_SPEED_16MHz_100us )
+			   || (speed == BTIMER_SPEED_20MHz_100us)
+			   || (speed == BTIMER_SPEED_30MHz_100us)
+			   || (speed == BTIMER_SPEED_40MHz_100us)
+			   || (speed == BTIMER_SPEED_50MHz_100us)
+			   || (speed == BTIMER_SPEED_60MHz_100us)
+			   || (speed == BTIMER_SPEED_70MHz_100us)
+			   || (speed == BTIMER_SPEED_80MHz_100us)
+			   || (speed == BTIMER_SPEED_90MHz_100us)
+			   || (speed == BTIMER_SPEED_100MHz_100us)){
 
 			period = ptrBTimerHandler->TIMx_Config.TIMx_period * 10   ;
 
@@ -92,12 +110,25 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 
 
 
-		}else{
+		}else if ((speed == BTIMER_SPEED_16MHz_1ms)
+			   || (speed == BTIMER_SPEED_20MHz_1ms)
+			   || (speed == BTIMER_SPEED_30MHz_1ms)
+			   || (speed == BTIMER_SPEED_40MHz_1ms)
+			   || (speed == BTIMER_SPEED_50MHz_1ms)
+			   || (speed == BTIMER_SPEED_60MHz_1ms)
+			   || (speed == BTIMER_SPEED_70MHz_1ms)
+			   || (speed == BTIMER_SPEED_80MHz_1ms)
+			   || (speed == BTIMER_SPEED_90MHz_1ms)
+			   || (speed == BTIMER_SPEED_100MHz_1ms)){
 
-			period = ptrBTimerHandler->TIMx_Config.TIMx_period ;
+			period = ptrBTimerHandler->TIMx_Config.TIMx_period;
 
 			ptrBTimerHandler->ptrTIMx->ARR = period - 1;
 
+		}else{
+			period = ptrBTimerHandler->TIMx_Config.TIMx_period / 10;  //Se tiene el caso mas minimo posible, donde el contador cuenta cada 10 nanosegundos
+
+			ptrBTimerHandler->ptrTIMx->ARR = period - 1;
 		}
 
 

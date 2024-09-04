@@ -18,3 +18,4 @@
 "./Src/USARTxDriver.o"
 "./Src/syscalls.o"
 "./Src/sysmem.o"
+"./Src/STMpointCsSources/system_stm32f4xx.o"

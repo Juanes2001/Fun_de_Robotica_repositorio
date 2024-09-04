@@ -21,11 +21,51 @@
 #define PWM_SPEED_16MHz_100us	1600
 #define PWM_SPEED_16MHz_1ms	    16000
 
+#define PWM_SPEED_20MHz_1us	    20
+#define PWM_SPEED_20MHz_10us	200
+#define PWM_SPEED_20MHz_100us	2000
+#define PWM_SPEED_20MHz_1ms	    20000
+
+#define PWM_SPEED_30MHz_1us	    30
+#define PWM_SPEED_30MHz_10us	300
+#define PWM_SPEED_30MHz_100us	3000
+#define PWM_SPEED_30MHz_1ms	    30000
+
+#define PWM_SPEED_40MHz_1us	    40
+#define PWM_SPEED_40MHz_10us	400
+#define PWM_SPEED_40MHz_100us	4000
+#define PWM_SPEED_40MHz_1ms	    40000
+
+#define PWM_SPEED_50MHz_1us	    50
+#define PWM_SPEED_50MHz_10us	500
+#define PWM_SPEED_50MHz_100us	5000
+#define PWM_SPEED_50MHz_1ms	    50000
+
+#define PWM_SPEED_60MHz_1us	    60
+#define PWM_SPEED_60MHz_10us	600
+#define PWM_SPEED_60MHz_100us	6000
+#define PWM_SPEED_60MHz_1ms	    60000
+
+#define PWM_SPEED_70MHz_1us	    70
+#define PWM_SPEED_70MHz_10us	700
+#define PWM_SPEED_70MHz_100us	7000
+#define PWM_SPEED_70MHz_1ms	    70000
+
+#define PWM_SPEED_80MHz_1us	    80
+#define PWM_SPEED_80MHz_10us	800
+#define PWM_SPEED_80MHz_100us	8000
+#define PWM_SPEED_80MHz_1ms	    80000
+
+#define PWM_SPEED_90MHz_1us	    90
+#define PWM_SPEED_90MHz_10us	900
+#define PWM_SPEED_90MHz_100us	9000
+#define PWM_SPEED_90MHz_1ms	    90000
+
 #define PWM_SPEED_100MHz_10ns   1
 #define PWM_SPEED_100MHz_1us    100
 #define PWM_SPEED_100MHz_10us   1000
 #define PWM_SPEED_100MHz_100us  10000
-
+#define PWM_SPEED_100MHz_1ms	100000
 
 
 #define PWM_ENABLE_POLARITY      1

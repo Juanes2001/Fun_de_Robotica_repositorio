@@ -247,39 +247,73 @@ void setFrequency(PWM_Handler_t *ptrPwmHandler){
 	// antes de hacer un update y reload.
 
 
-	if  ((speed == PWM_SPEED_16MHz_1us ) || (speed == PWM_SPEED_100MHz_1us)) {
+	if((speed == PWM_SPEED_16MHz_10us )
+     ||(speed == PWM_SPEED_20MHz_10us)
+     ||(speed == PWM_SPEED_30MHz_10us)
+     ||(speed == PWM_SPEED_40MHz_10us)
+     ||(speed == PWM_SPEED_50MHz_10us)
+     ||(speed == PWM_SPEED_60MHz_10us)
+     ||(speed == PWM_SPEED_70MHz_10us)
+     ||(speed == PWM_SPEED_80MHz_10us)
+     ||(speed == PWM_SPEED_90MHz_10us)
+     ||(speed == PWM_SPEED_100MHz_10us)){
 
-		periodo = ptrPwmHandler->config.periodo * 1000  ;
-
-		ptrPwmHandler->ptrTIMx->ARR = periodo - 1;
-
-
-	}else if ((speed == PWM_SPEED_16MHz_10us ) || (speed == PWM_SPEED_100MHz_10us)){
-
-		periodo = ptrPwmHandler->config.periodo * 100  ;
-
-		ptrPwmHandler->ptrTIMx->ARR = periodo - 1;
-
-	}else if ((speed == PWM_SPEED_16MHz_100us ) || (speed == PWM_SPEED_100MHz_100us)){
-
-		periodo = ptrPwmHandler->config.periodo * 10  ;
+		periodo = ptrPwmHandler->config.periodo * 1000 ;
 
 		ptrPwmHandler->ptrTIMx->ARR = periodo - 1;
 
 
-	}else if ((speed == PWM_SPEED_16MHz_1ms )){
+	}else if ((speed == PWM_SPEED_16MHz_10us )
+	  ||(speed == PWM_SPEED_20MHz_10us)
+	  ||(speed == PWM_SPEED_30MHz_10us)
+	  ||(speed == PWM_SPEED_40MHz_10us)
+	  ||(speed == PWM_SPEED_50MHz_10us)
+	  ||(speed == PWM_SPEED_60MHz_10us)
+	  ||(speed == PWM_SPEED_70MHz_10us)
+	  ||(speed == PWM_SPEED_80MHz_10us)
+	  ||(speed == PWM_SPEED_90MHz_10us)
+	  ||(speed == PWM_SPEED_100MHz_10us)){
 
-		periodo = ptrPwmHandler->config.periodo   ;
+		periodo = ptrPwmHandler->config.periodo * 100 ;
 
 		ptrPwmHandler->ptrTIMx->ARR = periodo - 1;
 
-	}else if ((speed == PWM_SPEED_100MHz_10ns )){
+	}else if ((speed == PWM_SPEED_16MHz_100us )
+		   || (speed == PWM_SPEED_20MHz_100us)
+		   || (speed == PWM_SPEED_30MHz_100us)
+		   || (speed == PWM_SPEED_40MHz_100us)
+		   || (speed == PWM_SPEED_50MHz_100us)
+		   || (speed == PWM_SPEED_60MHz_100us)
+		   || (speed == PWM_SPEED_70MHz_100us)
+		   || (speed == PWM_SPEED_80MHz_100us)
+		   || (speed == PWM_SPEED_90MHz_100us)
+		   || (speed == PWM_SPEED_100MHz_100us)){
 
-		// En este caso el periodo estaria en nanosegundos, dividimos por 10 para tener la cantidad de cuentas finales que debe de hacer el timer
-		periodo = ptrPwmHandler->config.periodo / 10;
+		periodo = ptrPwmHandler->config.periodo * 10   ;
 
 		ptrPwmHandler->ptrTIMx->ARR = periodo - 1;
 
+
+
+	}else if ((speed == PWM_SPEED_16MHz_1ms)
+		   || (speed == PWM_SPEED_20MHz_1ms)
+		   || (speed == PWM_SPEED_30MHz_1ms)
+		   || (speed == PWM_SPEED_40MHz_1ms)
+		   || (speed == PWM_SPEED_50MHz_1ms)
+		   || (speed == PWM_SPEED_60MHz_1ms)
+		   || (speed == PWM_SPEED_70MHz_1ms)
+		   || (speed == PWM_SPEED_80MHz_1ms)
+		   || (speed == PWM_SPEED_90MHz_1ms)
+		   || (speed == PWM_SPEED_100MHz_1ms)){
+
+		periodo = ptrPwmHandler->config.periodo;
+
+		ptrPwmHandler->ptrTIMx->ARR = periodo - 1;
+
+	}else{
+		periodo = ptrPwmHandler->config.periodo / 10;  //Se tiene el caso mas minimo posible, donde el contador cuenta cada 10 nanosegundos
+
+		ptrPwmHandler->ptrTIMx->ARR = periodo - 1;
 	}
 
 }

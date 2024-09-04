@@ -19,4 +19,5 @@ C_DEPS :=
 SUBDIRS := \
 Inc \
 Src \
+Src/STMpointCsSources \
 
