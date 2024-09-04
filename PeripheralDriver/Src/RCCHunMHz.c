@@ -31,7 +31,9 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 	switch (frequency) {
 		case RCC_20MHz:{
 			//freqsys = 16MHz * (120/(16*6)) =  20MHz
+			RCC->PLLCFGR &= ~(0xFF << RCC_PLLCFGR_PLLM_Pos);
 			RCC->PLLCFGR |= (16 << RCC_PLLCFGR_PLLM_Pos);
+			RCC->PLLCFGR &= ~(0x1FF << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR |= (120 << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR &= ~(0b11 << RCC_PLLCFGR_PLLP_Pos);
 			RCC->PLLCFGR |= (0b10 << RCC_PLLCFGR_PLLP_Pos); // Division por 6 en el pllP
@@ -55,7 +57,9 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 			break;
 		}case RCC_30MHz:{
 			//freqsys = 16MHz * (120/(16*4)) =  30MHz
+			RCC->PLLCFGR &= ~(0xFF << RCC_PLLCFGR_PLLM_Pos);
 			RCC->PLLCFGR |= (16 << RCC_PLLCFGR_PLLM_Pos);
+			RCC->PLLCFGR &= ~(0x1FF << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR |= (120 << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR &= ~(0b11 << RCC_PLLCFGR_PLLP_Pos);
 			RCC->PLLCFGR |= (0b01 << RCC_PLLCFGR_PLLP_Pos); // Division por 4 en el pllP
@@ -78,7 +82,9 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 			break;
 		}case RCC_40MHz:{
 			//freqsys = 16MHz * (240/(16*6)) =  40MHz
+			RCC->PLLCFGR &= ~(0xFF << RCC_PLLCFGR_PLLM_Pos);
 			RCC->PLLCFGR |= (16 << RCC_PLLCFGR_PLLM_Pos);
+			RCC->PLLCFGR &= ~(0x1FF << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR |= (240 << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR &= ~(0b11 << RCC_PLLCFGR_PLLP_Pos);
 			RCC->PLLCFGR |= (0b10 << RCC_PLLCFGR_PLLP_Pos); // Division por 6 en el pllP
@@ -102,7 +108,9 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 			break;
 		}case RCC_50MHz:{
 			//freqsys = 16MHz * (100/(16*2)) =  50MHz
+			RCC->PLLCFGR &= ~(0xFF << RCC_PLLCFGR_PLLM_Pos);
 			RCC->PLLCFGR |= (16 << RCC_PLLCFGR_PLLM_Pos);
+			RCC->PLLCFGR &= ~(0x1FF << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR |= (100 << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR &= ~(0b11 << RCC_PLLCFGR_PLLP_Pos);
 			RCC->PLLCFGR |= (0b00 << RCC_PLLCFGR_PLLP_Pos); // Division por 2 en el pllP
@@ -125,7 +133,9 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 			break;
 		}case RCC_60MHz:{
 			//freqsys = 16MHz * (120/(16*2)) =  60MHz
+			RCC->PLLCFGR &= ~(0xFF << RCC_PLLCFGR_PLLM_Pos);
 			RCC->PLLCFGR |= (16 << RCC_PLLCFGR_PLLM_Pos);
+			RCC->PLLCFGR &= ~(0x1FF << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR |= (120 << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR &= ~(0b11 << RCC_PLLCFGR_PLLP_Pos);
 			RCC->PLLCFGR |= (0b00 << RCC_PLLCFGR_PLLP_Pos); // Division por 2 en el pllP
@@ -148,7 +158,9 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 			break;
 		}case RCC_70MHz:{
 			//freqsys = 16MHz * (140/(16*2)) =  70MHz
+			RCC->PLLCFGR &= ~(0xFF << RCC_PLLCFGR_PLLM_Pos);
 			RCC->PLLCFGR |= (16 << RCC_PLLCFGR_PLLM_Pos);
+			RCC->PLLCFGR &= ~(0x1FF << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR |= (140 << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR &= ~(0b11 << RCC_PLLCFGR_PLLP_Pos);
 			RCC->PLLCFGR |= (0b00 << RCC_PLLCFGR_PLLP_Pos); // Division por 2 en el pllP
@@ -171,7 +183,9 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 			break;
 		}case RCC_80MHz:{
 			//freqsys = 16MHz * (160/(16*2)) =  80MHz
+			RCC->PLLCFGR &= ~(0xFF << RCC_PLLCFGR_PLLM_Pos);
 			RCC->PLLCFGR |= (16 << RCC_PLLCFGR_PLLM_Pos);
+			RCC->PLLCFGR &= ~(0x1FF << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR |= (160 << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR &= ~(0b11 << RCC_PLLCFGR_PLLP_Pos);
 			RCC->PLLCFGR |= (0b00 << RCC_PLLCFGR_PLLP_Pos); // Division por 2 en el pllP
@@ -194,7 +208,9 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 			break;
 		}case RCC_90MHz:{
 			//freqsys = 16MHz * (180/(16*2)) =  90MHz
+			RCC->PLLCFGR &= ~(0xFF << RCC_PLLCFGR_PLLM_Pos);
 			RCC->PLLCFGR |= (16 << RCC_PLLCFGR_PLLM_Pos);
+			RCC->PLLCFGR &= ~(0x1FF << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR |= (180 << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR &= ~(0b11 << RCC_PLLCFGR_PLLP_Pos);
 			RCC->PLLCFGR |= (0b00 << RCC_PLLCFGR_PLLP_Pos); // Division por 2 en el pllP
@@ -216,8 +232,10 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 
 			break;
 		}case RCC_100MHz:{
-			//freqsys = 16MHz * (180/(16*2)) =  90MHz
+			//freqsys = 16MHz * (100/(8*2)) =  100MHz
+			RCC->PLLCFGR &= ~(0xFF << RCC_PLLCFGR_PLLM_Pos);
 			RCC->PLLCFGR |= (8 << RCC_PLLCFGR_PLLM_Pos);
+			RCC->PLLCFGR &= ~(0x1FF << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR |= (100 << RCC_PLLCFGR_PLLN_Pos);
 			RCC->PLLCFGR &= ~(0b11 << RCC_PLLCFGR_PLLP_Pos);
 			RCC->PLLCFGR |= (0b00 << RCC_PLLCFGR_PLLP_Pos); // Division por 2 en el pllP
@@ -295,8 +313,8 @@ void show_MaxFreq (uint8_t outputType ,uint8_t div){
 				break;
 			}
 		}
-		// habilitamos la salida del MCO2 para el PLL clock
-		RCC->CFGR &= ~(0b11 << 30);
+		// habilitamos la salida del MCO1 para el PLL clock
+		RCC->CFGR |= (0b11 << 21);
 	//	RCC->CFGR |= RCC_CFGR_MCO2;
 
 
@@ -336,7 +354,7 @@ void show_MaxFreq (uint8_t outputType ,uint8_t div){
 			}
 		}
 		// habilitamos la salida del MCO2 para el PLL clock
-		RCC->CFGR &= ~(0b11 << 21);
+		RCC->CFGR |= (0b11 << 30);
 	//	RCC->CFGR |= RCC_CFGR_MCO2;
 
 	}
