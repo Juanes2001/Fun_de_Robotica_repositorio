@@ -10,6 +10,7 @@
 "./Src/MotorsDriver.o"
 "./Src/OLEDDriver.o"
 "./Src/PIDDriver.o"
+"./Src/PosRobt.o"
 "./Src/PwmDriver.o"
 "./Src/RCCHunMHz.o"
 "./Src/RTCDriver.o"

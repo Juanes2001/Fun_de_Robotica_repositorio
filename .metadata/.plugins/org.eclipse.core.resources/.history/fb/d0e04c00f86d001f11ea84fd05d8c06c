@@ -323,7 +323,7 @@ void setFrequency(PWM_Handler_t *ptrPwmHandler){
 void updateFrequency(PWM_Handler_t *ptrPwmHandler, uint16_t freq){
 	// Actualizamos el registro que manipula el periodo
 
-	ptrPwmHandler->config.periodo = (uint16_t) 1/freq;
+	ptrPwmHandler->config.periodo = (uint);
 
 
 	// Llamamos a la fucnión que cambia la frecuencia

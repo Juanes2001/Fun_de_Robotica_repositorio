@@ -33,7 +33,7 @@ void updateDirMotor(Motor_Handler_t *ptrMotorHandler)
 		ptrMotorHandler->configMotor.dir = (~ptrMotorHandler->configMotor.dir)&(0x01);
 		//Cambiamos la direccion del motor
 		GPIO_WritePin(ptrMotorHandler->phandlerGPIOIN, ptrMotorHandler->configMotor.dir&SET);
-		PWMx_Toggle(ptrMotorHandler->phandlerPWM);
+		statusPolarityPWM(ptrMotorHandler->phandlerPWM, ptrMotorHandler->configMotor.dir&SET);
 }
 
 double map(double x, double in_min, double in_max, double out_min, double out_max){

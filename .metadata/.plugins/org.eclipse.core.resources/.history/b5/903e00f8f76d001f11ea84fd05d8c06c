@@ -98,7 +98,7 @@ extern uint16_t periodo;
 /* Prototipos de las funciones */
 void pwm_Config(PWM_Handler_t *ptrPwmHandler);
 void setFrequency(PWM_Handler_t *ptrPwmHandler);
-void updateFrequency(PWM_Handler_t *ptrPwmHandler, uint16_t freq);
+void updateFrequency(PWM_Handler_t *ptrPwmHandler, float freq);
 void setDuttyCycle(PWM_Handler_t *ptrPwmHandler);
 void setDuttyCycleAfOpt(PWM_Handler_t *ptrPwmHandler);
 void updateDuttyCycle(PWM_Handler_t *ptrPwmHandler, float newDutty);
