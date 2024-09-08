@@ -13,30 +13,22 @@
 
 typedef struct
 {
-	float    u_M1 ;
-	float    u_M1_1 ;
-	float    q_M1_0,q_M1_1,q_M1_2; // Constantes de control del motor 1
-	float    e_M1,e_M1_1,e_M1_2;   // errores de control del motor 1
-	uint16_t counts_M1;          // Cuentas netas del encoder motor 1
+	float    u; 			//Respuesta de salida
+	float    e0;			//Error
+	float    sum; 			//Suma integral
+	float    ep;   			//Error previo
+	float    kp,ki,kd;      // Constantes PID
+}PID_Parameters_t;
 
-}Motor1_Config_t;
-
-typedef struct
-{
-	float    u_M2 ;
-	float    u_M2_1 ;
-	float    q_M2_0,q_M2_1,q_M2_2; //Constantes de control del motor 2
-	float    e_M2,e_M2_1,e_M2_2;   // Error de control del motor 2
-	uint16_t counts_M2;			   // Cuentas netas del encoder motor 2
-
-}Motor2_Config_t;
 
 typedef struct
 {
-	Motor1_Config_t	   configM1;	// Configuracion del motor 1
-	Motor2_Config_t	   configM2;	// Configuracion del motor 2
+	PID_Parameters_t *pid; // Puntero a estructura PID
+	uint8_t counts;        // cuentas de cada motors
+	float vel;				// velocidad de cada rueda
+  	float dis;    			// distancia por muestreo
 
-}Motor_Handler_t;
+}Motor_Parameters_t;
 
 
 // Funciones

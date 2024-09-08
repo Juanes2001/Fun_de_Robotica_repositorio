@@ -33,19 +33,10 @@
 #include "USARTxDriver.h"
 #include "RCCHunMHz.h"
 #include "EXTIDriver.h"
-#include "MotorsDriver.h"
 #include "I2CDriver.h"
 #include "MPUAccel.h"
 
 /*definicion de variables del sistema*/
-
-
-//#define STACK_SIZE 200
-
-//uint32_t SystemCoreClock = 100000000;
-/*Cabecera de la funcion de tarea 1 */
-//void vTaskOne( void * pvParameters );
-//void vTaskTwo( void * pvParameters );
 
 void inSystem (void);
 void parseCommands(char *stringVector);
@@ -107,10 +98,6 @@ PWM_Handler_t handlerPWM_2 = {0}; // Timer 5
 //Usart
 USART_Handler_t handlerUSART1 = {0};
 
-
-//Motores
-Motor_Handler_t handlerMotor1 = {0};
-Motor_Handler_t handlerMotor2 = {0};
 
 //I2C
 I2C_Handler_t handler_I2C1 = {0};
@@ -183,13 +170,6 @@ uint32_t tiempo = 0;
 float calibr    = 0;
 
 
-//Creacion de tareas
-
-//TaskHandle_t xHandleTask1 = NULL;
-//TaskHandle_t xHandleTask2 = NULL;
-
-//extern void SEGGER_UART_init(uint32_t);
-
 int main(void)
 {
 
@@ -200,119 +180,13 @@ int main(void)
 
 
 
-//	//Activamos el contador
-//   	DWT -> CTRL    |= (1 << 0);
-
-	// Configuracion de orden de prioridad
-//	vInitPrioGroupValue();
-
-//  SEGGER_UART_init(500000);
-//	/* Primero configuramos */
-//	SEGGER_SYSVIEW_Conf();
-//	/* Despues activamos el sistema */
-	//SEGGER_SYSVIEW_Start();
-
-
 	inSystem ();
 
-//	BaseType_t xReturned;
-//
-//	xReturned = xTaskCreate(
-//	                    vTaskOne,       /* Function that implements the task. */
-//	                    "Task-1",          /* Text name for the task. */
-//	                    STACK_SIZE,      /* Stack size in words, not bytes. */
-//						NULL,    /* Parameter passed into the task. */
-//	                    2,/* Priority at which the task is created. */
-//	                    &xHandleTask1 );      /* Used to pass out the created task's handle. */
-//
-//
-//	 configASSERT( xReturned == pdPASS );
-//
-//	 xReturned = xTaskCreate(
-//	 	                    vTaskTwo,       /* Function that implements the task. */
-//	 	                    "Task-2",          /* Text name for the task. */
-//	 	                    STACK_SIZE,      /* Stack size in words, not bytes. */
-//	 	                    "HOLA MUNDO",    /* Parameter passed into the task. */
-//	 	                    2,/* Priority at which the task is created. */
-//	 	                    &xHandleTask2 );      /* Used to pass out the created task's handle. */
-//
-//
-//	 /* Start the created tasks running. */
-//	 vTaskStartScheduler();
+
 
 
     /* Loop forever */
 	while(1){
-
-
-
-//		if (rxData != '\0'){
-//
-//			writeChar(&handlerUSART1, rxData);
-//
-//			if (rxData == '+'){
-//
-//				if (counter < 100){
-//					counter+= 1;
-//				}
-//				updateDuttyCycleAfOpt(&handlerPWM_1, counter);
-//				updateDuttyCycleAfOpt(&handlerPWM_2, counter);
-//				rxData = '\0';
-//
-//			}else if (rxData == '-'){
-//
-//				if (counter > 0){
-//					counter-= 1;
-//				}
-//				updateDuttyCycleAfOpt(&handlerPWM_1, counter);
-//				updateDuttyCycleAfOpt(&handlerPWM_2, counter);
-//				rxData = '\0';
-//			}else if (rxData == 'p'){
-//
-//				PWMx_Toggle(&handlerPWM_1);
-//				rxData = '\0';
-//			}else if (rxData == '1'){
-//
-//
-//				if (!flagPWM_1){
-//
-//					flagPWM_1 = enableOutput(&handlerPWM_1);
-//					GPIO_WritePin_Afopt (&handlerEn1PinC10,SET);
-//
-//				}else{
-//
-//					flagPWM_1 = disableOutput(&handlerPWM_1);
-//					GPIO_WritePin_Afopt (&handlerEn1PinC10,RESET);
-//				}
-//
-//
-//				rxData = '\0';
-//
-//
-//			}else if (rxData == '2'){
-//
-//
-//				if (!flagPWM_2){
-//
-//					flagPWM_2 = enableOutput(&handlerPWM_2);
-//					GPIO_WritePin_Afopt (&handlerEn2PinC11,SET);
-//
-//				}else{
-//
-//					flagPWM_2 = disableOutput(&handlerPWM_2);
-//					GPIO_WritePin_Afopt (&handlerEn2PinC11,RESET);
-//				}
-//
-//
-//				rxData = '\0';
-//
-//			}
-//
-//
-//			else{
-//				rxData = '\0';
-//			}
-//		}
 
 
 
@@ -340,187 +214,8 @@ int main(void)
 
 		}
 
-		if (doneTransaction){
-			parseCommands(bufferReception);
-			doneTransaction = RESET;
-		}
 
 
-		if
-
-		(enableChangePWM)
-
-//		(counterPWM1 <= 100 && counterPWM2 <= 100)
-
-//		( ( (dist_1 < distance) && (dist_2 < distance) ) )
-		{
-
-
-			if (flagT2){
-
-//					updateDuttyCycleAfOpt(&handlerPWM_1, counterPWM1);
-//					updateDuttyCycleAfOpt(&handlerPWM_2, counterPWM2);
-//
-//					controlM1 = counter_M1;
-//					controlM2 = counter_M2;
-//
-//					diferenceM1 = abs(controlM1 - controlM1_prev);
-//					diferenceM2 = abs(controlM2 - controlM2_prev);
-//
-//					controlM1_prev = controlM1;
-//					controlM2_prev = controlM2;
-
-//					if (diferenceM1 < diferenceM2){
-//
-//						counterPWM1 += 1.13; // hasta ahora el mejor ha sido 1.13
-//						counterPWM2 -= 1; // hasta ahora el mejor ha sido 1
-//
-//					}
-//
-//
-//					else if (diferenceM1 > diferenceM2){
-//
-//						counterPWM1 -= 1.11; // hasta ahora el mejor ha sido 1.1
-//						counterPWM2 += 1; // hasta ahora el mejor ha sido 1
-//
-//					}
-
-
-
-				controlM1 = handlerMotor1.configM1.counts_M1;
-				controlM2 = handlerMotor2.configM2.counts_M2;
-
-				diferenceM1 = abs(controlM1 - controlM1_prev);
-				diferenceM2 = abs(controlM2 - controlM2_prev);
-
-				controlM1_prev = controlM1;
-				controlM2_prev = controlM2;
-
-				uAM1 = PID(&handlerMotor1, diferenceM1, 1, setPoint);
-				uAM2 = PID(&handlerMotor2, diferenceM2, 2, setPoint);
-
-				PM1 = map(uAM1, 0 , 600 , 0, 100);
-				PM2 = map(uAM2, 0 , 600 , 0, 100);
-
-				if (PM1 < 0 || PM2 < 0){
-
-					PM1 = 0;
-					PM2 = 0;
-
-				}else if (PM1 > 100 || PM2 > 100){
-
-					PM1 = 100;
-					PM2 = 100;
-				}
-
-				dist_1 = distanceM1();
-				dist_2 = distanceM2();
-
-				updateDuttyCycleAfOpt(&handlerPWM_1, PM1);
-				updateDuttyCycleAfOpt(&handlerPWM_2, PM2);
-
-				sprintf (bufferMsg, //"%u\t%u\t%.3f\t%.3f\t
-
-						//"%u\t%u\t"
-
-						"%.3f\t%.3f\t%.3f\t%.3f\t%.3f\n",
-
-						PM1, PM2, diferenceM1, diferenceM2, setPoint
-
-						// counter_M1, counter_M2,
-
-//						 counterPWM1, diferenceM1, diferenceM2
-						//, dist_1 ,dist_2
-						);
-				writeMsg(&handlerUSART1, bufferMsg);
-
-//				counterPWM1 += 0.1;
-//				counterPWM2 += 0.1;
-
-
-
-				flagT2 = RESET;
-
-			}
-
-		}else if (flagGyro){
-
-			dps = readGyro_Z(&handler_MPUAccel_6050);
-			dps -= calibr;
-			sprintf (bufferMsg, //"%u\t%u\t%.3f\t%.3f\t
-
-			//"%u\t%u\t"
-
-			"%.3f\n",
-
-			dps
-
-			// counter_M1, counter_M2,
-
-	//					counterPWM1, diferenceM1, diferenceM2
-			//, dist_1 ,dist_2
-			);
-			writeMsg(&handlerUSART1, bufferMsg);
-
-			flagGyro = RESET;
-
-		}
-
-
-		else{
-
-		//	breakMotor();
-
-		}
-
-
-
-
-//		for (uint8_t i = 0; i<=4; i++){
-//
-//			promCountsM1 += promCountsM12[0][i];
-//			promCountsM2 += promCountsM12[1][i];
-//
-//			if (i == 4){
-//
-//				promedioM1  = promCountsM1 / 5;
-//				promedioM2  = promCountsM2 / 5;
-//
-//				promCountsM1 = 0;
-//				promCountsM2 = 0;
-//
-//			}
-//
-//		}
-
-//		if (enableChangePWM){
-//
-//			diferenceM1 =  setPoint - controlM1;
-//			diferenceM2 =  setPoint - controlM2;
-//
-//			PM1 = Kp * diferenceM1;
-//			PM2 = Kp * diferenceM2;
-//
-//
-//			if (abs(PM1) > 3){
-//
-//				counterPWM1 = map(PM1, -100, 100, 20, 50);
-//
-//				updateDuttyCycleAfOpt(&handlerPWM_1, counterPWM1);
-//
-//			}
-//
-//			if (abs(PM2) > 3){
-//
-//				counterPWM2 = map(PM2, -100, 100, 20, 34);
-//
-//				updateDuttyCycleAfOpt(&handlerPWM_2, counterPWM2);
-//
-//			}
-//
-//
-//
-//		}
 
 
 	}
@@ -531,7 +226,7 @@ void inSystem (void){
 
 
 	// Activamos la maxima velocidad del microcontrolador
-	RCC_enableMaxFrequencies();
+	RCC_enableMaxFrequencies(RCC_100MHz);
 	//Config del pin A8 salida de la velocidad del micro
 
 //	handlerMCO2Show.pGPIOx                             = GPIOC;
@@ -739,20 +434,6 @@ void inSystem (void){
 
 	//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
 
-	///////////////////////////////////////////Motores 1 y 2//////////////////////////////////////////////
-
-
-	handlerMotor1.configM1.e_M1   = 0;
-	handlerMotor1.configM1.e_M1_1 = 0;
-	handlerMotor1.configM1.e_M1_2 = 0;
-
-
-	handlerMotor2.configM2.e_M2   = 0;
-	handlerMotor2.configM2.e_M2_1 = 0;
-	handlerMotor2.configM2.e_M2_2 = 0;
-
-	//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
-
 		////////////////////////////////Configuracion PINES B8 (SCL) B9 (SDA) e I2C1 //////////////////////////////////////////////
 
 	handler_PINB8_I2C1.pGPIOx                             = GPIOB;
@@ -788,8 +469,6 @@ void inSystem (void){
 
 	////////////////////////////////Timer 5 para contador de tiempo ////////////////////////////////////
 
-
-
 	handlerTIM4_time.ptrTIMx                           = TIM4;
 	handlerTIM4_time.TIMx_Config.TIMx_interruptEnable  = BTIMER_ENABLE_INTERRUPT;
 	handlerTIM4_time.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
@@ -810,157 +489,8 @@ void parseCommands(char *stringVector){
 	if (strcmp(cmd, "help") == 0){
 
 		writeMsg(&handlerUSART1, "HELP MENU CMD : \n");
-		writeMsg(&handlerUSART1, "1)  start #setPoint #dir --- setPoint de 0 a 9 ---  dir 0 CW 1 CCW \n");
-		writeMsg(&handlerUSART1, "2)  goTo #dutty #dir #distance  -----dutty de 0 a 100 ||  dir 0 CW 1 CCW || Distancia en mm \n" );
-		writeMsg(&handlerUSART1, "3)  off \n");
-		writeMsg(&handlerUSART1, "4)  gyro \n");
+		writeMsg(&handlerUSART1, "1)  gyro \n");
 		writeMsg(&handlerUSART1, " \n");
-
-	}else if (strcmp(cmd, "start") == 0){
-
-		dist_1 = 0;
-		dist_2 = 0;
-
-		handlerMotor1.configM1.counts_M1 = 0;
-		handlerMotor2.configM2.counts_M2 = 0;
-
-		// Se setea El setpoint
-		setPoint = firstParameter;
-
-		if (!flagPWM_1){
-
-			//Se setea la direccion
-			GPIO_WritePin_Afopt(&handlerIn1PinC12, secondParameter);
-
-			//Se enciende el motor 1
-			flagPWM_1 = enableOutput(&handlerPWM_1);
-			GPIO_WritePin_Afopt (&handlerEn1PinC10,SET);
-
-
-		}else{
-
-			__NOP();
-		}
-
-
-		if (!flagPWM_2){
-
-
-			// Se setea la direccion seleccionada
-			GPIO_WritePin_Afopt(&handlerIn2PinD2, secondParameter);
-
-			//Se enciende el motor 2
-			flagPWM_2 = enableOutput(&handlerPWM_2);
-			GPIO_WritePin_Afopt (&handlerEn2PinC11,SET);
-
-
-		}else{
-			__NOP();
-		}
-
-
-		startTimer(&handlerTIM2_vel);
-		enableChangePWM = SET;
-
-
-	}else if (strcmp(cmd, "goTo") == 0){
-
-		dist_1 = 0;
-		dist_2 = 0;
-
-		handlerMotor1.configM1.counts_M1 = 0;
-		handlerMotor2.configM2.counts_M2 = 0;
-
-		distance = thirdParameter;
-		setPoint = thirdParameter;
-
-
-		if (!flagPWM_1){
-
-			// Seteamos los parametros para PID
-			handlerMotor1.configM1.u_M1_1 = setPoint / k;
-			setConstants(&handlerMotor1, 1, k, tau, theta, Ts);
-
-			// Se setea su PWM
-
-			updateDuttyCycleAfOpt(&handlerPWM_1, firstParameter);
-			counterPWM1 = showPWMBfOpt(&handlerPWM_1);
-
-			// Se setea la direccion seleccionada
-			GPIO_WritePin_Afopt(&handlerIn1PinC12, secondParameter);
-
-			//Se enciende el motor 2
-			flagPWM_1 = enableOutput(&handlerPWM_1);
-			GPIO_WritePin_Afopt (&handlerEn1PinC10,SET);
-
-
-		}else{
-			__NOP();
-		}
-
-		if (!flagPWM_2){
-
-			// Seteo de los parametros PID
-			handlerMotor2.configM2.u_M2_1 = setPoint / k;
-			setConstants(&handlerMotor2, 2, k, tau, theta, Ts);
-
-			// Se setea su PWM
-
-			updateDuttyCycleAfOpt(&handlerPWM_2, firstParameter);
-			counterPWM2 = showPWMBfOpt(&handlerPWM_2);
-
-			// Se setea la direccion seleccionada
-			GPIO_WritePin_Afopt(&handlerIn2PinD2, secondParameter);
-
-			//Se enciende el motor 2
-			flagPWM_2 = enableOutput(&handlerPWM_2);
-			GPIO_WritePin_Afopt (&handlerEn2PinC11,SET);
-
-
-		}else{
-			__NOP();
-		}
-
-		startTimer(&handlerTIM2_vel);
-		enableChangePWM = SET;
-
-
-	}else if (strcmp(cmd, "off") == 0){
-
-		//Se pregunta cual motor se quiere apagar
-
-		if (flagPWM_1){
-
-			//Se apagael motor 1
-			flagPWM_1 = disableOutput(&handlerPWM_1);
-			GPIO_WritePin_Afopt (&handlerEn1PinC10,RESET);
-
-
-		}else{
-
-			__NOP();
-
-		}
-
-
-
-		if (flagPWM_2){
-
-			//Se apaga el motor 2
-			flagPWM_2 = disableOutput(&handlerPWM_2);
-			GPIO_WritePin_Afopt (&handlerEn2PinC11,RESET);
-
-
-		}else{
-			__NOP();
-		}
-
-
-
-		stopTimer(&handlerTIM2_vel);
-		enableChangePWM = RESET;
-
-
 
 	}else if (strcmp(cmd, "gyro") == 0){
 
@@ -985,7 +515,7 @@ double distanceM1 (void){
 
 	double u_1;
 
-	u_1 = M_PI * (51.45) * handlerMotor1.configM1.counts_M1/ (72) ;
+	u_1 = M_PI * (51.45) * 10/ (72) ;
 
 	return u_1;
 }
@@ -994,7 +524,7 @@ double distanceM2 (void){
 
 	double u_2;
 
-	u_2 = M_PI * (51.70) * handlerMotor2.configM2.counts_M2/ (72) ;
+	u_2 = M_PI * (51.70) * 10/ (72) ;
 
 	return u_2;
 }
@@ -1036,56 +566,16 @@ void BasicTimer2_Callback(void){
 //Interrupciones de Exti
 void callback_extInt1(void){
 
-	handlerMotor1.configM1.counts_M1++;
 
 }
 
 void callback_extInt3(void){
 
-	handlerMotor2.configM2.counts_M2++;
+
 }
 
 
 //Definicion de funciones varias
-
-// Freno de motores
-void breakMotor(void){
-
-	//Se pregunta cual motor se quiere apagar
-
-	if (flagPWM_1){
-
-		//Se apagael motor 1
-		flagPWM_1 = disableOutput(&handlerPWM_1);
-		GPIO_WritePin_Afopt (&handlerEn1PinC10,RESET);
-
-
-	}else{
-
-		__NOP();
-
-	}
-
-
-
-	if (flagPWM_2){
-
-		//Se apaga el motor 2
-		flagPWM_2 = disableOutput(&handlerPWM_2);
-		GPIO_WritePin_Afopt (&handlerEn2PinC11,RESET);
-
-
-	}else{
-		__NOP();
-	}
-
-
-
-	stopTimer(&handlerTIM2_vel);
-	enableChangePWM = RESET;
-
-
-}
 
 
 // Calibracion Gyros:

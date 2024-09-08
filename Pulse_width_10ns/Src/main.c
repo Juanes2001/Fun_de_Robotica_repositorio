@@ -78,7 +78,7 @@ char userMsg[64];
 char bufferMsg[64];
 
 //Contador
-uint8_t counter = 50;
+double counter = 0;
 
 int main(void)
 {
@@ -98,7 +98,9 @@ int main(void)
 				if (rxData == '+'){
 
 					if (counter < 100){
-					counter+= 1;
+					counter+= 0.2;
+					}else{
+						counter = 100;
 					}
 					updateDuttyCycle(&handlerPWM_pulse_10ns, counter);
 					rxData = '\0';
@@ -106,7 +108,9 @@ int main(void)
 				}else if (rxData == '-'){
 
 					if (counter > 0){
-						counter-= 1;
+						counter-= 0.2;
+					}else{
+						counter = 0;
 					}
 					updateDuttyCycle(&handlerPWM_pulse_10ns, counter);
 					rxData = '\0';
@@ -120,8 +124,8 @@ void inSystem (void){
 
 
 	// Activamos la maxima velocidad del microcontrolador
-	show_MaxFreq(MCO2,5); // Sale por el pin A8
-	RCC_enableMaxFrequencies(RCC_20MHz);
+//	show_MaxFreq(MCO2,5); // Sale por el pin A8
+	RCC_enableMaxFrequencies(RCC_100MHz);
 
 	//Config del pin A8 salida de la velocidad del micro
 
@@ -164,7 +168,8 @@ void inSystem (void){
 
 	handlerPWM_pulse_10ns.ptrTIMx            = TIM1;
 	handlerPWM_pulse_10ns.config.channel     = PWM_CHANNEL_1;
-	handlerPWM_pulse_10ns.config.duttyCicle  = 50;
+	handlerPWM_pulse_10ns.config.duttyCicle  = 1;
+	counter = handlerPWM_pulse_10ns.config.duttyCicle;
 	handlerPWM_pulse_10ns.config.periodo     = 10000; // se maneja 100kHz por testeo
 	handlerPWM_pulse_10ns.config.prescaler   = PWM_SPEED_100MHz_10ns;
 	handlerPWM_pulse_10ns.config.polarity    = PWM_DISABLE_POLARITY;

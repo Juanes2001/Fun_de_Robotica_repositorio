@@ -59,7 +59,7 @@ typedef enum {
 #define STACK_SIZE 200
 
 // Velocidad del MCU
-uint32_t SystemCoreClock = 100000000;
+//uint32_t SystemCoreClock = 100000000;
 
 // Definicion de la variable xReturned donde se almacenara el estado de todas las tareas creadas
 BaseType_t xReturned;
@@ -95,7 +95,7 @@ int extract_command (command_t *cmd);
 
 //Algunos mensajes String necesarios para la comunicacion
 const char *msg_invalid = "\n ////Invalid option /////\n";
-const char *msg_option_0= "\n------ Selected Option - 0 ------- \n";
+const char *msg_option_0= "\n------ Selected Option - sGo ------- \n";
 const char *msg_option_1= "\n------ Selected Option - 1 ------- \n";
 const char *msg_option_2= "\n------ Selected Option - 2 ------- \n";
 const char *msg_option_n= "\n------ Option out of range ------- \n";
@@ -235,7 +235,7 @@ void inSystem (void){
 	//Descripcion de la configuracion
 
 	// Activamos la maxima velocidad del microcontrolador
-	RCC_enableMaxFrequencies();
+	RCC_enableMaxFrequencies(RCC_100MHz);
 
 //	//BLINKY LED
 	handlerPinA5.pGPIOx = GPIOA;
@@ -447,14 +447,6 @@ void process_command (command_t *cmd){
 		case sMainMenu:{
 			//Notificamos a la tarea respectiva
 			xTaskNotify(xHandleTask_Menu,(uint32_t)cmd, eSetValueWithOverwrite);
-			break;
-		}case sLedEffect:{
-			//Notificamos a la tarea respectiva
-//			xTaskNotify(xHandleTask_Led,(uint32_t)cmd, eSetValueWithOverwrite);
-			break;
-		}case sRtcMenu:{
-			//Notificamos a la tarea respectiva
-//			xTaskNotify(xHandleTask_Rtc,(uint32_t)cmd, eSetValueWithOverwrite);
 			break;
 		}
 		default:{

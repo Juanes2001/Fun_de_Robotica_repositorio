@@ -5,15 +5,15 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../Src/main4.c \
+../Src/main2.c \
 ../Src/syscalls.c 
 
 OBJS += \
-./Src/main4.o \
+./Src/main2.o \
 ./Src/syscalls.o 
 
 C_DEPS += \
-./Src/main4.d \
+./Src/main2.d \
 ./Src/syscalls.d 
 
 
@@ -24,7 +24,7 @@ Src/%.o Src/%.su: ../Src/%.c Src/subdir.mk
 clean: clean-Src
 
 clean-Src:
-	-$(RM) ./Src/main4.d ./Src/main4.o ./Src/main4.su ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su
+	-$(RM) ./Src/main2.d ./Src/main2.o ./Src/main2.su ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su
 
 .PHONY: clean-Src
 

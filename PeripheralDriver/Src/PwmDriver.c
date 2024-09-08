@@ -311,7 +311,7 @@ void setFrequency(PWM_Handler_t *ptrPwmHandler){
 		ptrPwmHandler->ptrTIMx->ARR = periodo - 1;
 
 	}else{
-		periodo = ptrPwmHandler->config.periodo / 10;  //Se tiene el caso mas minimo posible, donde el contador cuenta cada 10 nanosegundos
+		periodo = ptrPwmHandler->config.periodo / 20;  //Se tiene el caso mas minimo posible, donde el contador cuenta cada 10 nanosegundos
 
 		ptrPwmHandler->ptrTIMx->ARR = periodo - 1;
 	}
