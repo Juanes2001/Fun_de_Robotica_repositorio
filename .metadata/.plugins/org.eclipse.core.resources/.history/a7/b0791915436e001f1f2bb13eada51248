@@ -40,7 +40,7 @@
 // Definicion de algunas estructuras, con estas podemos almacenar el estado que queremos entrar dependiendo del comando que se seleccione
 typedef struct{
 	uint8_t payload[10];
-	int functionType;
+	uint8_t functionType;
 
 }command_t;
 
@@ -84,7 +84,6 @@ TaskHandle_t xHandleTask_Print    = NULL; // Handler de la tarea dE PRINT
 TaskHandle_t xHandleTask_Commands = NULL; // Handler de la tarea de Comandos
 TaskHandle_t xHandleTask_Stop     = NULL; // Handler de la tarea de Stop
 TaskHandle_t xHandleTask_Go       = NULL; // Handler de la tarea de Go
-TaskHandle_t xHandleTask_PID      = NULL; // Handler de la tarea de PID
 
 //Colas
 QueueHandle_t xQueue_Print;
@@ -285,9 +284,9 @@ int main(void)
 
 	 configASSERT( xReturned == pdPASS );// Nos aseguramos de que se creo la tarea de una forma correcta
 
-	 /////////////////////////////////TAREA DE PID//////////////////////////////////////
+	 /////////////////////////////////TAREA DE GO//////////////////////////////////////
 
-	xReturned = xTaskCreate(vTask_PID,"Task-PID",STACK_SIZE,NULL,3,&xHandleTask_PID );
+	xReturned = xTaskCreate(vTask_Go,"Task-Go",STACK_SIZE,NULL,3,&xHandleTask_Go );
 
 	 configASSERT( xReturned == pdPASS );// Nos aseguramos de que se creo la tarea de una forma correcta
 
@@ -631,6 +630,7 @@ void vTask_Menu( void * pvParameters ){
 
 	uint32_t cmd_addr;
 	command_t *cmd;
+	int option;
 
 	const char* msg_menu = "==================================\n"
 						   "|               MENU             |\n"
@@ -647,7 +647,9 @@ void vTask_Menu( void * pvParameters ){
 		cmd = (command_t *) cmd_addr;
 
 		// El comando recibido solo tener el largo de 1 caracter
-		if(cmd->functionType != -1){
+		if(){
+			// transformando un ASCII a un numero entero
+			option = cmd->payload[0]-48;
 
 			switch (cmd->functionType) {
 				case 1:{
@@ -661,7 +663,7 @@ void vTask_Menu( void * pvParameters ){
 
 
 					break;
-				}case 2:{
+				}case 1:{
 
 					//Envia a imprimir en la consola lo que se debe mostrar en el menu
 					xQueueSend(xQueue_Print,&msg_option_1,portMAX_DELAY);
@@ -672,7 +674,7 @@ void vTask_Menu( void * pvParameters ){
 
 
 					break;
-				}case 3:{
+				}case 2:{
 					//Envia a imprimir en la consola lo que se debe mostrar en el menu
 					xQueueSend(xQueue_Print,&msg_option_2,portMAX_DELAY);
 
@@ -691,11 +693,13 @@ void vTask_Menu( void * pvParameters ){
 				}
 			}
 
-		}else{
+		}
+		else{
 			xQueueSend(xQueue_Print, &msg_invalid,portMAX_DELAY);
 			//Aca se deberia notificar cambiar la variable next_state y notificar
 			next_state = sMainMenu;
 			xTaskNotify(xHandleTask_Menu,0,eNoAction);
+
 		}
 
 		// La tarea vuelve a quedar en un estado de espera por un tiempo indefinido
@@ -827,8 +831,6 @@ int extract_command (command_t *cmd){
 
 	if (strcmp(function, "Go") == 0){
 			cmd->functionType = 1;
-	}else{
-		cmd->functionType = -1;
 	}
 
 	return 0;

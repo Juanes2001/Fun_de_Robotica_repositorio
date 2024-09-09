@@ -661,7 +661,7 @@ void vTask_Menu( void * pvParameters ){
 
 
 					break;
-				}case 2:{
+				}case 1:{
 
 					//Envia a imprimir en la consola lo que se debe mostrar en el menu
 					xQueueSend(xQueue_Print,&msg_option_1,portMAX_DELAY);
@@ -672,7 +672,7 @@ void vTask_Menu( void * pvParameters ){
 
 
 					break;
-				}case 3:{
+				}case 2:{
 					//Envia a imprimir en la consola lo que se debe mostrar en el menu
 					xQueueSend(xQueue_Print,&msg_option_2,portMAX_DELAY);
 

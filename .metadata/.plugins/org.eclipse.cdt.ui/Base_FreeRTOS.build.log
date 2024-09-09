@@ -1,66 +1,53 @@
-19:08:32 **** Incremental Build of configuration Debug for project Base_FreeRTOS ****
+19:37:08 **** Incremental Build of configuration Debug for project Base_FreeRTOS ****
 make -j12 all 
 arm-none-eabi-gcc "../Src/main2.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DNUCLEO_F411RE -DSTM32 -DSTM32F4 -DSTM32F411RETx -DSTM32F411xE=1 -c -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/FreeRTOS/include" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/SEGGER/Config" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/SEGGER/OS" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/SEGGER/SEGGER" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/Inc" -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Src/main2.d" -MT"Src/main2.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/main2.o"
-../Src/main2.c: In function 'vTask_Menu':
-../Src/main2.c:658:6: error: expected expression before ')' token
-  658 |   if(){
-      |      ^
-../Src/main2.c:662:12: error: switch quantity not an integer
-  662 |    switch (function) {
-      |            ^~~~~~~~
-../Src/main2.c:663:5: error: case label does not reduce to an integer constant
-  663 |     case "Go":{
-      |     ^~~~
-../Src/main2.c:641:6: warning: variable 'option' set but not used [-Wunused-but-set-variable]
-  641 |  int option;
-      |      ^~~~~~
 In file included from ../Src/main2.c:13:
 ../Src/main2.c: In function 'process_command':
 /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/FreeRTOS/include/task.h:2038:100: error: expected expression before ',' token
  2038 |     xTaskGenericNotify( ( xTaskToNotify ), ( tskDEFAULT_INDEX_TO_NOTIFY ), ( ulValue ), ( eAction ), NULL )
       |                                                                                                    ^
-../Src/main2.c:793:3: note: in expansion of macro 'xTaskNotify'
-  793 |   xTaskNotify(xHandleTask_Stop,0, eNotifyAction);
+../Src/main2.c:795:3: note: in expansion of macro 'xTaskNotify'
+  795 |   xTaskNotify(xHandleTask_Stop,0, eNotifyAction);
       |   ^~~~~~~~~~~
 ../Src/main2.c: In function 'status_motor':
-../Src/main2.c:1039:3: warning: implicit declaration of function 'statusInOutPWM' [-Wimplicit-function-declaration]
- 1039 |   statusInOutPWM(handler_Motor_L.phandlerPWM, CHANNEL_ENABLE);
+../Src/main2.c:1048:3: warning: implicit declaration of function 'statusInOutPWM' [-Wimplicit-function-declaration]
+ 1048 |   statusInOutPWM(handler_Motor_L.phandlerPWM, CHANNEL_ENABLE);
       |   ^~~~~~~~~~~~~~
-../Src/main2.c:1039:18: error: 'handler_Motor_L' undeclared (first use in this function); did you mean 'handler_Motor_2'?
- 1039 |   statusInOutPWM(handler_Motor_L.phandlerPWM, CHANNEL_ENABLE);
+../Src/main2.c:1048:18: error: 'handler_Motor_L' undeclared (first use in this function); did you mean 'handler_Motor_2'?
+ 1048 |   statusInOutPWM(handler_Motor_L.phandlerPWM, CHANNEL_ENABLE);
       |                  ^~~~~~~~~~~~~~~
       |                  handler_Motor_2
-../Src/main2.c:1039:18: note: each undeclared identifier is reported only once for each function it appears in
-../Src/main2.c:1039:47: error: 'CHANNEL_ENABLE' undeclared (first use in this function)
- 1039 |   statusInOutPWM(handler_Motor_L.phandlerPWM, CHANNEL_ENABLE);
+../Src/main2.c:1048:18: note: each undeclared identifier is reported only once for each function it appears in
+../Src/main2.c:1048:47: error: 'CHANNEL_ENABLE' undeclared (first use in this function)
+ 1048 |   statusInOutPWM(handler_Motor_L.phandlerPWM, CHANNEL_ENABLE);
       |                                               ^~~~~~~~~~~~~~
-../Src/main2.c:1040:18: error: 'handler_Motor_R' undeclared (first use in this function); did you mean 'handler_Motor_2'?
- 1040 |   statusInOutPWM(handler_Motor_R.phandlerPWM, CHANNEL_ENABLE);
+../Src/main2.c:1049:18: error: 'handler_Motor_R' undeclared (first use in this function); did you mean 'handler_Motor_2'?
+ 1049 |   statusInOutPWM(handler_Motor_R.phandlerPWM, CHANNEL_ENABLE);
       |                  ^~~~~~~~~~~~~~~
       |                  handler_Motor_2
-../Src/main2.c:1041:3: warning: implicit declaration of function 'GPIO_writePin'; did you mean 'GPIO_WritePin'? [-Wimplicit-function-declaration]
- 1041 |   GPIO_writePin(handler_Motor_L.phandlerGPIOIN, (handler_Motor_L.configMotor.dir)&SET);
+../Src/main2.c:1050:3: warning: implicit declaration of function 'GPIO_writePin'; did you mean 'GPIO_WritePin'? [-Wimplicit-function-declaration]
+ 1050 |   GPIO_writePin(handler_Motor_L.phandlerGPIOIN, (handler_Motor_L.configMotor.dir)&SET);
       |   ^~~~~~~~~~~~~
       |   GPIO_WritePin
-../Src/main2.c:1046:3: warning: implicit declaration of function 'statusiInterruptionTimer' [-Wimplicit-function-declaration]
- 1046 |   statusiInterruptionTimer(&handler_TIMER_Sampling, INTERRUPTION_ENABLE);
+../Src/main2.c:1055:3: warning: implicit declaration of function 'statusiInterruptionTimer' [-Wimplicit-function-declaration]
+ 1055 |   statusiInterruptionTimer(&handler_TIMER_Sampling, INTERRUPTION_ENABLE);
       |   ^~~~~~~~~~~~~~~~~~~~~~~~
-../Src/main2.c:1046:29: error: 'handler_TIMER_Sampling' undeclared (first use in this function)
- 1046 |   statusiInterruptionTimer(&handler_TIMER_Sampling, INTERRUPTION_ENABLE);
+../Src/main2.c:1055:29: error: 'handler_TIMER_Sampling' undeclared (first use in this function)
+ 1055 |   statusiInterruptionTimer(&handler_TIMER_Sampling, INTERRUPTION_ENABLE);
       |                             ^~~~~~~~~~~~~~~~~~~~~~
-../Src/main2.c:1046:53: error: 'INTERRUPTION_ENABLE' undeclared (first use in this function); did you mean 'USART_INTERRUPT_RX_ENABLE'?
- 1046 |   statusiInterruptionTimer(&handler_TIMER_Sampling, INTERRUPTION_ENABLE);
+../Src/main2.c:1055:53: error: 'INTERRUPTION_ENABLE' undeclared (first use in this function); did you mean 'USART_INTERRUPT_RX_ENABLE'?
+ 1055 |   statusiInterruptionTimer(&handler_TIMER_Sampling, INTERRUPTION_ENABLE);
       |                                                     ^~~~~~~~~~~~~~~~~~~
       |                                                     USART_INTERRUPT_RX_ENABLE
-../Src/main2.c:1051:47: error: 'CHANNEL_DISABLE' undeclared (first use in this function)
- 1051 |   statusInOutPWM(handler_Motor_L.phandlerPWM, CHANNEL_DISABLE);
+../Src/main2.c:1060:47: error: 'CHANNEL_DISABLE' undeclared (first use in this function)
+ 1060 |   statusInOutPWM(handler_Motor_L.phandlerPWM, CHANNEL_DISABLE);
       |                                               ^~~~~~~~~~~~~~~
-../Src/main2.c:1061:53: error: 'INTERRUPTION_DISABLE' undeclared (first use in this function); did you mean 'USART_INTERRUPT_TX_DISABLE'?
- 1061 |   statusiInterruptionTimer(&handler_TIMER_Sampling, INTERRUPTION_DISABLE);
+../Src/main2.c:1070:53: error: 'INTERRUPTION_DISABLE' undeclared (first use in this function); did you mean 'USART_INTERRUPT_TX_DISABLE'?
+ 1070 |   statusiInterruptionTimer(&handler_TIMER_Sampling, INTERRUPTION_DISABLE);
       |                                                     ^~~~~~~~~~~~~~~~~~~~
       |                                                     USART_INTERRUPT_TX_DISABLE
 make: *** [Src/subdir.mk:22: Src/main2.o] Error 1
 "make -j12 all" terminated with exit code 2. Build might be incomplete.
 
-19:08:32 Build Failed. 12 errors, 4 warnings. (took 517ms)
+19:37:08 Build Failed. 9 errors, 3 warnings. (took 498ms)
 

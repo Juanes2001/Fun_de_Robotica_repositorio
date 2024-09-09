@@ -647,7 +647,7 @@ void vTask_Menu( void * pvParameters ){
 		cmd = (command_t *) cmd_addr;
 
 		// El comando recibido solo tener el largo de 1 caracter
-		if(cmd->functionType != -1){
+		if(){
 
 			switch (cmd->functionType) {
 				case 1:{
@@ -661,7 +661,7 @@ void vTask_Menu( void * pvParameters ){
 
 
 					break;
-				}case 2:{
+				}case 1:{
 
 					//Envia a imprimir en la consola lo que se debe mostrar en el menu
 					xQueueSend(xQueue_Print,&msg_option_1,portMAX_DELAY);
@@ -672,7 +672,7 @@ void vTask_Menu( void * pvParameters ){
 
 
 					break;
-				}case 3:{
+				}case 2:{
 					//Envia a imprimir en la consola lo que se debe mostrar en el menu
 					xQueueSend(xQueue_Print,&msg_option_2,portMAX_DELAY);
 
@@ -691,11 +691,13 @@ void vTask_Menu( void * pvParameters ){
 				}
 			}
 
-		}else{
+		}
+		else{
 			xQueueSend(xQueue_Print, &msg_invalid,portMAX_DELAY);
 			//Aca se deberia notificar cambiar la variable next_state y notificar
 			next_state = sMainMenu;
 			xTaskNotify(xHandleTask_Menu,0,eNoAction);
+
 		}
 
 		// La tarea vuelve a quedar en un estado de espera por un tiempo indefinido
