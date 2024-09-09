@@ -1,4 +1,4 @@
-10:43:34 **** Incremental Build of configuration Debug for project PeripheralDriver ****
+16:27:21 **** Incremental Build of configuration Debug for project PeripheralDriver ****
 make clean all 
 rm -rf ./Src/STMpointCsSources/system_stm32f4xx.d ./Src/STMpointCsSources/system_stm32f4xx.o ./Src/STMpointCsSources/system_stm32f4xx.su
 rm -rf ./Src/AdcDriver.d ./Src/AdcDriver.o ./Src/AdcDriver.su ./Src/Astar.d ./Src/Astar.o ./Src/Astar.su ./Src/BasicTimer.d ./Src/BasicTimer.o ./Src/BasicTimer.su ./Src/CaptureFreqDriver.d ./Src/CaptureFreqDriver.o ./Src/CaptureFreqDriver.su ./Src/EXTIDriver.d ./Src/EXTIDriver.o ./Src/EXTIDriver.su ./Src/FPUDriver.d ./Src/FPUDriver.o ./Src/FPUDriver.su ./Src/GPIOxDriver.d ./Src/GPIOxDriver.o ./Src/GPIOxDriver.su ./Src/I2CDriver.d ./Src/I2CDriver.o ./Src/I2CDriver.su ./Src/MPUAccel.d ./Src/MPUAccel.o ./Src/MPUAccel.su ./Src/MotorsDriver.d ./Src/MotorsDriver.o ./Src/MotorsDriver.su ./Src/OLEDDriver.d ./Src/OLEDDriver.o ./Src/OLEDDriver.su ./Src/PIDDriver.d ./Src/PIDDriver.o ./Src/PIDDriver.su ./Src/PosRobt.d ./Src/PosRobt.o ./Src/PosRobt.su ./Src/PwmDriver.d ./Src/PwmDriver.o ./Src/PwmDriver.su ./Src/RCCHunMHz.d ./Src/RCCHunMHz.o ./Src/RCCHunMHz.su ./Src/RTCDriver.d ./Src/RTCDriver.o ./Src/RTCDriver.su ./Src/SPIDriver.d ./Src/SPIDriver.o ./Src/SPIDriver.su ./Src/SysTickDriver.d ./Src/SysTickDriver.o ./Src/SysTickDriver.su ./Src/USARTxDriver.d ./Src/USARTxDriver.o ./Src/USARTxDriver.su ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su ./Src/sysmem.d ./Src/sysmem.o ./Src/sysmem.su
@@ -31,5 +31,5 @@ arm-none-eabi-ar: creating libPeripheralDriver.a
 Finished building target: libPeripheralDriver.a
  
 
-10:43:37 Build Finished. 0 errors, 0 warnings. (took 2s.712ms)
+16:27:23 Build Finished. 0 errors, 0 warnings. (took 2s.562ms)
 

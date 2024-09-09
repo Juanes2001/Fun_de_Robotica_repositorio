@@ -184,6 +184,34 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 	__enable_irq();
 }
 
+void TIM_SetPriority (BasicTimer_Handler_t *ptrBTimerHandler, uint8_t newPriority){
+
+	__disable_irq();
+
+	if(ptrBTimerHandler->ptrTIMx == TIM2){
+		// Activando en NVIC para la interrupción del TIM2
+		NVIC_SetPriority(TIM2_IRQn, newPriority);
+	}
+	else if(ptrBTimerHandler->ptrTIMx == TIM3){
+		// Activando en NVIC para la interrupción del TIM3
+		NVIC_SetPriority(TIM3_IRQn, newPriority);
+	}
+	else if(ptrBTimerHandler->ptrTIMx == TIM4){
+		// Activando en NVIC para la interrupción del TIM4
+		NVIC_SetPriority(TIM4_IRQn, newPriority);
+	}
+	else if(ptrBTimerHandler->ptrTIMx == TIM5){
+		// Activando en NVIC para la interrupción del TIM5
+		NVIC_SetPriority(TIM5_IRQn, newPriority);
+	}
+	else{
+		__NOP();
+	}
+
+	__enable_irq();
+
+}
+
 __attribute__((weak)) void BasicTimer1_Callback(void){
 	  /* NOTE : This function should not be modified, when the callback is needed,
 	            the BasicTimerX_Callback could be implemented in the main file

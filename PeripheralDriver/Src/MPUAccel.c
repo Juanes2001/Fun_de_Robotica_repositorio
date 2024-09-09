@@ -533,7 +533,7 @@ float readGyro_Z  (MPUAccel_Config *ptrMPUAccel){
 	switch (ptrMPUAccel->fullScaleGYRO){
 		case GYRO_250 :{
 
-			GYROZ_R =   GYROZ / (double) GYRO_250_SENS ;
+			GYROZ_R = GYROZ / (double) GYRO_250_SENS ;
 
 			break;
 		}case GYRO_500 :{
@@ -560,5 +560,6 @@ float readGyro_Z  (MPUAccel_Config *ptrMPUAccel){
 	return GYROZ_R;
 
 }
+
 
 

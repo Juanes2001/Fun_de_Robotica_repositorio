@@ -18,8 +18,8 @@ typedef struct
 {
 	float    u; 			//Respuesta de salida
 	float    e0;			//Error
-	float    sum; 			//Suma integral
-	float    ep;   			//Error previo
+	float    e_int; 			//Suma integral
+	float    e_prev;   			//Error previo
 	float    kp,ki,kd;      // Constantes PID
 }PID_Parameters_t;
 
@@ -51,7 +51,8 @@ typedef struct
 	Config_Motor_t configMotor;            //Configuracion del motor
 	GPIO_Handler_t *phandlerGPIOIN;        //Handler para el el pin del IN del driver del motor
 	GPIO_Handler_t *phandlerGPIOEN;        //Handler para el el pin del EN del driver del motor
-	PWM_Handler_t *phandlerPWM;            //Handler del pwm para el driver del motor
+	PWM_Handler_t  *phandlerPWM;            //Handler del pwm para el driver del motor
+
 }Motor_Handler_t;
 
 //Definimos las cabeceras de las funciones

@@ -1,0 +1,579 @@
+/*
+ * MPUAccel.c
+ *
+ *  Created on: 26/11/2022
+ *      Author: ALEJANDRA MARIA
+ */
+#include "stdlib.h"
+#include "MPUAccel.h"
+#include "I2CDriver.h"
+#include "GPIOxDriver.h"
+
+
+void configMPUAccel (MPUAccel_Config *ptrMPUAccel){
+
+	uint8_t rdy  = 0;
+	uint8_t byte = 0;
+	// Paso 1 se configuran los pines GPIO y el perisferico I2C respectivo para poder configurar a partir del
+	//MCU el sensor, se tiene en cuenta tanto la lectura del pin SDA como el SCL
+	GPIO_Config(ptrMPUAccel->ptrGPIOhandlerSDA);
+	GPIO_Config(ptrMPUAccel->ptrGPIOhandlerSCL);
+	i2c_config(ptrMPUAccel->ptrI2Chandler);
+
+
+	// verificamos que el MPU se comunica con exito
+	while(!rdy){
+
+		rdy = WHOIAM(ptrMPUAccel);
+	}
+
+	//Paso 2, Colocamos en 0 el bit 7 del PM1, (registro 0x6B) ya que sin esto no se puede modificar ningun registro.
+	byte = readData(ptrMPUAccel, 0x6B);
+	byte &=  ~byte;
+	writeData(ptrMPUAccel, 0x6B, byte );
+	byte = readData(ptrMPUAccel, 0x6B);
+
+	// los siguientes pasos se activan dentro del mismo switch case ya que se requiere saber cual cantidad se desea medir
+	//Paso 3,  configuramos el Full Rage de la cantidad pedida en el registro 0x1B y 0x1C para GYRO y Accel
+	// respectivamente
+
+
+		//Preguntamos por el range requerido por el usuario de aceleracion, puede ser +-2g,4g,8g,16g (# X la aceleracion
+		//de la gravedad)
+		byte = readData(ptrMPUAccel, 0x1C);
+		byte &= ~(0b00011000) ;
+		switch (ptrMPUAccel->fullScaleACCEL){
+			case ACCEL_2G :{
+
+				byte |= (ACCEL_2G << 3);
+				writeData(ptrMPUAccel, 0x1C, byte);
+
+				break;
+			}case ACCEL_4G :{
+
+				byte |= (ACCEL_4G << 3);
+				writeData(ptrMPUAccel, 0x1C, byte);
+
+				break;
+			}case ACCEL_8G :{
+
+				byte |= (ACCEL_8G << 3);
+				writeData(ptrMPUAccel, 0x1C, byte);
+
+				break;
+			}case ACCEL_16G :{
+
+				byte |= (ACCEL_16G << 3);
+				writeData(ptrMPUAccel, 0x1C, byte);
+
+				break;
+			}default:{
+				break;
+			}
+
+		}
+		byte = readData(ptrMPUAccel, 0x1C);
+
+		//Preguntamos por el Range del giroscopio pedido por el usuario, puede ser +-250, +-500, +-1000, +-2000 (°/segundo)
+		byte = readData(ptrMPUAccel, 0x1B);
+		byte &= ~(0b00011000) ;
+		switch (ptrMPUAccel->fullScaleGYRO){
+			case GYRO_250 :{
+
+				byte |= (GYRO_250 << 3);
+				writeData(ptrMPUAccel, 0x1B, byte);
+
+				break;
+			}case GYRO_500 :{
+
+				byte |= (GYRO_500 << 3);
+				writeData(ptrMPUAccel, 0x1B, byte);
+
+				break;
+			}case GYRO_1000 :{
+
+				byte |= (GYRO_1000 << 3);
+				writeData(ptrMPUAccel, 0x1B, byte);
+
+				break;
+			}case GYRO_2000 :{
+
+				byte |= (GYRO_2000 << 3);
+				writeData(ptrMPUAccel, 0x1B, byte);
+
+				break;
+			}default:{
+				break;
+			}
+
+		}
+		byte = readData(ptrMPUAccel, 0x1B);
+
+
+}
+
+
+
+// En esta funcion escribimos la secuencia para escritura propia del MCU
+void writeData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t data){
+	//Limpiamos la bandera AF por si antes se levanto
+	ptrMPUAccel->ptrI2Chandler->ptrI2Cx->SR1 &= ~(I2C_SR1_AF);
+
+	//Comenzamos la transacción
+	i2c_startTransaction (ptrMPUAccel->ptrI2Chandler);
+
+	//Mandamos el Address correspondiente y el bit escribir
+	i2c_sendSlaveAddressRW(ptrMPUAccel->ptrI2Chandler, ptrMPUAccel->ptrI2Chandler->I2C_Config.slaveAddress, I2C_WRITE_DATA);
+
+	// Dentro de la funcion anterior ya esta la espera respectiva para el ACK que debe mandar el Slave
+	i2c_sendMemoryAddress(ptrMPUAccel->ptrI2Chandler, RA);
+
+	// Esperamos el ACK que debe de mandar el Slave
+	while (ptrMPUAccel->ptrI2Chandler->ptrI2Cx->SR1 & I2C_SR1_AF){
+		__NOP();
+	}
+
+	i2c_sendDataByte(ptrMPUAccel->ptrI2Chandler, data);
+
+	// Esperamos el ACK que debe de mandar el Slave
+	while (ptrMPUAccel->ptrI2Chandler->ptrI2Cx->SR1 & I2C_SR1_AF){
+		__NOP();
+	}
+
+	i2c_stopTransaction(ptrMPUAccel->ptrI2Chandler);
+
+
+
+}
+
+// En esta funcion escribimos la secuencia para lectura propia del MCU
+uint8_t readData (MPUAccel_Config *ptrMPUAccel, uint8_t RA){
+
+	/* 0. Creamos una variable auxiliar para recribir el dato que leemos*/
+	uint8_t auxRead = 0;
+
+	//Limpiamos la bandera AF por si antes se levanto
+	ptrMPUAccel->ptrI2Chandler->ptrI2Cx->SR1 &= ~(I2C_SR1_AF);
+
+	//Comenzamos la transacción
+	i2c_startTransaction (ptrMPUAccel->ptrI2Chandler);
+
+	//Mandamos el Address correspondiente y el bit escribir
+	i2c_sendSlaveAddressRW(ptrMPUAccel->ptrI2Chandler, ptrMPUAccel->ptrI2Chandler->I2C_Config.slaveAddress, I2C_WRITE_DATA);
+
+	// Dentro de la funcion anterior ya esta la espera respectiva para el ACK que debe mandar el Slave
+	i2c_sendMemoryAddress(ptrMPUAccel->ptrI2Chandler, RA);
+
+	// Esperamos el ACK que debe de mandar el Slave
+	while (ptrMPUAccel->ptrI2Chandler->ptrI2Cx->SR1 & I2C_SR1_AF){
+		__NOP();
+	}
+
+	// Comenzamos el reestar
+	i2c_reStartTransaction(ptrMPUAccel->ptrI2Chandler);
+
+	// Ya dentro de la anterior funcion esta la espera a que comience el bit de start
+	//Volvemos a mandar el Address con el bit de read (1)
+	i2c_sendSlaveAddressRW(ptrMPUAccel->ptrI2Chandler, ptrMPUAccel->ptrI2Chandler->I2C_Config.slaveAddress, I2C_READ_DATA);
+
+	// Mandamos el noAcknowledge despues de recibir el dato respectivo
+	i2c_sendNoAck(ptrMPUAccel->ptrI2Chandler);
+
+	// Paramos la transacción
+	i2c_stopTransaction(ptrMPUAccel->ptrI2Chandler);
+
+	auxRead = i2c_readDataByte(ptrMPUAccel->ptrI2Chandler);
+
+	return auxRead;
+}
+
+
+
+int* readContinuousData (MPUAccel_Config *ptrMPUAccel, uint8_t RA, uint8_t numbR_to_Read){
+
+	/* 0. Creamos una variable auxiliar para recribir el dato que leemos*/
+	int *auxRead = (int *) malloc (numbR_to_Read * sizeof(int));
+
+	//Limpiamos la bandera AF por si antes se levanto
+	ptrMPUAccel->ptrI2Chandler->ptrI2Cx->SR1 &= ~(I2C_SR1_AF);
+
+	//Comenzamos la transacción
+	i2c_startTransaction (ptrMPUAccel->ptrI2Chandler);
+
+	//Mandamos el Address correspondiente y el bit escribir
+	i2c_sendSlaveAddressRW(ptrMPUAccel->ptrI2Chandler, ptrMPUAccel->ptrI2Chandler->I2C_Config.slaveAddress, I2C_WRITE_DATA);
+
+	// Dentro de la funcion anterior ya esta la espera respectiva para el ACK que debe mandar el Slave
+	i2c_sendMemoryAddress(ptrMPUAccel->ptrI2Chandler, RA);
+
+	// Esperamos el ACK que debe de mandar el Slave
+	while (ptrMPUAccel->ptrI2Chandler->ptrI2Cx->SR1 & I2C_SR1_AF){
+		__NOP();
+	}
+
+	// Comenzamos el reestar
+	i2c_reStartTransaction(ptrMPUAccel->ptrI2Chandler);
+
+	// Ya dentro de la anterior funcion esta la espera a que comience el bit de start
+	//Volvemos a mandar el Address con el bit de read (1)
+	i2c_sendSlaveAddressRW(ptrMPUAccel->ptrI2Chandler, ptrMPUAccel->ptrI2Chandler->I2C_Config.slaveAddress, I2C_READ_DATA);
+
+	for(uint8_t i = 0 ; i < numbR_to_Read; i++){
+
+		// Mandamos un ACK para leer el siguiente registro
+		i2c_sendAck (ptrMPUAccel->ptrI2Chandler);
+		//Guardamos en un buffer los datos que vamos leyendo por cada ACK que mandamos
+		auxRead [i] = i2c_readDataByte(ptrMPUAccel->ptrI2Chandler);
+
+	}
+
+	// Mandamos el noAcknowledge despues de recibir el dato respectivo
+	i2c_sendNoAck(ptrMPUAccel->ptrI2Chandler);
+
+	// Paramos la transacción
+	i2c_stopTransaction(ptrMPUAccel->ptrI2Chandler);
+
+
+	return auxRead;
+
+
+}
+
+//Esta funcion permite verificar comunicacion correcta con el MPU
+uint8_t WHOIAM (MPUAccel_Config *ptrMPUAccel){
+
+	uint8_t whoami = 0;
+	uint8_t rdy    = 0;
+
+	//leemos el registro 0x75 correspondiente
+	whoami = readData(ptrMPUAccel, 0x75);
+
+	// verificamos la transacción
+
+	whoami &= ~(129);
+
+	rdy = (ADDRESS_DOWN >> 1) && (whoami >> 1);
+
+	return rdy;
+
+}
+
+
+// EN las siguientes 6 funciones llamamos los datos dentro de los registros respectivos para poder tener los datos de
+//Aceleracion y velocidad angular
+
+float readAccel_X (MPUAccel_Config *ptrMPUAccel){
+
+	//Creamos las variables donde almacenamos todos los datos
+
+	int16_t AccelX_H  = 0;
+	int16_t AccelX_L  = 0;
+	int16_t    AccelX = 0;
+	double  AccelX_R  = 0;
+
+	// Llamamos los bytes alto y bajo de los registros 0x3B y 0x3C respectivamente para el eje X
+	AccelX_H = readData(ptrMPUAccel, 0x3B);
+	AccelX_L = readData(ptrMPUAccel, 0x3C);
+
+	//Juntamos ambos bytes en un solo numero para tener la lectura completa del ADC;
+	AccelX = (AccelX_H << 8) | (AccelX_L);
+
+	// Como queremos es el dato de cuantas unidades de gravedad hay , entonces dividimos AccelX por la sensibilidad respectiva
+	// Preguntamos que caso de rango se tiene para este caso
+	switch (ptrMPUAccel->fullScaleACCEL){
+		case ACCEL_2G :{
+
+			AccelX_R = AccelX / (double) ACCEL_2G_SENS;
+
+			break;
+		}case ACCEL_4G :{
+
+			AccelX_R = AccelX / (double) ACCEL_4G_SENS;
+
+			break;
+		}case ACCEL_8G :{
+
+			AccelX_R = AccelX / (double) ACCEL_8G_SENS;
+
+			break;
+		}case ACCEL_16G :{
+
+			AccelX_R = AccelX / (double) ACCEL_16G_SENS;
+
+			break;
+		}default:{
+			break;
+		}
+
+	}
+
+	return AccelX_R;
+
+}
+
+
+float readAccel_Y (MPUAccel_Config *ptrMPUAccel){
+
+	//Creamos las variables donde almacenamos todos los datos
+
+	int16_t AccelY_H = 0;
+	int16_t AccelY_L = 0;
+	int16_t    AccelY   = 0;
+	double  AccelY_R   = 0;
+
+	// Llamamos los bytes alto y bajo de los registros 0x3D y 0x3E respectivamente para el eje Y
+	AccelY_H = readData(ptrMPUAccel, 0x3D);
+	AccelY_L = readData(ptrMPUAccel, 0x3E);
+
+	//Juntamos ambos bytes en un solo numero para tener la lectura completa del ADC;
+	AccelY = (AccelY_H << 8) | (AccelY_L);
+
+
+	// Como queremos es el dato de cuantas unidades de gravedad hay , entonces dividimos AccelY por la sensibilidad respectiva
+	// Preguntamos que caso de rango se tiene para este caso
+	switch (ptrMPUAccel->fullScaleACCEL){
+		case ACCEL_2G :{
+
+			AccelY_R = AccelY / (double) ACCEL_2G_SENS;
+
+			break;
+		}case ACCEL_4G :{
+
+			AccelY_R = AccelY / (double) ACCEL_4G_SENS;
+
+			break;
+		}case ACCEL_8G :{
+
+			AccelY_R = AccelY / (double) ACCEL_8G_SENS;
+
+			break;
+		}case ACCEL_16G :{
+
+			AccelY_R = AccelY / (double) ACCEL_16G_SENS;
+
+			break;
+		}default:{
+			break;
+		}
+
+	}
+
+	return AccelY_R;
+
+}
+
+
+float readAccel_Z (MPUAccel_Config *ptrMPUAccel){
+
+	//Creamos las variables donde almacenamos todos los datos
+
+	int16_t AccelZ_H = 0;
+	int16_t AccelZ_L = 0;
+	int16_t    AccelZ   = 0;
+	double  AccelZ_R   = 0;
+
+	// Llamamos los bytes alto y bajo de los registros 0x3F y 0x40 respectivamente para el eje Z
+	AccelZ_H = readData(ptrMPUAccel, 0x3F);
+	AccelZ_L = readData(ptrMPUAccel, 0x40);
+
+	//Juntamos ambos bytes en un solo numero para tener la lectura completa del ADC;
+	AccelZ = (AccelZ_H << 8) | (AccelZ_L);
+
+	// Como queremos es el dato de cuantas unidades de gravedad hay , entonces dividimos Accelz por la sensibilidad respectiva
+	// Preguntamos que caso de rango se tiene para este caso
+	switch (ptrMPUAccel->fullScaleACCEL){
+		case ACCEL_2G :{
+
+			 AccelZ_R = AccelZ / (double) ACCEL_2G_SENS;
+
+			break;
+		}case ACCEL_4G :{
+
+			 AccelZ_R = AccelZ / (double) ACCEL_4G_SENS;
+
+			break;
+		}case ACCEL_8G :{
+
+			 AccelZ_R = AccelZ / (double) ACCEL_8G_SENS;
+
+			break;
+		}case ACCEL_16G :{
+
+			 AccelZ_R = AccelZ / (double) ACCEL_16G_SENS;
+
+			break;
+		}default:{
+			break;
+		}
+
+	}
+
+	return AccelZ_R;
+
+}
+
+
+float readGyro_X  (MPUAccel_Config *ptrMPUAccel){
+
+	//Creamos las variables donde almacenamos todos los datos
+
+	int16_t GYROX_H = 0;
+	int16_t GYROX_L = 0;
+	int16_t   GYROX   = 0;
+	double  GYROX_R   = 0;
+
+	// Llamamos los bytes alto y bajo de los registros 0x43 y 0x44 respectivamente para el eje X
+	GYROX_H = readData(ptrMPUAccel, 0x43);
+	GYROX_L = readData(ptrMPUAccel, 0x44);
+
+	//Juntamos ambos bytes en un solo numero para tener la lectura completa del ADC;
+	GYROX = (GYROX_H << 8) | (GYROX_L);
+
+	// Como queremos es el dato de cuantos dps hay , entonces dividimos GYROX por la sensibilidad respectiva
+	// Preguntamos que caso de rango se tiene para este caso
+	switch (ptrMPUAccel->fullScaleGYRO){
+		case GYRO_250 :{
+
+			GYROX_R = GYROX / (double) GYRO_250_SENS;
+
+			break;
+		}case GYRO_500 :{
+
+			GYROX_R = GYROX / (double) GYRO_500_SENS;
+
+			break;
+		}case GYRO_1000 :{
+
+			GYROX_R = GYROX / (double) GYRO_1000_SENS;
+
+			break;
+		}case GYRO_2000 :{
+
+			GYROX_R = GYROX / (double) GYRO_2000_SENS;
+
+			break;
+		}default:{
+			break;
+		}
+
+	}
+
+	return GYROX_R;
+
+}
+
+
+float readGyro_Y  (MPUAccel_Config *ptrMPUAccel){
+
+	//Creamos las variables donde almacenamos todos los datos
+
+	int16_t GYROY_H = 0;
+	int16_t GYROY_L = 0;
+	int16_t   GYROY   = 0;
+	double  GYROY_R   = 0;
+
+	// Llamamos los bytes alto y bajo de los registros 0x45 y 0x46 respectivamente para el eje Y
+	GYROY_H = readData(ptrMPUAccel, 0x45);
+	GYROY_L = readData(ptrMPUAccel, 0x46);
+
+	//Juntamos ambos bytes en un solo numero para tener la lectura completa del ADC;
+	GYROY = (GYROY_H << 8) | (GYROY_L);
+
+	// Como queremos es el dato de cuantos dps hay , entonces dividimos GYROY por la sensibilidad respectiva
+	// Preguntamos que caso de rango se tiene para este caso
+	switch (ptrMPUAccel->fullScaleGYRO){
+		case GYRO_250 :{
+
+			GYROY_R = GYROY / (double) GYRO_250_SENS;
+
+			break;
+		}case GYRO_500 :{
+
+			GYROY_R = GYROY / (double) GYRO_500_SENS;
+
+			break;
+		}case GYRO_1000 :{
+
+			GYROY_R = GYROY / (double) GYRO_1000_SENS;
+
+			break;
+		}case GYRO_2000 :{
+
+			GYROY_R = GYROY / (double) GYRO_2000_SENS;
+
+			break;
+		}default:{
+			break;
+		}
+
+	}
+
+	return GYROY_R;
+
+}
+
+float readGyro_Z  (MPUAccel_Config *ptrMPUAccel){
+
+	//Creamos las variables donde almacenamos todos los datos
+
+	int16_t  GYROZ_H  = 0;
+	int16_t  GYROZ_L  = 0;
+	int16_t  GYROZ    = 0;
+	double   GYROZ_R   = 0;
+
+	// Llamamos los bytes alto y bajo de los registros 0x47 y 0x48 respectivamente para el eje Z
+	GYROZ_H = readData(ptrMPUAccel, 0x47);
+	GYROZ_L = readData(ptrMPUAccel, 0x48);
+
+	//Juntamos ambos bytes en un solo numero para tener la lectura completa del ADC;
+	GYROZ = (GYROZ_H << 8) | (GYROZ_L);
+
+	// Como queremos es el dato de cuantos dps hay , entonces dividimos GYROZ por la sensibilidad respectiva
+	// Preguntamos que caso de rango se tiene para este caso
+	switch (ptrMPUAccel->fullScaleGYRO){
+		case GYRO_250 :{
+
+			GYROZ_R =   GYROZ / (double) GYRO_250_SENS ;
+
+			break;
+		}case GYRO_500 :{
+
+			GYROZ_R = GYROZ /  (double) GYRO_500_SENS ;
+
+			break;
+		}case GYRO_1000 :{
+
+			GYROZ_R = GYROZ / (double)  GYRO_1000_SENS;
+
+			break;
+		}case GYRO_2000 :{
+
+			GYROZ_R = GYROZ / (double) GYRO_2000_SENS;
+
+			break;
+		}default:{
+			break;
+		}
+
+	}
+
+	return GYROZ_R;
+
+}
+
+
+float getAngle(MPUAccel_Handler_t *ptrMPUAccel, MPUTimerSample_t *timer, float ang_init, uint8_t axis, int16_t offset_Axis)
+{
+	//Lectura velocidad angular
+	float w_Angular= readMPU(ptrMPUAccel, axis, offset_Axis);
+	//Calculo del tiempo trascurrido tras el ultima leida
+	uint64_t time_now = getTicksMs();
+	timer->delta_timer =  time_now - timer->timer_prev;
+	timer->timer_prev = time_now;
+	//Calculo angulo
+	float ang = ang_init + (w_Angular*timer->delta_timer)/1000;
+
+	return ang;
+}
+
+

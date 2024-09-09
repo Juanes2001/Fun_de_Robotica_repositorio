@@ -16,10 +16,8 @@
  ******************************************************************************
  */
 #include <stm32f4xx.h>
-
+//
 #include <stdint.h>
-#include "FreeRTOS.h"
-#include "task.h"
 #include <stdbool.h>
 #include <math.h>
 #include <stdio.h>
@@ -35,6 +33,8 @@
 #include "EXTIDriver.h"
 #include "I2CDriver.h"
 #include "MPUAccel.h"
+#include "MotorsDriver.h"
+#include "PosRobt.h"
 
 /*definicion de variables del sistema*/
 
@@ -624,59 +624,3 @@ float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis){
 
 
 
-
-
-
-
-
-//void vTaskOne( void * pvParameters )
-//{
-//
-//	BaseType_t notify_state ={0};
-//	uint8_t flag = RESET;
-//
-//   while(1){
-//	   //printf("%s\n",((char*) pvParameters));
-//	   if (notify_state == pdTRUE){
-//		   flag = !flag;
-//   	   //vTaskDelay((pdMS_TO_TICKS(100)));
-//	   }
-//
-//	   if (flag){
-//		   GPIOxTooglePin(&handlerPinA5);
-//	   }
-//	   else{
-//
-//		   GPIO_WritePin(&handlerPinA5, RESET);
-//	   }
-//
-//	   notify_state = xTaskNotifyWait(0,0,NULL,pdMS_TO_TICKS(100));
-//	   //taskYIELD();
-//   }
-//}
-//
-//void vTaskTwo( void * pvParameters )
-//{
-//
-//	uint8_t button_state = 0;
-//	uint8_t prev_button_state = 0;
-//
-//   while(1){
-////	   printf("%s\n",((char*) pvParameters));
-//	   button_state = GPIO_ReadPin(&handlerUserButton);
-//
-//	   if (button_state){
-//		   if (!prev_button_state){
-//			   //Notificacion
-//			   xTaskNotify(xHandleTask1,0,eNoAction);
-//
-//		   }
-//	   }
-//
-//	   prev_button_state = button_state;
-//
-//	   vTaskDelay((pdMS_TO_TICKS(10)));
-//	   //GPIO_WritePin(&handlerPinA5, SET);
-//	   //taskYIELD();
-//   }
-//}

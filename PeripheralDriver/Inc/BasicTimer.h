@@ -58,6 +58,20 @@
 #define BTIMER_DISABLE_INTERRUPT 0
 #define BTIMER_ENABLE_INTERRUPT  1
 
+// Prioridades para el Free
+enum {
+	e_TIM_PRIORITY_6 =6,
+	e_TIM_PRIORITY_7,
+	e_TIM_PRIORITY_8,
+	e_TIM_PRIORITY_9,
+	e_TIM_PRIORITY_10,
+	e_TIM_PRIORITY_11,
+	e_TIM_PRIORITY_12,
+	e_TIM_PRIORITY_13,
+	e_TIM_PRIORITY_14,
+	e_TIM_PRIORITY_15
+};
+
 
 /* Estructura que contiene la configuración mínima necesaria para el manejo del Timer.*/
 typedef struct
@@ -76,6 +90,7 @@ typedef struct
 }BasicTimer_Handler_t;
 
 void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler);
+void TIM_SetPriority (BasicTimer_Handler_t *ptrBTimerHandler, uint8_t newPriority);
 
 void BasicTimer1_Callback(void);
 void BasicTimer2_Callback(void); /* Esta función debe ser sobre-escrita en el main para que el sistema funcione*/
