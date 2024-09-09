@@ -40,11 +40,9 @@
 
 void inSystem (void);
 void parseCommands(char *stringVector);
-double distanceM1 (void);
-double distanceM2 (void);
-void breakMotor (void);
 float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis);
-
+void getAngle(MPUAccel_Config *ptrMPUAccel,float angle_init,uint8_t flag, float calibr,Parameters_Position_t realPos);
+void On_Off_motor(uint8_t status);
 
 //Definición Handlers
 //GPIO
@@ -88,7 +86,7 @@ EXTI_Config_t handlerExtiConEnc_2 = {0};
 
 //Timers
 BasicTimer_Handler_t handlerTimerBlinky = {0}; // Timer 3
-BasicTimer_Handler_t handlerTIM2_vel    = {0}; // Timer 2
+BasicTimer_Handler_t handlerTIM2_PARAMETROS_MOVIMIENTO    = {0}; // Timer 2
 BasicTimer_Handler_t handlerTIM4_time   = {0}; // Timer 4
 
 //PWMs
@@ -96,7 +94,7 @@ PWM_Handler_t handlerPWM_1 = {0}; // Timer 5
 PWM_Handler_t handlerPWM_2 = {0}; // Timer 5
 
 //Usart
-USART_Handler_t handlerUSART1 = {0};
+USART_Handler_t handlerUSART = {0};
 
 
 //I2C
@@ -105,9 +103,27 @@ I2C_Handler_t handler_I2C1 = {0};
 //MPUAccel
 MPUAccel_Config handler_MPUAccel_6050 ={0};
 
+// Motor Drivers
+Motor_Handler_t handler_Motor_1 = {0};
+Motor_Handler_t handler_Motor_2 = {0};// Handler para motor izquierdo
+
+
+// Estructura de estados
+typedef enum{
+	sLine = 0,
+	sRoll
+}state_t;
+
+
+//-----Macros------
+#define distanceBetweenWheels 10600             //Distacia entre ruedas     10430
+#define D1 5170                                 //Diametro rueda izquierda
+#define D2 5145                                 //Diametro rueda Derecha
+#define Ce 72                                   //Numero de interrupciones en el incoder
+
 
 // Variables para los comandos
-char bufferReception[64];
+char bufferReception[64] = {0};
 uint8_t counterReception = 0;
 uint8_t doneTransaction = RESET;
 uint8_t rxData = '\0';
@@ -116,59 +132,37 @@ unsigned int firstParameter;
 unsigned int secondParameter;
 unsigned int thirdParameter;
 char userMsg[64];
-char bufferMsg[64];
+
+//////Banderas y estados-----------
+state_t Mode   = sLine;
+uint8_t flag_action = 0;
+uint8_t flag_angulo = 0;
 
 
-//Banderas
-uint8_t flagUart        = RESET;
-uint8_t flagPWM_1       = RESET;
-uint8_t flagPWM_2       = RESET;
-uint8_t flagT2          = RESET;
-uint8_t flagPr          = SET;
-uint8_t enableChangePWM = RESET;
-uint8_t flagGyro        = RESET;
+// TIEMPOS DE SAMPLEO Y CONTEO PARA DEFINICION DE PARAMETROS
+uint8_t timeAction_TIMER_Sampling = 13;            // Cantidad de cuentas para
+uint16_t time_accumulated = 0;
+uint16_t counting_action = 0;                     //Contador para la accion
+uint32_t time_accion = 0;
 
-//contadores
-float counterPWM1      = 0;
-float counterPWM2      = 0;
-float counter          = 0;
-uint32_t counter_M1Abs = 0;
-uint32_t counter_M2Abs = 0;
-double dist_1 = 0;
-double dist_2 = 0;
-uint16_t  controlM1      = 0;
-uint16_t  controlM2      = 0;
-uint16_t  controlM1_prev = 0;
-uint16_t  controlM2_prev = 0;
-uint16_t counterTIM3     = 0;
-uint16_t counterSet      = 0;
+//-----Variables PID-----------
+PID_Parameters_t parameter_PID_distace = {0};        //estructura para los parametros del PID
 
-//Velocidades
-float diferenceM1  = 0;
-float diferenceM2  = 0;
+/// Variables para Odometria
+Parameters_Path_t parameters_Path_Robot    = {0};           //Estructura que almacena los parametros del camino a recorrer
+Parameters_Position_t parameters_Pos_Robot = {0}; 	//Estructura que almacena la posicion del robot
+double cal_Gyro = 0;   // variable que almacena la calibración del giroscopio
+float ang_d = 0;
+float sum_ang = 0;
+float promAng = 0;
+float cm_1 = ((M_PI*D1)/(100*Ce)); // Numero de milimetros por paso de la rueda izquierda
+float cm_2 = ((M_PI*D2)/(100*Ce)); // Numero de milimetros por paso de la rueda derecha
+double ang_for_Displament_ICR = 0;
+double ang_complementary = 0;
 
-
-//Constantes
-float setPoint    = 0;
-uint16_t distance = 0;
-
-//Factores de correccion
-float PM1 = 0;
-float PM2 = 0;
-
-//Variables PID
-float uAM1  = 0;
-float uAM2  = 0;
-float k     = 2;
-float tau   = 200;
-float theta = 150;
-float Ts    = 80;
-
-//Variables
-float dps       = 0;
-uint32_t tiempo = 0;
-float calibr    = 0;
-
+// VARIABLES VARIAS DEL ROBOT
+#define fixed_dutty 28 // Fixed dutty cycle, velocidad constante
+#define fixed_sample_period 16 // Periodo en milisegundos de muestreo de datos de encoder
 
 int main(void)
 {
@@ -192,7 +186,7 @@ int main(void)
 
 
 		if (rxData != '\0'){
-			writeChar(&handlerUSART1, rxData);
+			writeChar(&handlerUSART, rxData);
 			bufferReception[counterReception] = rxData;
 			counterReception++;
 
@@ -207,12 +201,17 @@ int main(void)
 
 				memset(bufferReception, 0, sizeof(bufferReception));
 				counterReception = 0;
-				writeMsg(&handlerUSART1, "Buffer Vaciado\n \r");
+				writeMsg(&handlerUSART, "Buffer Vaciado\n \r");
 			}
 
 				rxData = '\0';
 
 		}
+
+
+
+
+
 
 
 
@@ -408,28 +407,27 @@ void inSystem (void){
 	handlerPinRx.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
 	GPIO_Config(&handlerPinRx);
 
-	handlerUSART1.ptrUSARTx                      = USART2;
-	handlerUSART1.USART_Config.USART_MCUvelocity = USART_50MHz_VELOCITY;
-	handlerUSART1.USART_Config.USART_baudrate    = USART_BAUDRATE_19200;
-	handlerUSART1.USART_Config.USART_enableInRx  = USART_INTERRUPT_RX_ENABLE;
-	handlerUSART1.USART_Config.USART_enableInTx  = USART_INTERRUPT_TX_DISABLE;
-	handlerUSART1.USART_Config.USART_mode        = USART_MODE_RXTX;
-	handlerUSART1.USART_Config.USART_parity      = USART_PARITY_NONE;
-	handlerUSART1.USART_Config.USART_stopbits    = USART_STOPBIT_1;
-	handlerUSART1.USART_Config.USART_datasize    = USART_DATASIZE_8BIT;
-	USART_Config(&handlerUSART1);
+	handlerUSART.ptrUSARTx                      = USART2;
+	handlerUSART.USART_Config.USART_MCUvelocity = USART_50MHz_VELOCITY;
+	handlerUSART.USART_Config.USART_baudrate    = USART_BAUDRATE_19200;
+	handlerUSART.USART_Config.USART_enableInRx  = USART_INTERRUPT_RX_ENABLE;
+	handlerUSART.USART_Config.USART_enableInTx  = USART_INTERRUPT_TX_DISABLE;
+	handlerUSART.USART_Config.USART_mode        = USART_MODE_RXTX;
+	handlerUSART.USART_Config.USART_parity      = USART_PARITY_NONE;
+	handlerUSART.USART_Config.USART_stopbits    = USART_STOPBIT_1;
+	handlerUSART.USART_Config.USART_datasize    = USART_DATASIZE_8BIT;
+	USART_Config(&handlerUSART);
 
 	//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
 
 	///////////////////////////////////////////Timer para el control de la velocidad//////////////////////////////////////////////
 
-	handlerTIM2_vel.ptrTIMx                           = TIM2;
-	handlerTIM2_vel.TIMx_Config.TIMx_interruptEnable  = BTIMER_ENABLE_INTERRUPT;
-	handlerTIM2_vel.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
-	handlerTIM2_vel.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_10us;
-	handlerTIM2_vel.TIMx_Config.TIMx_period           = 80;
-	Ts = handlerTIM2_vel.TIMx_Config.TIMx_period;
-	BasicTimer_Config(&handlerTIM2_vel);
+	handlerTIM2_PARAMETROS_MOVIMIENTO.ptrTIMx                           = TIM2;
+	handlerTIM2_PARAMETROS_MOVIMIENTO.TIMx_Config.TIMx_interruptEnable  = BTIMER_ENABLE_INTERRUPT;
+	handlerTIM2_PARAMETROS_MOVIMIENTO.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
+	handlerTIM2_PARAMETROS_MOVIMIENTO.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_10us;
+	handlerTIM2_PARAMETROS_MOVIMIENTO.TIMx_Config.TIMx_period           = fixed_sample_period;
+	BasicTimer_Config(&handlerTIM2_PARAMETROS_MOVIMIENTO);
 
 
 	//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
@@ -470,10 +468,10 @@ void inSystem (void){
 	////////////////////////////////Timer 5 para contador de tiempo ////////////////////////////////////
 
 	handlerTIM4_time.ptrTIMx                           = TIM4;
-	handlerTIM4_time.TIMx_Config.TIMx_interruptEnable  = BTIMER_ENABLE_INTERRUPT;
+	handlerTIM4_time.TIMx_Config.TIMx_interruptEnable  = BTIMER_DISABLE_INTERRUPT;
 	handlerTIM4_time.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
 	handlerTIM4_time.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_100us;
-	handlerTIM4_time.TIMx_Config.TIMx_period           = 100;
+	handlerTIM4_time.TIMx_Config.TIMx_period           = 1;
 	BasicTimer_Config(&handlerTIM4_time);
 
 }
@@ -488,45 +486,24 @@ void parseCommands(char *stringVector){
 
 	if (strcmp(cmd, "help") == 0){
 
-		writeMsg(&handlerUSART1, "HELP MENU CMD : \n");
-		writeMsg(&handlerUSART1, "1)  gyro \n");
-		writeMsg(&handlerUSART1, " \n");
+		writeMsg(&handlerUSART, "HELP MENU CMD : \n");
+		writeMsg(&handlerUSART, "1)  goto #Distance \n");
+		writeMsg(&handlerUSART, " \n");
 
-	}else if (strcmp(cmd, "gyro") == 0){
+	}else if (strcmp(cmd, "goto") == 0){
 
-		calibr = calibracionGyros(&handler_MPUAccel_6050, 'z');
-		startTimer(&handlerTIM4_time);
-
+		On_Off_motor(SET); // Encendemos los motores para irnos hacia adelante y con una velocidad fija
+		startTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Comenzamos el muestreo de datos con los que aplicaremos un control adecuado
 	}
 
 
 	else {
-		writeMsg(&handlerUSART1, "Comando Incorrecto :c \n");
+		writeMsg(&handlerUSART, "Comando Incorrecto :c \n");
 
 
 	}
 
 
-}
-
-
-
-double distanceM1 (void){
-
-	double u_1;
-
-	u_1 = M_PI * (51.45) * 10/ (72) ;
-
-	return u_1;
-}
-
-double distanceM2 (void){
-
-	double u_2;
-
-	u_2 = M_PI * (51.70) * 10/ (72) ;
-
-	return u_2;
 }
 
 
@@ -537,29 +514,85 @@ void usart2Rx_Callback(void){
 
 }
 
-//Interrupcion Timer 4
-void BasicTimer4_Callback(void){
-
-	flagGyro = SET;
-	tiempo += 1;
-
-}
 
 //Interrupción Timer 3
 void BasicTimer3_Callback(void){
-
 	GPIOxTooglePin(&handlerPinA5);
-	counterTIM3++;
-
 }
 
 //Interrupcion Timer 2
 
 void BasicTimer2_Callback(void){
 
-	flagT2 = SET;
 
+	// Levantamos bandera que calcula el angulo actual
+	flag_angulo = SET;
 
+	//Verificamos el modo
+	if(Mode == sLine){ // Levantamos la vandera que calcula todos los parametros necesarios para el control
+
+		//Acumulamos los angulos
+		sum_ang += parameters_Pos_Robot.grad_relativo;
+		//Se acumula el tiempo
+		time_accumulated += handlerTIM2_PARAMETROS_MOVIMIENTO.TIMx_Config.TIMx_period;
+
+		//----------------Accion a realizar con un tiempo especifico--------------------
+		if(counting_action>=timeAction_TIMER_Sampling)
+		{
+			//Guardamos el tiempo entre acciones especificas
+			time_accion = time_accumulated;
+			//Calculamos el angulo promedio y la establecemis como el angulo relativo
+			promAng = sum_ang/counting_action;
+			parameters_Pos_Robot.phi_relativo = (promAng*M_PI)/180;          //[rad]
+			parameters_Pos_Robot.phi_relativo = atan2(sin(parameters_Pos_Robot.phi_relativo),cos(parameters_Pos_Robot.phi_relativo));
+			//Calculamos la velocidad
+			handler_Motor_1.parametersMotor.dis = (cm_1*handler_Motor_1.parametersMotor.counts);                   //[mm]
+			handler_Motor_2.parametersMotor.dis = (cm_2*handler_Motor_2.parametersMotor.counts);				   //[mm]
+			handler_Motor_1.parametersMotor.vel = handler_Motor_1.parametersMotor.dis/time_accion;      //[m/s]
+			handler_Motor_2.parametersMotor.vel = handler_Motor_2.parametersMotor.dis/time_accion;      //[m/s]
+			//Reiniciamos el numero de conteos
+			handler_Motor_1.parametersMotor.counts = 0;
+			handler_Motor_2.parametersMotor.counts = 0;
+			//Reiniciamos variable
+			sum_ang = 0;
+			//Reiniciamos tiempo
+			time_accumulated = 0;
+			//Reiniciamos el contador de accion
+			counting_action = 0;
+			//Levantamos bandera
+			flag_action = 1;
+		}
+		else{ counting_action++; }
+	}
+	else if(Mode == sRoll)
+	{
+		//----------------Accion a realizar con un tiempo especifico--------------------
+		if(counting_action>=timeAction_TIMER_Sampling)
+		{
+			//Guardamos el tiempo entre acciones especificas
+			time_accion = time_accumulated;
+			//Calculo de la distancia recorrida por cada rueda
+			handler_Motor_1.parametersMotor.dis = (cm_1*handler_Motor_1.parametersMotor.counts);                   //[mm]
+			handler_Motor_2.parametersMotor.dis = (cm_2*handler_Motor_2.parametersMotor.counts);				   //[mm]
+			handler_Motor_1.parametersMotor.vel = handler_Motor_1.parametersMotor.dis/time_accion;      //[m/s]
+			handler_Motor_2.parametersMotor.vel = handler_Motor_2.parametersMotor.dis/time_accion;      //[m/s]
+			//Reiniciamos el numero de conteos
+			handler_Motor_2.parametersMotor.counts = 0;
+			handler_Motor_1.parametersMotor.counts = 0;
+			//Calculo angulo debido al desplazamiento del ICR
+			ang_for_Displament_ICR += (((handler_Motor_2.parametersMotor.dis - handler_Motor_1.parametersMotor.dis)*100)
+					/distanceBetweenWheels)*(180/M_PI); //[rad]
+			//Reiniciamos tiempo
+			time_accumulated = 0;
+			//Reiniciamos el contador de accion
+			counting_action = 0;
+		}
+		else{counting_action++;}
+
+		//Combinar ambos ángulos
+		ang_complementary = parameters_Pos_Robot.grad_relativo + ang_for_Displament_ICR;
+	}
+	else{  __NOP(); }
 }
 
 
@@ -623,4 +656,67 @@ float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis){
 }
 
 
+void getAngle(MPUAccel_Config *ptrMPUAccel,float angle_init,uint8_t flag, float calibr, Parameters_Position_t realPos){
 
+	///////////////////////////MEDIDA DEL ANGULO ACUMULADO////////////////////////////////////
+
+	if (flag){
+	//----------------Accion a Realiza cada interrupción------------------
+		//Leemos el ángulo
+		//Lectura velocidad angular
+		float w = readGyro_Z(ptrMPUAccel) - cal_Gyro;
+		//Calculo angulo
+		float ang_d = angle_init + (w * 16)/1000; // conversion de velocidad angular a grados absolutos con respecto al inicio del programa
+
+		realPos.grad_relativo = ang_d;
+	}
+}
+
+void On_Off_motor(uint8_t status){
+
+
+	if(status == 1)
+	{
+		//Activamos el motor
+		// ENCENCEMOS EL MOTOR 1 (LEFT)
+			// Se setea la direccion seleccionada
+			GPIO_WritePin_Afopt(handler_Motor_1.phandlerGPIOIN , SET); // Direccion hacia adelante
+			//Se enciende el motor 1
+			enableOutput(handler_Motor_1.phandlerPWM);
+			GPIO_WritePin_Afopt(handler_Motor_1.phandlerGPIOEN,SET); // Encendemos el motor 1
+
+			// ENCENCEMOS EL MOTOR 2 (Right)
+			// Se setea la direccion seleccionada
+			GPIO_WritePin_Afopt(handler_Motor_2.phandlerGPIOIN, SET); // Encendemos el motor 2
+			//Se enciende el motor 2
+			enableOutput(handler_Motor_2.phandlerPWM);
+			GPIO_WritePin_Afopt (handler_Motor_2.phandlerGPIOEN,SET);
+	}
+	else
+	{
+		//DESACTIVAMOS EL MOTOR
+		// APAGAMOS EL MOTOR 1 (LEFT)
+			//Se enciende el motor 1
+			disableOutput(handler_Motor_1.phandlerPWM);
+			GPIO_WritePin_Afopt(handler_Motor_1.phandlerGPIOEN, RESET); // Apagamos el motor 1
+			// APAGAMOS EL MOTOR 2 (Right)
+			//Se enciende el motor 2
+			disableOutput(handler_Motor_2.phandlerPWM);
+			GPIO_WritePin_Afopt (handler_Motor_2.phandlerGPIOEN,RESET);
+	}
+}
+
+
+void delay_ms(uint16_t time_to_wait_ms){
+
+	startTimer(&handlerTIM4_time);
+	// definimos una variable que almacenara el valor del counter en el timer 4
+	uint16_t limit = (time_to_wait_ms * 10) - 1 ;
+	uint16_t CNT   = 0;
+
+	// comparamos el counter con el limit, y comenzamos a que cuente cada que el timer 4 haga una cuenta nueva
+	while (CNT < limit){
+		if (handlerTIM4_time.ptrTIMx->CNT == handlerTIM4_time.ptrTIMx->ARR)  {CNT += handlerTIM4_time.ptrTIMx->CNT;}
+	}
+	stopTimer(&handlerTIM4_time);
+}

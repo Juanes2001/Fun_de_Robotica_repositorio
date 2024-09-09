@@ -5454,3 +5454,42 @@ org.eclipse.swt.SWTException: Widget is disposed
 	at org.eclipse.equinox.launcher.Main.basicRun(Main.java:596)
 	at org.eclipse.equinox.launcher.Main.run(Main.java:1467)
 	at org.eclipse.equinox.launcher.Main.main(Main.java:1440)
+
+!ENTRY org.eclipse.cdt.ui 4 0 2024-09-08 19:56:41.345
+!MESSAGE Error in CDT UI during reconcile
+!STACK 1
+C Model Exception: C Model Status [Element main2.c does not exist.]
+	at org.eclipse.cdt.internal.core.model.CElement.newNotPresentException(CElement.java:485)
+	at org.eclipse.cdt.internal.core.model.TranslationUnit.makeConsistent(TranslationUnit.java:583)
+	at org.eclipse.cdt.internal.core.model.ReconcileWorkingCopyOperation.executeOperation(ReconcileWorkingCopyOperation.java:65)
+	at org.eclipse.cdt.internal.core.model.CModelOperation.execute(CModelOperation.java:346)
+	at org.eclipse.cdt.internal.core.model.CModelOperation.run(CModelOperation.java:613)
+	at org.eclipse.cdt.internal.core.model.CModelOperation.runOperation(CModelOperation.java:641)
+	at org.eclipse.cdt.internal.core.model.WorkingCopy.reconcile(WorkingCopy.java:365)
+	at org.eclipse.cdt.internal.ui.text.CReconcilingStrategy.reconcile(CReconcilingStrategy.java:79)
+	at org.eclipse.cdt.internal.ui.text.CReconcilingStrategy.reconcile(CReconcilingStrategy.java:64)
+	at org.eclipse.cdt.internal.ui.text.CompositeReconcilingStrategy.reconcile(CompositeReconcilingStrategy.java:89)
+	at org.eclipse.cdt.internal.ui.text.CCompositeReconcilingStrategy.reconcile(CCompositeReconcilingStrategy.java:90)
+	at org.eclipse.jface.text.reconciler.MonoReconciler.process(MonoReconciler.java:76)
+	at org.eclipse.cdt.internal.ui.text.CReconciler.process(CReconciler.java:346)
+	at org.eclipse.jface.text.reconciler.AbstractReconciler$BackgroundThread.run(AbstractReconciler.java:207)
+!SUBENTRY 1 org.eclipse.cdt.core 4 969 2024-09-08 19:56:41.345
+!MESSAGE Element main2.c does not exist.
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-09-08 20:25:50.552
+!MESSAGE Indexed 'Base_FreeRTOS' (21 sources, 93 headers) in 0.908 sec: 7,234 declarations; 21,392 references; 36 unresolved inclusions; 108 syntax errors; 1,339 unresolved names (4.5%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-09-08 20:25:52.526
+!MESSAGE Indexed 'Base_FreeRTOS' (11 sources, 97 headers) in 0.853 sec: 6,638 declarations; 16,826 references; 0 unresolved inclusions; 108 syntax errors; 10 unresolved names (0.043%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-09-08 20:28:07.236
+!MESSAGE Indexed 'Base_FreeRTOS' (20 sources, 93 headers) in 0.54 sec: 7,067 declarations; 20,580 references; 25 unresolved inclusions; 108 syntax errors; 762 unresolved names (2.7%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-09-08 20:28:08.589
+!MESSAGE Indexed 'Base_FreeRTOS' (11 sources, 97 headers) in 0.57 sec: 6,638 declarations; 16,826 references; 0 unresolved inclusions; 108 syntax errors; 10 unresolved names (0.043%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-09-08 22:29:03.329
+!MESSAGE Indexed 'Pruebas_sin_FreeRTOS' (19 sources, 92 headers) in 0.651 sec: 6,909 declarations; 20,509 references; 23 unresolved inclusions; 112 syntax errors; 1,165 unresolved names (4.1%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-09-08 22:29:04.856
+!MESSAGE Indexed 'Pruebas_sin_FreeRTOS' (2 sources, 86 headers) in 0.396 sec: 4,736 declarations; 6,574 references; 0 unresolved inclusions; 3 syntax errors; 126 unresolved names (1.1%)

@@ -1,53 +1,11 @@
-19:37:08 **** Incremental Build of configuration Debug for project Base_FreeRTOS ****
+22:50:28 **** Incremental Build of configuration Debug for project Base_FreeRTOS ****
 make -j12 all 
 arm-none-eabi-gcc "../Src/main2.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DNUCLEO_F411RE -DSTM32 -DSTM32F4 -DSTM32F411RETx -DSTM32F411xE=1 -c -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/FreeRTOS/include" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/SEGGER/Config" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/SEGGER/OS" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/SEGGER/SEGGER" -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/Inc" -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include -I/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include -I"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Inc" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Src/main2.d" -MT"Src/main2.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/main2.o"
-In file included from ../Src/main2.c:13:
-../Src/main2.c: In function 'process_command':
-/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/ThirdParty/FreeRTOS/include/task.h:2038:100: error: expected expression before ',' token
- 2038 |     xTaskGenericNotify( ( xTaskToNotify ), ( tskDEFAULT_INDEX_TO_NOTIFY ), ( ulValue ), ( eAction ), NULL )
-      |                                                                                                    ^
-../Src/main2.c:795:3: note: in expansion of macro 'xTaskNotify'
-  795 |   xTaskNotify(xHandleTask_Stop,0, eNotifyAction);
-      |   ^~~~~~~~~~~
-../Src/main2.c: In function 'status_motor':
-../Src/main2.c:1048:3: warning: implicit declaration of function 'statusInOutPWM' [-Wimplicit-function-declaration]
- 1048 |   statusInOutPWM(handler_Motor_L.phandlerPWM, CHANNEL_ENABLE);
-      |   ^~~~~~~~~~~~~~
-../Src/main2.c:1048:18: error: 'handler_Motor_L' undeclared (first use in this function); did you mean 'handler_Motor_2'?
- 1048 |   statusInOutPWM(handler_Motor_L.phandlerPWM, CHANNEL_ENABLE);
-      |                  ^~~~~~~~~~~~~~~
-      |                  handler_Motor_2
-../Src/main2.c:1048:18: note: each undeclared identifier is reported only once for each function it appears in
-../Src/main2.c:1048:47: error: 'CHANNEL_ENABLE' undeclared (first use in this function)
- 1048 |   statusInOutPWM(handler_Motor_L.phandlerPWM, CHANNEL_ENABLE);
-      |                                               ^~~~~~~~~~~~~~
-../Src/main2.c:1049:18: error: 'handler_Motor_R' undeclared (first use in this function); did you mean 'handler_Motor_2'?
- 1049 |   statusInOutPWM(handler_Motor_R.phandlerPWM, CHANNEL_ENABLE);
-      |                  ^~~~~~~~~~~~~~~
-      |                  handler_Motor_2
-../Src/main2.c:1050:3: warning: implicit declaration of function 'GPIO_writePin'; did you mean 'GPIO_WritePin'? [-Wimplicit-function-declaration]
- 1050 |   GPIO_writePin(handler_Motor_L.phandlerGPIOIN, (handler_Motor_L.configMotor.dir)&SET);
-      |   ^~~~~~~~~~~~~
-      |   GPIO_WritePin
-../Src/main2.c:1055:3: warning: implicit declaration of function 'statusiInterruptionTimer' [-Wimplicit-function-declaration]
- 1055 |   statusiInterruptionTimer(&handler_TIMER_Sampling, INTERRUPTION_ENABLE);
-      |   ^~~~~~~~~~~~~~~~~~~~~~~~
-../Src/main2.c:1055:29: error: 'handler_TIMER_Sampling' undeclared (first use in this function)
- 1055 |   statusiInterruptionTimer(&handler_TIMER_Sampling, INTERRUPTION_ENABLE);
-      |                             ^~~~~~~~~~~~~~~~~~~~~~
-../Src/main2.c:1055:53: error: 'INTERRUPTION_ENABLE' undeclared (first use in this function); did you mean 'USART_INTERRUPT_RX_ENABLE'?
- 1055 |   statusiInterruptionTimer(&handler_TIMER_Sampling, INTERRUPTION_ENABLE);
-      |                                                     ^~~~~~~~~~~~~~~~~~~
-      |                                                     USART_INTERRUPT_RX_ENABLE
-../Src/main2.c:1060:47: error: 'CHANNEL_DISABLE' undeclared (first use in this function)
- 1060 |   statusInOutPWM(handler_Motor_L.phandlerPWM, CHANNEL_DISABLE);
-      |                                               ^~~~~~~~~~~~~~~
-../Src/main2.c:1070:53: error: 'INTERRUPTION_DISABLE' undeclared (first use in this function); did you mean 'USART_INTERRUPT_TX_DISABLE'?
- 1070 |   statusiInterruptionTimer(&handler_TIMER_Sampling, INTERRUPTION_DISABLE);
-      |                                                     ^~~~~~~~~~~~~~~~~~~~
-      |                                                     USART_INTERRUPT_TX_DISABLE
-make: *** [Src/subdir.mk:22: Src/main2.o] Error 1
+arm-none-eabi-gcc -o "Base_FreeRTOS.elf" @"objects.list"  -lPeripheralDriver -mcpu=cortex-m4 -T"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Base_FreeRTOS.map" -Wl,--gc-sections -static -L/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver/Debug --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+/home/juan/st/stm32cubeide_1.10.1/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.10.3-2021.10.linux64_1.0.0.202111181127/tools/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/bin/ld: cannot find -lPeripheralDriver
+collect2: error: ld returned 1 exit status
+make: *** [makefile:66: Base_FreeRTOS.elf] Error 1
 "make -j12 all" terminated with exit code 2. Build might be incomplete.
 
-19:37:08 Build Failed. 9 errors, 3 warnings. (took 498ms)
+22:50:28 Build Failed. 2 errors, 0 warnings. (took 519ms)
 

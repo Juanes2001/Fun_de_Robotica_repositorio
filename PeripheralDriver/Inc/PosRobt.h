@@ -49,22 +49,19 @@ typedef struct
 
 
 //-----------------Parametros Teoricos-----------------------
-typedef struct
-{
-	double magnitude_d;          //magnitud del vector director de la recta
-	double proy_A;               //Parametros  para el calculo de la magnitud de la proyeccion sobre la recta
-	double proy_B;
-	double proy_C;
-	double dis_point_A;          //Parametros para el calculo de la dsitancai entre la posicion global y la recta
-	double dis_point_B;
-	double dis_point_C;
-
-}Parameters_Distance_t;
 
 
 typedef struct
 {
-	Parameters_Distance_t parametersStraight;  //Parametros para el calculo de la distancia del punto a la recta como tambien a lo largo de la misma
+	//Parametros para el calculo de la distancia del punto a la recta como tambien a lo largo de la misma
+	double magnitude_director;          //magnitud del vector director de la recta
+	double proy_Parte_1;               //Parametros  para el calculo de la magnitud de la proyeccion sobre la recta
+	double proy_Parte_2;
+	double proy_Parte_1_2;
+	double dis_point_Parte_1;          //Parametros para el calculo de la dsitancai entre la posicion global y la recta
+	double dis_point_Parte_2;
+	double dis_point_Parte_1_2;
+
 	int rotative_Grad_Relative;                //Rotacion relativa en grados
 	int rotative_Grad;                         //Rotacion en grados
 	int line_Distance;                         //Distancia a recorrer

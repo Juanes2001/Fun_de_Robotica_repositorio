@@ -82,43 +82,59 @@ void change_coordinates_position(Parameters_Path_t *ptrParameterPath, double coo
 void calculation_parameter_distance(Parameters_Path_t  *ptrParameterPath)
 {
 	//Calculo del vector director de la recta
-	double a = ptrParameterPath->goal_Position_x - ptrParameterPath->start_position_x;
-	double b = ptrParameterPath->goal_Position_y - ptrParameterPath->start_position_y;
+
+	// Para hacer un buen control al robot y que este pueda seguir de una forma muy bien aproximada la trayectoria deseada teorica es necesario
+	// Aplicar geometria vectorial para calcular: LA DISTANCIA RECORRIDA SOBRE LA TRAYECTORIA TEORICA, Y LA DISTANCIA DESDE EL ROBOT A LA RECTA TEORICA.
+	// A este ultimo es deseable calcularlo ya que queremos que esta distancia sea la mas pequeña posible cuando el robot este caminando.
+
+	// las ecuaciones respectivas para hallar la proyeccion del vector del robot con respecto a su punto inicial SON:
+
+	// |PROY_D^(Pos actual global - pos inicial)| = |(pos actual global - pos inicial) dot (pos final - pos inicial)/magnitud del vector director|
+	// resolviendo esta ecuacion se llega a  =  [(pos final x- pos inicial x) * pos actual global x  + (pos final y- pos inicial y) * pos actual global y] / magnitud del director
+
+	// Ahora para la distancia del robot a la recta se usa un producto cruz como herramienta, llegando a la ecuación simple para la distancia de:
+
+	//  |{PROY_D^(Pos actual global - pos inicial) X (pos actual global - pos inicial) }|/|PROY_D^(Pos actual global - pos inicial)|
+
+	// Obteniendo en el desarrollo como resultado:
+	// -((pos final y - pos inicial y) * pos actual global x - (pos final x - pos inicial x) * pos actual global y)/ magnitud del director
+
+
+
+	double director_x = ptrParameterPath->goal_Position_x - ptrParameterPath->start_position_x;
+	double director_y = ptrParameterPath->goal_Position_y - ptrParameterPath->start_position_y;
 	//definicion de la magnitud de director
-	ptrParameterPath->parametersStraight.magnitude_d = sqrt(pow(a,2)+pow(b,2));
+	ptrParameterPath->magnitude_director = sqrt(pow(director_x,2)+pow(director_y,2));
 	//definicion de los parametros para el calculo de la magnitud de la proyeccion sobre la recta
-	ptrParameterPath->parametersStraight.proy_A = a;
-	ptrParameterPath->parametersStraight.proy_B = b;
-	ptrParameterPath->parametersStraight.proy_C = -1*a*ptrParameterPath->start_position_x - b*ptrParameterPath->start_position_y;
+	ptrParameterPath->proy_Parte_1 = director_x;
+	ptrParameterPath->proy_Parte_2 = director_y;
+	ptrParameterPath->proy_Parte_1_2 = -1 * director_x * ptrParameterPath->start_position_x - director_y * ptrParameterPath->start_position_y;
 	//definicion de los parametros para el calculo de la distancia del punto a la recta
-	ptrParameterPath->parametersStraight.dis_point_A = b;
-	ptrParameterPath->parametersStraight.dis_point_B = -1*a;
-	ptrParameterPath->parametersStraight.dis_point_C = -1*b*ptrParameterPath->start_position_x + a*ptrParameterPath->start_position_y;
+	ptrParameterPath->dis_point_Parte_1 = director_y;
+	ptrParameterPath->dis_point_Parte_2 = -1 * director_x;
+	ptrParameterPath->dis_point_Parte_1_2 = -1 * director_y * ptrParameterPath->start_position_x + director_x * ptrParameterPath->start_position_y;
 }
 
 //------------Funciones para el calculo de la respectiva distancia------------------------
 double distance_to_straight_line(Parameters_Path_t  *ptrParameterPath, double position_x, double position_y)
 {
-	//Calculo
-	double distance = -1*((ptrParameterPath->parametersStraight.dis_point_A*position_x + ptrParameterPath->parametersStraight.dis_point_B*position_y
-			+ ptrParameterPath->parametersStraight.dis_point_C)/ptrParameterPath->parametersStraight.magnitude_d);
-	//Retornar
+	// Calculo de la distancia del robot a la linea recta usando los parametros
+	double distance = -1*((ptrParameterPath->dis_point_Parte_1 * position_x + ptrParameterPath->dis_point_Parte_2 * position_y
+				       + ptrParameterPath->dis_point_Parte_1_2) / ptrParameterPath->magnitude_director);
+
 	return distance;
 }
 
 double distance_traveled(Parameters_Path_t  *ptrParameterPath, double position_x, double position_y)
 {
-	//Calculo
-	double distance_Tra = (ptrParameterPath->parametersStraight.proy_A*position_x + ptrParameterPath->parametersStraight.proy_B*position_y
-			+ ptrParameterPath->parametersStraight.proy_C)/ptrParameterPath->parametersStraight.magnitude_d;
+	//Calculo de la distancia viajada relativo a la linea recta
+	double distance_Tra = (ptrParameterPath->proy_Parte_1 * position_x + ptrParameterPath->proy_Parte_2 * position_y
+			+ ptrParameterPath->proy_Parte_1_2)/ptrParameterPath->magnitude_director;
 	//Retornar
 	return distance_Tra;
 }
 
-
-
-
-//------------------------------Funciones auxiliares-----------------------------
+//------------------------------Funciones auxiliares-----------------------------------
 
 double calculed_ang_turn(double vector_a[2], double vector_b[2])
 {
@@ -128,7 +144,7 @@ double calculed_ang_turn(double vector_a[2], double vector_b[2])
     double magvector_b = sqrt(pow(vector_b[0],2)+pow(vector_b[1],2));
     double ang_between_vector = acos((vector_a[0]*vector_b[0]+vector_a[1]*vector_b[1])/(magvector_b*magvector_a));
     //conversion a grados
-    ang_between_vector = (ang_between_vector*180)/M_PI;
+    ang_between_vector = (ang_between_vector*180) / M_PI;
     //agregamos la direccion de giro
     if(dot<0){ ang_between_vector = -ang_between_vector;}
     //Retornar valor

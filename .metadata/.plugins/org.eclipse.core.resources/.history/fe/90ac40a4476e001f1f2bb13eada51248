@@ -1,0 +1,1104 @@
+/*
+ * main2.c
+ *
+ *  Created on: Aug 2, 2024
+ *      Author: juan
+ */
+
+
+#include <stm32f4xx.h>
+
+//LIBRERIAS FREERTOS
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "timers.h"
+#include "semphr.h"
+
+//LIBRERIAS DE C
+#include <stdint.h>
+#include <stdbool.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+//LIBRERIAS DE PERIFERAL DRIVERS
+#include "GPIOxDriver.h"
+#include "BasicTimer.h"
+#include "PwmDriver.h"
+#include "EXTIDriver.h"
+#include "RCCHunMHz.h"
+#include "USARTxDriver.h"
+#include "MPUAccel.h"
+#include "I2CDriver.h"
+#include "MotorsDriver.h"
+#include "PosRobt.h"
+
+
+
+// Definicion de algunas estructuras, con estas podemos almacenar el estado que queremos entrar dependiendo del comando que se seleccione
+typedef struct{
+	uint8_t payload[10];
+	int functionType;
+
+}command_t;
+
+// En esta estructura enumerada se tendran todos los estados posibles, donde mediante comandos nos iremos a un estado u otro
+typedef enum {
+	sMainMenu = 0,
+	sGo,
+	sGoTo,
+	sStop,
+	sRoll,
+	sRollTo,
+	sAstar,
+	sSquare
+}state_t;
+
+
+/*definicion de variables del sistema*/
+
+// Aqui designamos al heap cada tarea cuanta memoria en words almacenará
+#define STACK_SIZE 200
+
+// Velocidad del MCU
+//uint32_t SystemCoreClock = 100000000;
+
+// Definicion de la variable xReturned donde se almacenara el estado de todas las tareas creadas
+BaseType_t xReturned;
+/*Cabecera de la funcion de las tareas */
+void vTask_Menu( void * pvParameters );
+void vTask_Print( void * pvParameters );
+void vTask_Commands( void * pvParameters );
+void vTask_Stop( void * pvParameters );
+void vTask_Go( void * pvParameters );
+void vTask_PID( void * pvParameters );
+
+//Cabecera de la funcion Timer de FreeRTOS
+void led_state_callback (TimerHandle_t xTimer);
+
+//Tareas
+TaskHandle_t xHandleTask_Menu     = NULL; // Handler de la tarea de Menu
+TaskHandle_t xHandleTask_Print    = NULL; // Handler de la tarea dE PRINT
+TaskHandle_t xHandleTask_Commands = NULL; // Handler de la tarea de Comandos
+TaskHandle_t xHandleTask_Stop     = NULL; // Handler de la tarea de Stop
+TaskHandle_t xHandleTask_Go       = NULL; // Handler de la tarea de Go
+TaskHandle_t xHandleTask_PID      = NULL; // Handler de la tarea de PID
+
+//Colas
+QueueHandle_t xQueue_Print;
+QueueHandle_t xQueue_InputData;
+
+//Timer FreeRTOS
+TimerHandle_t handler_led_timer;
+
+//Semaforos
+SemaphoreHandle_t xSemaphore_Handle = NULL;
+
+
+
+void inSystem (void);
+void parseCommands(char *stringVector);
+void process_command (command_t *cmd);
+int extract_command (command_t *cmd);
+
+// FUNCION DELAY
+void delay_ms(uint16_t time_to_wait_ms);
+// CALIBRACIÓN ANGULO
+float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis);
+
+//Algunos mensajes String necesarios para la comunicacion
+const char *msg_invalid = "\n ////Invalid option /////\n";
+const char *msg_option_1= "\n------ Selected Option - sGo ------- \n";
+const char *msg_option_2= "\n------ Selected Option - 1 ------- \n";
+const char *msg_option_3= "\n------ Selected Option - 2 ------- \n";
+const char *msg_option_n= "\n------ Option out of range ------- \n";
+const char *msg_no_smphr= "\n-------Semaphore no activated------\n";
+
+
+//Definición Handlers
+//GPIO
+GPIO_Handler_t handlerPinA5           = {};
+GPIO_Handler_t handlerUSART_RX       = {};
+GPIO_Handler_t handlerUSART_TX       = {};
+
+//USART
+USART_Handler_t handlerUSART2 = {};
+
+
+//Pines PWM que controlan la velocidad de los motores
+GPIO_Handler_t handlerPinPwm_1      = {0};
+GPIO_Handler_t handlerPinPwm_2      = {0};
+
+
+//Pin para visualizar la velocidad del micro
+GPIO_Handler_t handlerMCO2Show      = {0};
+
+//Pines para encendido y apagado de los motores
+GPIO_Handler_t handlerEn2PinC11     = {0};
+GPIO_Handler_t handlerEn1PinC10     = {0};
+
+//Pines de salida para la direccion de las ruedas
+GPIO_Handler_t handlerIn2PinD2      = {0};
+GPIO_Handler_t handlerIn1PinC12     = {0};
+
+//Pines para lectura de encoders
+GPIO_Handler_t handlerEncoder1PinC1 = {0};
+GPIO_Handler_t handlerEncoder2PinC3 = {0};
+
+// Pines para I2C1
+GPIO_Handler_t handler_PINB8_I2C1   = {0};
+GPIO_Handler_t handler_PINB9_I2C1   = {0};
+
+//Extis
+EXTI_Config_t handlerExtiConEnc_1 = {0};
+EXTI_Config_t handlerExtiConEnc_2 = {0};
+
+//Timers
+BasicTimer_Handler_t handlerTimerBlinky = {0}; // Timer 3
+BasicTimer_Handler_t handlerTIM2_vel    = {0}; // Timer 2
+BasicTimer_Handler_t handlerTIM4_time   = {0}; // Timer 4
+
+//PWMs
+PWM_Handler_t handlerPWM_1 = {0}; // Timer 5
+PWM_Handler_t handlerPWM_2 = {0}; // Timer 5
+
+//I2C
+I2C_Handler_t handler_I2C1 = {0};
+
+//MPUAccel
+MPUAccel_Config handler_MPUAccel_6050 ={0};
+
+///// Definicion de los handler de cada motor
+Motor_Handler_t handler_Motor_1 = {0};
+Motor_Handler_t handler_Motor_2 = {0};
+
+//-----Macros------
+#define distanceBetweenWheels 10600             //Distacia entre ruedas     10430
+#define DL 5170                                 //Diametro rueda izquierda
+#define DR 5145                                 //Diametro rueda Derecha
+#define Ce 72                                   //Numero de interrupciones en el incoder
+
+
+// Variables para los comandos
+char bufferReception[64] = {0};
+char function[32] = {0};
+uint8_t counterReception = 0;
+uint8_t doneTransaction = RESET;
+uint8_t rxData = '\0';
+//char cmd[32];
+
+unsigned int firstParameter;
+unsigned int secondParameter;
+unsigned int thirdParameter;
+char userMsg[64];
+
+//////Banderas y estados-----------
+state_t next_state  = sMainMenu;
+uint8_t flag_mode   = 0;
+uint8_t flag_action = 0;
+
+
+// TIEMPOS DE SAMPLEO Y CONTEO PARA DEFINICION DE PARAMETROS
+uint8_t timeAction_TIMER_Sampling = 13;            // Cantidad de cuentas para
+uint16_t time_accumulated = 0;
+uint16_t counting_action = 0;                     //Contador para la accion
+uint32_t time_accion = 0;
+
+//-----Variables PID-----------
+PID_Parameters_t parameter_PID_distace = {0};        //estructura para los parametros del PID
+
+/// Variables para Odometria
+Parameters_Path_t parameters_Path_Robot    = {0};           //Estructura que almacena los parametros del camino a recorrer
+Parameters_Position_t parameters_Pos_Robot = {0}; 	//Estructura que almacena la posicion del robot
+double cal_Gyro = 0;
+float ang_d = 0;
+float sum_ang = 0;
+float promAng = 0;
+float cm_1 = 0;
+float cm_2 = 0;
+double ang_for_Displament_ICR = 0;
+double ang_complementary = 0;
+
+// VARIABLES VARIAS DEL ROBOT
+#define fixed_dutty 28
+
+int main(void)
+{
+
+
+	//Activamos el FPU o la unidad de punto flotante
+	SCB -> CPACR |= (0xF << 20);
+
+
+	//Activamos el contador
+   	DWT -> CTRL    |= (1 << 0);
+
+	// Configuracion de orden de prioridad
+	//vInitPrioGroupValue();
+//
+//	/* Primero configuramos */
+//	SEGGER_SYSVIEW_Conf();
+//	/* Despues activamos el sistema */
+//	SEGGER_SYSVIEW_Start();
+
+
+	inSystem ();
+
+	cal_Gyro = calibracionGyros(&handler_MPUAccel_6050, 'z');
+
+
+	/////////////////////////////////TAREA DEL MENU//////////////////////////////////////
+
+	xReturned = xTaskCreate(
+					vTask_Menu,             // Nombre de la funcion de la tarea relacionada
+					"Task-MENU",            // Nombre con el que se puede definir la tarea
+					STACK_SIZE,             // Tamaño de la tarea en el heap
+					NULL,                   // parametro pasado a la tarea
+					3,                      // Prioridad de la tarea
+					&xHandleTask_Menu );    // Handler de la tarea respectiva
+
+
+	 configASSERT( xReturned == pdPASS ); // Nos aseguramos de que se creo la tarea de una forma correcta
+
+
+	/////////////////////////////////TAREA DE IMPRESIÓN//////////////////////////////////////
+
+	xReturned = xTaskCreate(vTask_Print, "Task-Print",STACK_SIZE,NULL,2,&xHandleTask_Print );
+
+	 configASSERT( xReturned == pdPASS ); // Nos aseguramos de que se creo la tarea de una forma correcta
+
+	 /////////////////////////////////TAREA DE COMANDOS //////////////////////////////////////
+
+	xReturned = xTaskCreate(vTask_Commands,"Task-Commands",STACK_SIZE,NULL,3,&xHandleTask_Commands );
+
+	 configASSERT( xReturned == pdPASS );// Nos aseguramos de que se creo la tarea de una forma correcta
+
+	 /////////////////////////////////TAREA DE STOP //////////////////////////////////////
+
+
+	xReturned = xTaskCreate(vTask_Stop,"Task-Stop",STACK_SIZE,NULL,3,&xHandleTask_Stop );
+
+	 configASSERT( xReturned == pdPASS );// Nos aseguramos de que se creo la tarea de una forma correcta
+
+	 /////////////////////////////////TAREA DE GO//////////////////////////////////////
+
+	xReturned = xTaskCreate(vTask_Go,"Task-Go",STACK_SIZE,NULL,3,&xHandleTask_Go );
+
+	 configASSERT( xReturned == pdPASS );// Nos aseguramos de que se creo la tarea de una forma correcta
+
+	 /////////////////////////////////TAREA DE PID//////////////////////////////////////
+
+	xReturned = xTaskCreate(vTask_PID,"Task-PID",STACK_SIZE,NULL,3,&xHandleTask_PID );
+
+	 configASSERT( xReturned == pdPASS );// Nos aseguramos de que se creo la tarea de una forma correcta
+
+
+
+	 //Creacion de colas
+	 // Para cada funcion de crear se tiene que definir el largo de la cola,, y el
+	 // largo de cada elemento de la cola.
+	 xQueue_InputData = xQueueCreate(10,sizeof(char));
+	 configASSERT(xQueue_InputData != NULL);// Verificamos que se creo la cola correctamente
+
+	 //XQueue_Print = xQueueCreate (10, sizeof (struct AMessage *))
+	 xQueue_Print = xQueueCreate(10,sizeof(size_t));
+	 configASSERT(xQueue_Print != NULL); // Verificamos que se creo la cola correctamente
+
+	 //Creando el timer de FreeRTOS
+
+
+	 /* Start the created tasks running. */
+
+	 handler_led_timer = xTimerCreate("led_timer",
+			 	 	 	 	 	 	 pdMS_TO_TICKS(500),
+									 pdTRUE,
+									 (void *) 1,
+									 led_state_callback);
+
+	 xTimerStart(handler_led_timer, portMAX_DELAY);
+
+	 // Definicion del semaforo para saltar interrupciiones y definir tareas de diferentes prioridades
+
+
+
+	 vTaskStartScheduler();
+
+
+    /* Loop forever */
+	while(1){
+		//Si se llega hasta aca es porque algo salio mal
+
+	}
+}
+
+
+void inSystem (void){
+
+
+
+
+	//Descripcion de la configuracion
+
+	// Activamos la maxima velocidad del microcontrolador
+	RCC_enableMaxFrequencies(RCC_100MHz);
+
+//	//BLINKY LED
+	handlerPinA5.pGPIOx = GPIOA;
+	handlerPinA5.GPIO_PinConfig.GPIO_PinAltFunMode = AF0;
+	handlerPinA5.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
+	handlerPinA5.GPIO_PinConfig.GPIO_PinOPType = GPIO_OTYPE_PUSHPULL;
+	handlerPinA5.GPIO_PinConfig.GPIO_PinNumber = PIN_5;
+	handlerPinA5.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+	handlerPinA5.GPIO_PinConfig.GPIO_PinSpeed = GPIO_OSPEEDR_FAST;
+	GPIO_Config(&handlerPinA5);
+	GPIO_WritePin(&handlerPinA5, RESET);
+
+
+	//////////////////////////////////////////////////// Velocidad de motores //////////////////////////////////////////////
+
+
+		//PWM
+		// PWM motor 1
+		handlerPinPwm_1.pGPIOx                             = GPIOA;
+		handlerPinPwm_1.GPIO_PinConfig.GPIO_PinAltFunMode  = AF2;
+		handlerPinPwm_1.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
+		handlerPinPwm_1.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
+		handlerPinPwm_1.GPIO_PinConfig.GPIO_PinNumber      = PIN_0;
+		handlerPinPwm_1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		handlerPinPwm_1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
+		GPIO_Config(&handlerPinPwm_1);
+
+		handlerPWM_1.ptrTIMx            = TIM5;
+		handlerPWM_1.config.channel     = PWM_CHANNEL_1;
+		handlerPWM_1.config.duttyCicle  = fixed_dutty;
+		handlerPWM_1.config.periodo     = 33; // se maneja 30 hz por testeo
+		handlerPWM_1.config.prescaler   = PWM_SPEED_100MHz_1us;
+		handlerPWM_1.config.polarity    = PWM_ENABLE_POLARITY;
+		handlerPWM_1.config.optocoupler = PWM_ENABLE_OPTOCOUPLER;
+		pwm_Config(&handlerPWM_1);
+		startPwmSignal(&handlerPWM_1);
+
+		//PWM motor 2
+		handlerPinPwm_2.pGPIOx                             = GPIOA;
+		handlerPinPwm_2.GPIO_PinConfig.GPIO_PinAltFunMode  = AF2;
+		handlerPinPwm_2.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
+		handlerPinPwm_2.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
+		handlerPinPwm_2.GPIO_PinConfig.GPIO_PinNumber      = PIN_1;
+		handlerPinPwm_2.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		handlerPinPwm_2.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
+		GPIO_Config(&handlerPinPwm_2);
+
+		handlerPWM_2.ptrTIMx            = TIM5;
+		handlerPWM_2.config.channel     = PWM_CHANNEL_2;
+		handlerPWM_2.config.duttyCicle  = fixed_dutty;
+		handlerPWM_2.config.periodo     = 33;// se maneja 25 hz por testeo
+		handlerPWM_2.config.prescaler   = PWM_SPEED_100MHz_1us;
+		handlerPWM_2.config.polarity    = PWM_ENABLE_POLARITY;
+		handlerPWM_2.config.optocoupler = PWM_ENABLE_OPTOCOUPLER;
+		pwm_Config(&handlerPWM_2);
+		startPwmSignal(&handlerPWM_2);
+
+
+		//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
+
+		////////////////////////////////////// Enable 1 y 2, encendido y apagado de motores //////////////////////////////////////////////
+
+
+
+		handlerEn1PinC10.pGPIOx                             = GPIOC;
+		handlerEn1PinC10.GPIO_PinConfig.GPIO_PinAltFunMode  = AF0;
+		handlerEn1PinC10.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_OUT;
+		handlerEn1PinC10.GPIO_PinConfig.GPIO_PinNumber      = PIN_10;
+		handlerEn1PinC10.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
+		handlerEn1PinC10.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		handlerEn1PinC10.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
+		GPIO_Config(&handlerEn1PinC10);
+		GPIO_WritePin_Afopt(&handlerEn1PinC10, RESET);
+
+		handlerEn2PinC11.pGPIOx                             = GPIOC;
+		handlerEn2PinC11.GPIO_PinConfig.GPIO_PinAltFunMode  = AF0;
+		handlerEn2PinC11.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_OUT;
+		handlerEn2PinC11.GPIO_PinConfig.GPIO_PinNumber      = PIN_11;
+		handlerEn2PinC11.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
+		handlerEn2PinC11.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		handlerEn2PinC11.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
+		GPIO_Config(&handlerEn2PinC11);
+		GPIO_WritePin_Afopt(&handlerEn2PinC11, RESET);
+
+
+		//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
+
+		////////////////////////////////////// In 1 y 2, direccion de colores CW y CCW //////////////////////////////////////////////
+
+		handlerIn1PinC12.pGPIOx                             = GPIOC;
+		handlerIn1PinC12.GPIO_PinConfig.GPIO_PinAltFunMode  = AF0;
+		handlerIn1PinC12.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_OUT;
+		handlerIn1PinC12.GPIO_PinConfig.GPIO_PinNumber      = PIN_12;
+		handlerIn1PinC12.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
+		handlerIn1PinC12.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		handlerIn1PinC12.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
+		GPIO_Config(&handlerIn1PinC12);
+		GPIO_WritePin_Afopt(&handlerIn1PinC12, RESET); // default
+
+		handlerIn2PinD2.pGPIOx                             = GPIOD;
+		handlerIn2PinD2.GPIO_PinConfig.GPIO_PinAltFunMode  = AF0;
+		handlerIn2PinD2.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_OUT;
+		handlerIn2PinD2.GPIO_PinConfig.GPIO_PinNumber      = PIN_2;
+		handlerIn2PinD2.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
+		handlerIn2PinD2.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		handlerIn2PinD2.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
+		GPIO_Config(&handlerIn2PinD2);
+		GPIO_WritePin_Afopt(&handlerIn2PinD2, RESET); // default
+
+
+		//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
+
+		////////////////////////////////////// Conteo de encoders motor 1 y motor 2//////////////////////////////////////////////
+
+
+		handlerEncoder1PinC1.pGPIOx                             = GPIOC;
+		handlerEncoder1PinC1.GPIO_PinConfig.GPIO_PinAltFunMode  = AF0;
+		handlerEncoder1PinC1.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_IN;
+		handlerEncoder1PinC1.GPIO_PinConfig.GPIO_PinNumber      = PIN_1;
+		handlerEncoder1PinC1.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
+		handlerEncoder1PinC1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		handlerEncoder1PinC1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
+		handlerExtiConEnc_1.pGPIOHandler                        = &handlerEncoder1PinC1;
+		handlerExtiConEnc_1.edgeType                            = EXTERNAL_INTERRUPT_RASINGANDFALLING_EDGE;
+		extInt_Config(&handlerExtiConEnc_1);
+
+		handlerEncoder2PinC3.pGPIOx                             = GPIOC;
+		handlerEncoder2PinC3.GPIO_PinConfig.GPIO_PinAltFunMode  = AF0;
+		handlerEncoder2PinC3.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_IN;
+		handlerEncoder2PinC3.GPIO_PinConfig.GPIO_PinNumber      = PIN_3;
+		handlerEncoder2PinC3.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
+		handlerEncoder2PinC3.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		handlerEncoder2PinC3.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
+		handlerExtiConEnc_2.pGPIOHandler                        = &handlerEncoder2PinC3;
+		handlerExtiConEnc_2.edgeType                            = EXTERNAL_INTERRUPT_RASINGANDFALLING_EDGE;
+		extInt_Config(&handlerExtiConEnc_2);
+
+
+
+		//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
+
+		///////////////////////////////////////////Comunicación serial para comandos //////////////////////////////////////////////
+
+
+		//USART 2 Comunicacion serial
+		handlerUSART_RX.pGPIOx = GPIOA;
+		handlerUSART_RX.GPIO_PinConfig.GPIO_PinAltFunMode = AF7;
+		handlerUSART_RX.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
+		handlerUSART_RX.GPIO_PinConfig.GPIO_PinOPType = GPIO_OTYPE_PUSHPULL;
+		handlerUSART_RX.GPIO_PinConfig.GPIO_PinNumber = PIN_3;
+		handlerUSART_RX.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		handlerUSART_RX.GPIO_PinConfig.GPIO_PinSpeed = GPIO_OSPEEDR_FAST;
+		GPIO_Config(&handlerUSART_RX);
+
+
+		handlerUSART_TX.pGPIOx = GPIOA;
+		handlerUSART_TX.GPIO_PinConfig.GPIO_PinAltFunMode = AF7;
+		handlerUSART_TX.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
+		handlerUSART_TX.GPIO_PinConfig.GPIO_PinOPType = GPIO_OTYPE_PUSHPULL;
+		handlerUSART_TX.GPIO_PinConfig.GPIO_PinNumber = PIN_2;
+		handlerUSART_TX.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		handlerUSART_TX.GPIO_PinConfig.GPIO_PinSpeed = GPIO_OSPEEDR_FAST;
+		GPIO_Config(&handlerUSART_TX);
+
+		handlerUSART2.ptrUSARTx                      = USART2;
+		handlerUSART2.USART_Config.USART_MCUvelocity = USART_50MHz_VELOCITY;
+		handlerUSART2.USART_Config.USART_baudrate    = USART_BAUDRATE_19200;
+		handlerUSART2.USART_Config.USART_enableInRx  = USART_INTERRUPT_RX_ENABLE;
+		handlerUSART2.USART_Config.USART_enableInTx  = USART_INTERRUPT_TX_DISABLE;
+		handlerUSART2.USART_Config.USART_mode        = USART_MODE_RXTX;
+		handlerUSART2.USART_Config.USART_parity      = USART_PARITY_NONE;
+		handlerUSART2.USART_Config.USART_stopbits    = USART_STOPBIT_1;
+		handlerUSART2.USART_Config.USART_datasize    = USART_DATASIZE_8BIT;
+		USART_Config(&handlerUSART2);
+		usart_Set_Priority(&handlerUSART2, e_USART_PRIORITY_6);
+
+		//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
+
+		///////////////////////////////////////////Timer para el control de la Distancia y la velocidad//////////////////////////////////////////////
+
+		handlerTIM2_vel.ptrTIMx                           = TIM2;
+		handlerTIM2_vel.TIMx_Config.TIMx_interruptEnable  = BTIMER_ENABLE_INTERRUPT;
+		handlerTIM2_vel.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
+		handlerTIM2_vel.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_10us;
+		handlerTIM2_vel.TIMx_Config.TIMx_period           = 16;
+		BasicTimer_Config(&handlerTIM2_vel);
+		TIM_SetPriority(&handlerTIM2_vel, e_TIM_PRIORITY_6);
+
+
+		//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
+
+		////////////////////////////////Configuracion PINES B8 (SCL) B9 (SDA) e I2C1 //////////////////////////////////////////////
+
+		handler_PINB8_I2C1.pGPIOx                             = GPIOB;
+		handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinAltFunMode  = AF4;
+		handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
+		handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinNumber      = PIN_8;
+		handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_OPENDRAIN;
+		handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
+
+		handler_PINB9_I2C1.pGPIOx                             = GPIOB;
+		handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinAltFunMode  = AF4;
+		handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
+		handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinNumber      = PIN_9;
+		handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_OPENDRAIN;
+		handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+		handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
+
+		handler_I2C1.ptrI2Cx = I2C1;
+		handler_I2C1.I2C_Config.clkSpeed = MAIN_CLOCK_50_MHz_FOR_I2C;
+		handler_I2C1.I2C_Config.slaveAddress = ADDRESS_DOWN;
+		handler_I2C1.I2C_Config.modeI2C = I2C_MODE_FM;
+
+		handler_MPUAccel_6050.ptrGPIOhandlerSCL  = &handler_PINB8_I2C1;
+		handler_MPUAccel_6050.ptrGPIOhandlerSDA  = &handler_PINB9_I2C1;
+		handler_MPUAccel_6050.ptrI2Chandler   = &handler_I2C1;
+		handler_MPUAccel_6050.fullScaleACCEL  = ACCEL_2G;
+		handler_MPUAccel_6050.fullScaleGYRO   = GYRO_250;
+		configMPUAccel(&handler_MPUAccel_6050);
+
+
+		//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
+
+		////////////////////////////////Timer 4 para contador de tiempo ////////////////////////////////////
+
+		handlerTIM4_time.ptrTIMx                           = TIM4;
+		handlerTIM4_time.TIMx_Config.TIMx_interruptEnable  = BTIMER_DISABLE_INTERRUPT;
+		handlerTIM4_time.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
+		handlerTIM4_time.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_100us;
+		handlerTIM4_time.TIMx_Config.TIMx_period           = 1;
+		BasicTimer_Config(&handlerTIM4_time);
+
+
+
+
+}
+
+
+void int_Config_Motor(void){
+
+	//---------------Motor Izquierdo----------------
+	//Parametro de la señal del dutty
+	handler_Motor_1.configMotor.dutty =  28;
+	handler_Motor_1.configMotor.dir = SET;
+	//handler de los perifericos
+	handler_Motor_1.phandlerGPIOEN = &handlerEn1PinC10;
+	handler_Motor_1.phandlerGPIOIN = &handlerIn1PinC12;
+	handler_Motor_1.phandlerPWM = &handlerPWM_1;
+	//definicion de parametros
+	handler_Motor_1.parametersMotor.pid->e0 = handler_Motor_1.parametersMotor.pid->e_prev = 0;
+	handler_Motor_1.parametersMotor.pid->u =  handler_Motor_1.parametersMotor.pid->e_int = 0;
+	//Calculo de Constantes PID
+	handler_Motor_1.parametersMotor.pid->kp = 250;
+	handler_Motor_1.parametersMotor.pid->ki = 0;
+	handler_Motor_1.parametersMotor.pid->kd = 100;
+
+	//---------------Motor Derecho----------------
+	//Parametro de la señal del dutty
+	handler_Motor_2.configMotor.dutty =  28;
+	handler_Motor_2.configMotor.dir = SET;
+	//handler de los perifericos
+	handler_Motor_2.phandlerGPIOEN = &handlerEn2PinC11;
+	handler_Motor_2.phandlerGPIOIN = &handlerIn2PinD2;
+	handler_Motor_2.phandlerPWM = &handlerPWM_2;
+	//definicion de parametros
+	handler_Motor_2.parametersMotor.pid->e0 =  handler_Motor_2.parametersMotor.pid->e_prev = 0;
+	handler_Motor_2.parametersMotor.pid->u =  handler_Motor_2.parametersMotor.pid->e_int = 0;
+	//Calculo de Constantes PID
+	handler_Motor_2.parametersMotor.pid->kp = 250;
+	handler_Motor_2.parametersMotor.pid->ki = 0;
+	handler_Motor_2.parametersMotor.pid->kd = 100;
+
+	//---------------PID del la distancia-----------------
+	//definicion de parametros
+	parameter_PID_distace.e0 = parameter_PID_distace.e_prev = 0;
+	parameter_PID_distace.u =  parameter_PID_distace.e_int = 0;
+	//Calculo de Constantes PID
+	parameter_PID_distace.kp = 1.0;
+	parameter_PID_distace.ki = 0.1;
+	parameter_PID_distace.kd = 0.8;
+}
+
+//////////////////////////////////////////////////////////////////////// MENU STATE/////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void vTask_Menu( void * pvParameters ){
+
+	uint32_t cmd_addr;
+	command_t *cmd;
+
+	const char* msg_menu = "==================================\n"
+						   "|               MENU             |\n"
+						   "sGo # ---------> Ir indefinidamente \n"
+						   "Enter your choice here:";
+
+	while (1){
+
+		// Envia a imprimir en la consola lo que se debe mostrar en el menu
+		xQueueSend(xQueue_Print, &msg_menu, portMAX_DELAY);
+
+		// Se queda esperando a recibir el comando que se debe ejecutar
+		xTaskNotifyWait (0,0,&cmd_addr, portMAX_DELAY);
+		cmd = (command_t *) cmd_addr;
+
+		// El comando recibido solo tener el largo de 1 caracter
+		if(cmd->functionType != -1){
+
+			switch (cmd->functionType) {
+				case 1:{
+
+					//Envia a imprimir en la consola lo que se debe mostrar en el menu
+					xQueueSend(xQueue_Print,&msg_option_1,portMAX_DELAY);
+
+					// Aca se deberia notificar para cambiar la variable next_state y notification
+					next_state = sGo;
+					xTaskNotify(xHandleTask_Go,0,eNoAction);
+
+
+					break;
+				}case 2:{
+
+					//Envia a imprimir en la consola lo que se debe mostrar en el menu
+					xQueueSend(xQueue_Print,&msg_option_1,portMAX_DELAY);
+
+					// Aca se deberia notificar para cambiar la variable next_state y notification
+					next_state = sGo;
+					xTaskNotify(xHandleTask_Menu,0,eNoAction);
+
+
+					break;
+				}case 3:{
+					//Envia a imprimir en la consola lo que se debe mostrar en el menu
+					xQueueSend(xQueue_Print,&msg_option_2,portMAX_DELAY);
+
+					// Aca se deberia notificar para cambiar la variable next_state y notification
+					next_state = sMainMenu;
+					xTaskNotify(xHandleTask_Menu,0,eNoAction);
+
+
+
+					break;
+				}
+				default:{
+					xQueueSend(xQueue_Print,&msg_option_n,portMAX_DELAY);
+					continue;
+
+				}
+			}
+
+		}else{
+			xQueueSend(xQueue_Print, &msg_invalid,portMAX_DELAY);
+			//Aca se deberia notificar cambiar la variable next_state y notificar
+			next_state = sMainMenu;
+			xTaskNotify(xHandleTask_Menu,0,eNoAction);
+		}
+
+		// La tarea vuelve a quedar en un estado de espera por un tiempo indefinido
+		xTaskNotifyWait(0,0,NULL,portMAX_DELAY);
+
+
+
+	}// Fin del loop de esta tarea
+
+}
+
+void vTask_Commands( void * pvParameters ){
+
+	BaseType_t notify_status = {0};
+	command_t cmd = {0};
+
+   while(1){
+
+	   //Esperamos la notificacion desde la interrupcion
+	   notify_status = xTaskNotifyWait(0,0,NULL,portMAX_DELAY); // Esoerar hasta que la notificacion salte
+
+	   //Cuando es verdadero significa que se recibio una notificacion
+	   if (notify_status == pdPASS){
+
+		   process_command(&cmd);
+
+	   }
+   }
+}
+
+//////////////////////////////////////////////////////////////////////// MENU STATE/////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+
+////////////////////////////////////////////////////////////////////////STOP STATE/////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void vTask_Stop( void * pvParameters ){
+
+
+	while(1){
+
+		 //Esperamos la notificacion desde la interrupcion de comandos
+		 xTaskNotifyWait(0,0,NULL,portMAX_DELAY); // Esoerar hasta que la notificacion salte
+
+
+
+	}
+
+
+
+}
+
+////////////////////////////////////////////////////////////////////////STOP STATE/////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+
+////////////////////////////////////////////////////////////////////////GO STATE/////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void vTask_Go( void * pvParameters ){
+
+
+
+
+
+}
+
+void vTask_Print( void * pvParameters ){
+
+
+	uint32_t *msg;
+
+   while(1){
+
+	   xQueueReceive(xQueue_Print, &msg, portMAX_DELAY);
+	   //usart write command
+	   writeMsg(&handlerUSART2, (char*) msg);
+   }
+}
+
+void process_command (command_t *cmd){
+
+	extract_command(cmd);
+
+
+	if (next_state == sMainMenu){
+		//Notificamos a la tarea respectiva
+		xTaskNotify(xHandleTask_Menu,(uint32_t)cmd, eSetValueWithOverwrite);
+	}else{
+		//Notificamos a la tarea en el estado de parada.
+		xTaskNotify(xHandleTask_Stop,0, eNotifyAction);
+	}
+
+
+}
+
+int extract_command (command_t *cmd){
+
+	uint8_t item;
+	uint8_t counter_j = 0;
+	BaseType_t status;
+
+	status = uxQueueMessagesWaiting(xQueue_InputData);
+	if (status == 0){
+		return -1;
+	}
+
+	do{
+		// Recibimos un elemento y lo montamos en el item ademas no deseamos bloquarlo
+		status = xQueueReceive(xQueue_InputData, &item,0);
+		if(status == pdTRUE){
+
+			//vamos llenando el arreglo del comando
+			cmd->payload[counter_j++] = item;
+
+		}
+	}while(item != '#');
+
+	cmd->payload[counter_j-1] = '\0'; // Agregamos la terminacion nula para que tengamos un string
+
+	// Del comando entregado extraemos toda la informacion necesaria para poder usarla luego en los estados necesarios
+	sscanf((char *) cmd->payload, "%s %u %u %u %s", function ,&firstParameter, &secondParameter, &thirdParameter, userMsg);
+
+	if (strcmp(function, "Go") == 0){
+			cmd->functionType = 1;
+	}else{
+		cmd->functionType = -1;
+	}
+
+	return 0;
+
+}
+
+
+
+//Interripcion USART2
+void usart2Rx_Callback(void){
+
+	rxData = getRxData();
+//
+	BaseType_t xHigerPriorituTaskWoken;
+	(void) xHigerPriorituTaskWoken;
+	xHigerPriorituTaskWoken = pdFALSE;
+
+	//Verificamos que la cola aun no se encuentra llena
+	xReturned = xQueueIsQueueFullFromISR(xQueue_InputData);
+	// Si retorna que aun tiene espacio entoncesretorna falso
+
+	if (xReturned != pdTRUE ){
+
+		xQueueSendToBackFromISR(xQueue_InputData,
+								(void*) &rxData,
+								NULL);
+
+
+	}else{
+
+
+		if (rxData == '#'){
+
+			xQueueReceiveFromISR(xQueue_InputData,
+								 (void *) &rxData,
+								 NULL);
+			xQueueSendToBackFromISR(xQueue_InputData,
+									(void *) &rxData
+									,NULL);
+		}
+
+	}
+
+	if (rxData == '#'){
+		// Se manda la notificacion de la tarea que se quiere mover al estado de RUN
+		xTaskNotifyFromISR(xHandleTask_Commands,
+						   0,
+						   eNoAction,
+						   NULL);
+//		xSemaphoreGiveFromISR(xSemaphore_Handle, &xHigerPriorituTaskWoken);
+
+	}
+}
+
+//Definimos la funcion que se desea ejecutar cuando se genera la interrupcion por el TIM2
+void BasicTimer2_Callback(void)
+{
+	//----------------Accion a Realizar con el tiempo del TIMER--------------------
+	//Leemos el ángulo
+	//Lectura velocidad angular
+	float w = readGyro_Z(&handler_MPUAccel_6050) - cal_Gyro;
+	//Calculo angulo
+	float ang_d = (w * 16)/1000; // conversion de velocidad angular a grados absolutos con respecto al inicio del programa
+
+
+	parameters_Pos_Robot.grad_relativo = ang_d;
+
+	//Verificamos el modo
+	if(flag_mode == 1)
+	{
+		//Acumulamos los angulos
+		sum_ang += parameters_Pos_Robot.grad_relativo;
+		//Se acumula el tiempo
+		time_accumulated += handlerTIM2_vel.TIMx_Config.TIMx_period;
+
+		//----------------Accion a realizar con un tiempo especifico--------------------
+		if(counting_action>=timeAction_TIMER_Sampling)
+		{
+			//Guardamos el tiempo entre acciones especificas
+			time_accion = time_accumulated;
+			//Calculamos el angulo promedio y la establecemis como el angulo relativo
+			promAng = sum_ang/counting_action;
+			parameters_Pos_Robot.phi_relativo = (promAng*M_PI)/180;          //[rad]
+			parameters_Pos_Robot.phi_relativo = atan2(sin(parameters_Pos_Robot.phi_relativo),cos(parameters_Pos_Robot.phi_relativo));
+			//Calculamos la velocidad
+			handler_Motor_1.parametersMotor.dis = (cm_1*handler_Motor_1.parametersMotor.counts);                   //[mm]
+			handler_Motor_2.parametersMotor.dis = (cm_2*handler_Motor_2.parametersMotor.counts);				   //[mm]
+			handler_Motor_1.parametersMotor.vel = handler_Motor_1.parametersMotor.dis/time_accion;      //[m/s]
+			handler_Motor_2.parametersMotor.vel = handler_Motor_2.parametersMotor.dis/time_accion;      //[m/s]
+			//Reiniciamos el numero de conteos
+			handler_Motor_1.parametersMotor.counts = 0;
+			handler_Motor_2.parametersMotor.counts = 0;
+			//Reiniciamos variable
+			sum_ang = 0;
+			//Reiniciamos tiempo
+			time_accumulated = 0;
+			//Reiniciamos el contador de accion
+			counting_action = 0;
+			//Levantamos bandera
+			flag_action = 1;
+		}
+		else{ counting_action++; }
+	}
+	else if(flag_mode==2)
+	{
+		//----------------Accion a realizar con un tiempo especifico--------------------
+		if(counting_action>=timeAction_TIMER_Sampling)
+		{
+			//Guardamos el tiempo entre acciones especificas
+			time_accion = time_accumulated;
+			//Calculo de la distancia recorrida por cada rueda
+			handler_Motor_1.parametersMotor.dis = (cm_1*handler_Motor_1.parametersMotor.counts);                   //[mm]
+			handler_Motor_2.parametersMotor.dis = (cm_2*handler_Motor_2.parametersMotor.counts);				   //[mm]
+			handler_Motor_1.parametersMotor.vel = handler_Motor_1.parametersMotor.dis/time_accion;      //[m/s]
+			handler_Motor_2.parametersMotor.vel = handler_Motor_2.parametersMotor.dis/time_accion;      //[m/s]
+			//Reiniciamos el numero de conteos
+			handler_Motor_2.parametersMotor.counts = 0;
+			handler_Motor_1.parametersMotor.counts = 0;
+			//Calculo angulo debido al desplazamiento del ICR
+			ang_for_Displament_ICR += (((handler_Motor_2.parametersMotor.dis - handler_Motor_1.parametersMotor.dis)*100)
+					/distanceBetweenWheels)*(180/M_PI); //[rad]
+			//Reiniciamos tiempo
+			time_accumulated = 0;
+			//Reiniciamos el contador de accion
+			counting_action = 0;
+		}
+		else{counting_action++;}
+
+		//Combinar ambos ángulos
+		ang_complementary = parameters_Pos_Robot.grad_relativo + ang_for_Displament_ICR;
+	}
+	else{  __NOP(); }
+}
+
+// Calibracion Gyros:
+
+float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis){
+
+	uint16_t  numMedidas = 200;
+	float    medidas    = 0;
+	float    suma       = 0;
+	uint8_t  contador   = 0;
+	float    promedio   = 0;
+
+	switch (axis) {
+		case 'x':{
+			while (contador < numMedidas){
+				medidas = readGyro_X(ptrMPUAccel);
+				suma += medidas;
+				contador++;
+				delay_ms(1);
+			}
+			promedio = suma / numMedidas;
+			break;
+		}case 'y':{
+			while (contador < numMedidas){
+				medidas = readGyro_Y(ptrMPUAccel);
+				suma += medidas;
+				contador++;
+			}
+			promedio = suma / numMedidas;
+			break;
+		}case 'z':{
+			while (contador < numMedidas){
+				medidas = readGyro_Z(ptrMPUAccel);
+				suma += medidas;
+				contador++;
+			}
+			promedio = suma / numMedidas;
+			break;
+		}default:{
+			break;
+		}
+	}
+
+
+	return promedio;
+}
+
+
+void delay_ms(uint16_t time_to_wait_ms){
+
+	startTimer(&handlerTIM4_time);
+	// definimos una variable que almacenara el valor del counter en el timer 4
+	uint16_t limit = (time_to_wait_ms * 10) - 1 ;
+	uint16_t CNT   = 0;
+
+	// comparamos el counter con el limit, y comenzamos a que cuente cada que el timer 4 haga una cuenta nueva
+	while (CNT < limit){
+		if (handlerTIM4_time.ptrTIMx->CNT == handlerTIM4_time.ptrTIMx->ARR)  {CNT += handlerTIM4_time.ptrTIMx->CNT;}
+	}
+	stopTimer(&handlerTIM4_time);
+}
+
+void init_coordinates(void)
+{
+	//Reinicio de varibable
+	ang_for_Displament_ICR = 0;
+	ang_complementary = 0;
+	//Reinicio de parametros de la estructura de la posicion del robot
+	parameters_Pos_Robot.grad_grobal = parameters_Pos_Robot.grad_relativo       = parameters_Pos_Robot.phi_relativo= 0;
+	parameters_Pos_Robot.xg_position = parameters_Pos_Robot.xg_position_inicial = parameters_Pos_Robot.xr_position = 0;
+	parameters_Pos_Robot.yg_position = parameters_Pos_Robot.yg_position_inicial = parameters_Pos_Robot.yr_position = 0;
+	//Reinicio de parametros de la structura de path
+	parameters_Path_Robot.goal_Position_x  = parameters_Path_Robot.goal_Position_y        = 0;
+	parameters_Path_Robot.line_Distance    = 0;
+	parameters_Path_Robot.rotative_Grad    = parameters_Path_Robot.rotative_Grad_Relative = 0;
+	parameters_Path_Robot.start_position_x =  parameters_Path_Robot.start_position_y      = 0;
+}
+
+//--------------------Operacion Motor----------------------
+void status_motor(uint8_t status){
+
+
+		// ENCENCEMOS EL MOTOR 1 (LEFT)
+		// Se setea la direccion seleccionada
+		GPIO_WritePin_Afopt(&handlerIn1PinC12, SET); // Direccion hacia adelante
+		//Se enciende el motor 1
+		enableOutput(&handlerPWM_1);
+		GPIO_WritePin_Afopt(&handlerEn1PinC10,SET); // Encendemos el motor
+
+		// ENCENCEMOS EL MOTOR 2 (Right)
+		// Se setea la direccion seleccionada
+		GPIO_WritePin_Afopt(&handlerIn2PinD2, SET);
+		//Se enciende el motor 2
+		enableOutput(&handlerPWM_2);
+		GPIO_WritePin_Afopt (&handlerEn2PinC11,SET);
+
+		startTimer(&handlerTIM2_vel);
+
+
+	if(status == 1)
+	{
+		//Activamos el motor
+
+
+		statusInOutPWM(handler_Motor_1.phandlerPWM, CHANNEL_ENABLE);
+		statusInOutPWM(handler_Motor_2.phandlerPWM, CHANNEL_ENABLE);
+		GPIO_writePin(handler_Motor_L.phandlerGPIOIN, (handler_Motor_L.configMotor.dir)&SET);
+		GPIO_writePin(handler_Motor_R.phandlerGPIOIN, (handler_Motor_R.configMotor.dir)&SET);
+		GPIO_writePin(handler_Motor_L.phandlerGPIOEN, RESET);
+		GPIO_writePin(handler_Motor_R.phandlerGPIOEN, RESET);
+		//Activamos la interrupcion
+		statusiInterruptionTimer(&handler_TIMER_Sampling, INTERRUPTION_ENABLE);
+	}
+	else
+	{
+		//Desactivamos el motor
+		statusInOutPWM(handler_Motor_L.phandlerPWM, CHANNEL_DISABLE);
+		statusInOutPWM(handler_Motor_R.phandlerPWM, CHANNEL_DISABLE);
+		GPIO_writePin(handler_Motor_L.phandlerGPIOIN, (handler_Motor_L.configMotor.dir)&RESET);
+		GPIO_writePin(handler_Motor_R.phandlerGPIOIN, (handler_Motor_R.configMotor.dir)&RESET);
+		GPIO_writePin(handler_Motor_L.phandlerGPIOEN, SET);
+		GPIO_writePin(handler_Motor_R.phandlerGPIOEN, SET);
+		//Reiniciamos Bandera
+		flag_mode = 0;
+		//Desactivamos interrupcion
+		delay_ms(200);
+		statusiInterruptionTimer(&handler_TIMER_Sampling, INTERRUPTION_DISABLE);
+	}
+}
+
+
+
+
+
+void led_state_callback (TimerHandle_t xTimer){
+
+	GPIOxTooglePin(&handlerPinA5);
+
+}

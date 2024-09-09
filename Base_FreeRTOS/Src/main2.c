@@ -102,6 +102,7 @@ void inSystem (void);
 void parseCommands(char *stringVector);
 void process_command (command_t *cmd);
 int extract_command (command_t *cmd);
+void On_Off_motor(uint8_t status);
 
 // FUNCION DELAY
 void delay_ms(uint16_t time_to_wait_ms);
@@ -157,7 +158,7 @@ EXTI_Config_t handlerExtiConEnc_2 = {0};
 
 //Timers
 BasicTimer_Handler_t handlerTimerBlinky = {0}; // Timer 3
-BasicTimer_Handler_t handlerTIM2_vel    = {0}; // Timer 2
+BasicTimer_Handler_t handlerTIM2_PARAMETROS_MOVIMIENTO    = {0}; // Timer 2
 BasicTimer_Handler_t handlerTIM4_time   = {0}; // Timer 4
 
 //PWMs
@@ -176,8 +177,8 @@ Motor_Handler_t handler_Motor_2 = {0};
 
 //-----Macros------
 #define distanceBetweenWheels 10600             //Distacia entre ruedas     10430
-#define DL 5170                                 //Diametro rueda izquierda
-#define DR 5145                                 //Diametro rueda Derecha
+#define D1 5170                                 //Diametro rueda izquierda
+#define D2 5145                                 //Diametro rueda Derecha
 #define Ce 72                                   //Numero de interrupciones en el incoder
 
 
@@ -212,14 +213,17 @@ PID_Parameters_t parameter_PID_distace = {0};        //estructura para los param
 /// Variables para Odometria
 Parameters_Path_t parameters_Path_Robot    = {0};           //Estructura que almacena los parametros del camino a recorrer
 Parameters_Position_t parameters_Pos_Robot = {0}; 	//Estructura que almacena la posicion del robot
-double cal_Gyro = 0;
+double cal_Gyro = 0;   // variable que almacena la calibración del giroscopio
 float ang_d = 0;
 float sum_ang = 0;
 float promAng = 0;
-float cm_1 = 0;
-float cm_2 = 0;
+float cm_1 = ((M_PI*D1)/(100*Ce)); // Numero de milimetros por paso de la rueda izquierda
+float cm_2 = ((M_PI*D2)/(100*Ce)); // Numero de milimetros por paso de la rueda derecha
 double ang_for_Displament_ICR = 0;
 double ang_complementary = 0;
+
+// VARIABLES VARIAS DEL ROBOT
+#define fixed_dutty 28
 
 int main(void)
 {
@@ -369,14 +373,12 @@ void inSystem (void){
 
 		handlerPWM_1.ptrTIMx            = TIM5;
 		handlerPWM_1.config.channel     = PWM_CHANNEL_1;
-		handlerPWM_1.config.duttyCicle  = 0;
-	//	counter = 50;
-		handlerPWM_1.config.periodo     = 40; // se maneja 25 hz por testeo
+		handlerPWM_1.config.duttyCicle  = fixed_dutty;
+		handlerPWM_1.config.periodo     = 33; // se maneja 30 hz por testeo
 		handlerPWM_1.config.prescaler   = PWM_SPEED_100MHz_1us;
 		handlerPWM_1.config.polarity    = PWM_ENABLE_POLARITY;
 		handlerPWM_1.config.optocoupler = PWM_ENABLE_OPTOCOUPLER;
 		pwm_Config(&handlerPWM_1);
-		startPwmSignal(&handlerPWM_1);
 
 		//PWM motor 2
 		handlerPinPwm_2.pGPIOx                             = GPIOA;
@@ -390,13 +392,13 @@ void inSystem (void){
 
 		handlerPWM_2.ptrTIMx            = TIM5;
 		handlerPWM_2.config.channel     = PWM_CHANNEL_2;
-		handlerPWM_2.config.duttyCicle  = 0;
-		handlerPWM_2.config.periodo     = 40;// se maneja 25 hz por testeo
+		handlerPWM_2.config.duttyCicle  = fixed_dutty;
+		handlerPWM_2.config.periodo     = 33;// se maneja 25 hz por testeo
 		handlerPWM_2.config.prescaler   = PWM_SPEED_100MHz_1us;
 		handlerPWM_2.config.polarity    = PWM_ENABLE_POLARITY;
 		handlerPWM_2.config.optocoupler = PWM_ENABLE_OPTOCOUPLER;
 		pwm_Config(&handlerPWM_2);
-		startPwmSignal(&handlerPWM_2);
+		startPwmSignal(&handlerPWM_2); // INICIAMOS EL TIMER 5 PARA AMBOS CANALES
 
 
 		//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
@@ -521,13 +523,13 @@ void inSystem (void){
 
 		///////////////////////////////////////////Timer para el control de la Distancia y la velocidad//////////////////////////////////////////////
 
-		handlerTIM2_vel.ptrTIMx                           = TIM2;
-		handlerTIM2_vel.TIMx_Config.TIMx_interruptEnable  = BTIMER_ENABLE_INTERRUPT;
-		handlerTIM2_vel.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
-		handlerTIM2_vel.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_10us;
-		handlerTIM2_vel.TIMx_Config.TIMx_period           = 16;
-		BasicTimer_Config(&handlerTIM2_vel);
-		TIM_SetPriority(&handlerTIM2_vel, e_TIM_PRIORITY_6);
+		handlerTIM2_PARAMETROS_MOVIMIENTO.ptrTIMx                           = TIM2;
+		handlerTIM2_PARAMETROS_MOVIMIENTO.TIMx_Config.TIMx_interruptEnable  = BTIMER_ENABLE_INTERRUPT;
+		handlerTIM2_PARAMETROS_MOVIMIENTO.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
+		handlerTIM2_PARAMETROS_MOVIMIENTO.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_10us;
+		handlerTIM2_PARAMETROS_MOVIMIENTO.TIMx_Config.TIMx_period           = 16;
+		BasicTimer_Config(&handlerTIM2_PARAMETROS_MOVIMIENTO);
+		TIM_SetPriority(&handlerTIM2_PARAMETROS_MOVIMIENTO, e_TIM_PRIORITY_6);
 
 
 		//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
@@ -737,18 +739,10 @@ void vTask_Commands( void * pvParameters ){
 
 void vTask_Stop( void * pvParameters ){
 
-
 	while(1){
-
 		 //Esperamos la notificacion desde la interrupcion de comandos
 		 xTaskNotifyWait(0,0,NULL,portMAX_DELAY); // Esoerar hasta que la notificacion salte
-
-
-
 	}
-
-
-
 }
 
 ////////////////////////////////////////////////////////////////////////STOP STATE/////////////////////////////////////////////////////////////////////////////////
@@ -764,10 +758,29 @@ void vTask_Stop( void * pvParameters ){
 void vTask_Go( void * pvParameters ){
 
 
+	while(1){
+
+		//Esperamos la notificacion desde la interrupcion de comandos
+		 xTaskNotifyWait(0,0,NULL,portMAX_DELAY); // Esoerar hasta que la notificacion salte
+
+		 On_Off_motor(SET);
+		 startTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO);
+
+	}
+
+
+}
+
+
+void vTask_PID( void * pvParameters ){
 
 
 
 }
+
+////////////////////////////////////////////////////////////////////////GO STATE/////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 void vTask_Print( void * pvParameters ){
 
@@ -792,7 +805,7 @@ void process_command (command_t *cmd){
 		xTaskNotify(xHandleTask_Menu,(uint32_t)cmd, eSetValueWithOverwrite);
 	}else{
 		//Notificamos a la tarea en el estado de parada.
-		xTaskNotify(xHandleTask_Stop,0, eNotifyAction);
+		xTaskNotify(xHandleTask_Stop,0, eNoAction);
 	}
 
 
@@ -884,8 +897,7 @@ void usart2Rx_Callback(void){
 }
 
 //Definimos la funcion que se desea ejecutar cuando se genera la interrupcion por el TIM2
-void BasicTimer2_Callback(void)
-{
+void BasicTimer2_Callback(void){
 	//----------------Accion a Realizar con el tiempo del TIMER--------------------
 	//Leemos el ángulo
 	//Lectura velocidad angular
@@ -902,7 +914,7 @@ void BasicTimer2_Callback(void)
 		//Acumulamos los angulos
 		sum_ang += parameters_Pos_Robot.grad_relativo;
 		//Se acumula el tiempo
-		time_accumulated += handlerTIM2_vel.TIMx_Config.TIMx_period;
+		time_accumulated += handlerTIM2_PARAMETROS_MOVIMIENTO.TIMx_Config.TIMx_period;
 
 		//----------------Accion a realizar con un tiempo especifico--------------------
 		if(counting_action>=timeAction_TIMER_Sampling)
@@ -1040,34 +1052,38 @@ void init_coordinates(void)
 }
 
 //--------------------Operacion Motor----------------------
-void status_motor(uint8_t status)
-{
+void On_Off_motor(uint8_t status){
+
 	if(status == 1)
 	{
 		//Activamos el motor
-		statusInOutPWM(handler_Motor_L.phandlerPWM, CHANNEL_ENABLE);
-		statusInOutPWM(handler_Motor_R.phandlerPWM, CHANNEL_ENABLE);
-		GPIO_writePin(handler_Motor_L.phandlerGPIOIN, (handler_Motor_L.configMotor.dir)&SET);
-		GPIO_writePin(handler_Motor_R.phandlerGPIOIN, (handler_Motor_R.configMotor.dir)&SET);
-		GPIO_writePin(handler_Motor_L.phandlerGPIOEN, RESET);
-		GPIO_writePin(handler_Motor_R.phandlerGPIOEN, RESET);
-		//Activamos la interrupcion
-		statusiInterruptionTimer(&handler_TIMER_Sampling, INTERRUPTION_ENABLE);
+
+		// ENCENCEMOS EL MOTOR 1 (LEFT)
+			// Se setea la direccion seleccionada
+			GPIO_WritePin_Afopt(handler_Motor_1.phandlerGPIOIN , SET); // Direccion hacia adelante
+			//Se enciende el motor 1
+			enableOutput(handler_Motor_1.phandlerPWM);
+			GPIO_WritePin_Afopt(handler_Motor_1.phandlerGPIOEN,SET); // Encendemos el motor 1
+
+			// ENCENCEMOS EL MOTOR 2 (Right)
+			// Se setea la direccion seleccionada
+			GPIO_WritePin_Afopt(handler_Motor_2.phandlerGPIOIN, SET); // Encendemos el motor 2
+			//Se enciende el motor 2
+			enableOutput(handler_Motor_2.phandlerPWM);
+			GPIO_WritePin_Afopt (handler_Motor_2.phandlerGPIOEN,SET);
 	}
 	else
 	{
-		//Desactivamos el motor
-		statusInOutPWM(handler_Motor_L.phandlerPWM, CHANNEL_DISABLE);
-		statusInOutPWM(handler_Motor_R.phandlerPWM, CHANNEL_DISABLE);
-		GPIO_writePin(handler_Motor_L.phandlerGPIOIN, (handler_Motor_L.configMotor.dir)&RESET);
-		GPIO_writePin(handler_Motor_R.phandlerGPIOIN, (handler_Motor_R.configMotor.dir)&RESET);
-		GPIO_writePin(handler_Motor_L.phandlerGPIOEN, SET);
-		GPIO_writePin(handler_Motor_R.phandlerGPIOEN, SET);
-		//Reiniciamos Bandera
-		flag_mode = 0;
-		//Desactivamos interrupcion
-		delay_ms(200);
-		statusiInterruptionTimer(&handler_TIMER_Sampling, INTERRUPTION_DISABLE);
+		//DESACTIVAMOS EL MOTOR
+
+		// APAGAMOS EL MOTOR 1 (LEFT)
+			//Se enciende el motor 1
+			disableOutput(handler_Motor_1.phandlerPWM);
+			GPIO_WritePin_Afopt(handler_Motor_1.phandlerGPIOEN, RESET); // Apagamos el motor 1
+			// APAGAMOS EL MOTOR 2 (Right)
+			//Se enciende el motor 2
+			disableOutput(handler_Motor_2.phandlerPWM);
+			GPIO_WritePin_Afopt (handler_Motor_2.phandlerGPIOEN,RESET);
 	}
 }
 
