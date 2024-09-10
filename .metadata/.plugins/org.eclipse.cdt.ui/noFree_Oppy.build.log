@@ -1,0 +1,10 @@
+02:19:33 **** Incremental Build of configuration Debug for project noFree_Oppy ****
+make -j12 all 
+arm-none-eabi-size   noFree_Oppy.elf 
+   text	   data	    bss	    dec	    hex	filename
+  43248	    488	   2328	  46064	   b3f0	noFree_Oppy.elf
+Finished building: default.size.stdout
+ 
+
+02:19:33 Build Finished. 0 errors, 0 warnings. (took 299ms)
+
