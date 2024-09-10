@@ -37,13 +37,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_macro  00011bec  00000000  00000000  0002f8d0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0000cd4d  00000000  00000000  000414bc  2**0
+ 17 .debug_line   0000d5c7  00000000  00000000  000414bc  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    000608dc  00000000  00000000  0004e209  2**0
+ 18 .debug_str    0006092a  00000000  00000000  0004ea83  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000050  00000000  00000000  000aeae5  2**0
+ 19 .comment      00000050  00000000  00000000  000af3ad  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00003890  00000000  00000000  000aeb38  2**2
+ 20 .debug_frame  00003890  00000000  00000000  000af400  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -784,7 +784,7 @@ Disassembly of section .text:
  8000a4a:	e712      	b.n	8000872 <__aeabi_dmul+0x24a>
 
 08000a4c <__gedf2>:
- 8000a4c:	f04f 3cff 	mov.w	ip, #4294967295	; 0xffffffff
+ 8000a4c:	f04f 3cff 	mov.w	ip, #4294967295
  8000a50:	e006      	b.n	8000a60 <__cmpdf2+0x4>
  8000a52:	bf00      	nop
 
@@ -961,7 +961,7 @@ Disassembly of section .text:
  8000c04:	4770      	bx	lr
  8000c06:	ea50 3001 	orrs.w	r0, r0, r1, lsl #12
  8000c0a:	d102      	bne.n	8000c12 <__aeabi_d2uiz+0x3a>
- 8000c0c:	f04f 30ff 	mov.w	r0, #4294967295	; 0xffffffff
+ 8000c0c:	f04f 30ff 	mov.w	r0, #4294967295
  8000c10:	4770      	bx	lr
  8000c12:	f04f 0000 	mov.w	r0, #0
  8000c16:	4770      	bx	lr
@@ -1342,7 +1342,7 @@ int main(void)
  8000ec0:	681c      	ldr	r4, [r3, #0]
  8000ec2:	f002 f825 	bl	8002f10 <xTaskGetTickCount>
  8000ec6:	4602      	mov	r2, r0
- 8000ec8:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
+ 8000ec8:	f04f 33ff 	mov.w	r3, #4294967295
  8000ecc:	9300      	str	r3, [sp, #0]
  8000ece:	2300      	movs	r3, #0
  8000ed0:	2101      	movs	r1, #1
@@ -2162,13 +2162,13 @@ void vTask_Menu( void * pvParameters ){
  80013d2:	6818      	ldr	r0, [r3, #0]
  80013d4:	f107 010c 	add.w	r1, r7, #12
  80013d8:	2300      	movs	r3, #0
- 80013da:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
+ 80013da:	f04f 32ff 	mov.w	r2, #4294967295
  80013de:	f000 fe8b 	bl	80020f8 <xQueueGenericSend>
 
 		// Se queda esperando a recibir el comando que se debe ejecutar
 		xTaskNotifyWait (0,0,&cmd_addr, portMAX_DELAY);
  80013e2:	f107 0310 	add.w	r3, r7, #16
- 80013e6:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
+ 80013e6:	f04f 32ff 	mov.w	r2, #4294967295
  80013ea:	9200      	str	r2, [sp, #0]
  80013ec:	2200      	movs	r2, #0
  80013ee:	2100      	movs	r1, #0
@@ -2182,7 +2182,7 @@ void vTask_Menu( void * pvParameters ){
 		if(cmd->functionType != -1){
  80013fa:	697b      	ldr	r3, [r7, #20]
  80013fc:	68db      	ldr	r3, [r3, #12]
- 80013fe:	f1b3 3fff 	cmp.w	r3, #4294967295	; 0xffffffff
+ 80013fe:	f1b3 3fff 	cmp.w	r3, #4294967295
  8001402:	d052      	beq.n	80014aa <vTask_Menu+0xe6>
 
 			switch (cmd->functionType) {
@@ -2204,7 +2204,7 @@ void vTask_Menu( void * pvParameters ){
  800141a:	4b34      	ldr	r3, [pc, #208]	; (80014ec <vTask_Menu+0x128>)
  800141c:	6818      	ldr	r0, [r3, #0]
  800141e:	2300      	movs	r3, #0
- 8001420:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
+ 8001420:	f04f 32ff 	mov.w	r2, #4294967295
  8001424:	4932      	ldr	r1, [pc, #200]	; (80014f0 <vTask_Menu+0x12c>)
  8001426:	f000 fe67 	bl	80020f8 <xQueueGenericSend>
 
@@ -2233,7 +2233,7 @@ void vTask_Menu( void * pvParameters ){
  8001444:	4b29      	ldr	r3, [pc, #164]	; (80014ec <vTask_Menu+0x128>)
  8001446:	6818      	ldr	r0, [r3, #0]
  8001448:	2300      	movs	r3, #0
- 800144a:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
+ 800144a:	f04f 32ff 	mov.w	r2, #4294967295
  800144e:	4928      	ldr	r1, [pc, #160]	; (80014f0 <vTask_Menu+0x12c>)
  8001450:	f000 fe52 	bl	80020f8 <xQueueGenericSend>
 
@@ -2261,7 +2261,7 @@ void vTask_Menu( void * pvParameters ){
  800146e:	4b1f      	ldr	r3, [pc, #124]	; (80014ec <vTask_Menu+0x128>)
  8001470:	6818      	ldr	r0, [r3, #0]
  8001472:	2300      	movs	r3, #0
- 8001474:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
+ 8001474:	f04f 32ff 	mov.w	r2, #4294967295
  8001478:	4921      	ldr	r1, [pc, #132]	; (8001500 <vTask_Menu+0x13c>)
  800147a:	f000 fe3d 	bl	80020f8 <xQueueGenericSend>
 
@@ -2290,7 +2290,7 @@ void vTask_Menu( void * pvParameters ){
  8001498:	4b14      	ldr	r3, [pc, #80]	; (80014ec <vTask_Menu+0x128>)
  800149a:	6818      	ldr	r0, [r3, #0]
  800149c:	2300      	movs	r3, #0
- 800149e:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
+ 800149e:	f04f 32ff 	mov.w	r2, #4294967295
  80014a2:	4918      	ldr	r1, [pc, #96]	; (8001504 <vTask_Menu+0x140>)
  80014a4:	f000 fe28 	bl	80020f8 <xQueueGenericSend>
 					continue;
@@ -2304,7 +2304,7 @@ void vTask_Menu( void * pvParameters ){
  80014aa:	4b10      	ldr	r3, [pc, #64]	; (80014ec <vTask_Menu+0x128>)
  80014ac:	6818      	ldr	r0, [r3, #0]
  80014ae:	2300      	movs	r3, #0
- 80014b0:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
+ 80014b0:	f04f 32ff 	mov.w	r2, #4294967295
  80014b4:	4914      	ldr	r1, [pc, #80]	; (8001508 <vTask_Menu+0x144>)
  80014b6:	f000 fe1f 	bl	80020f8 <xQueueGenericSend>
 			//Aca se deberia notificar cambiar la variable next_state y notificar
@@ -2325,7 +2325,7 @@ void vTask_Menu( void * pvParameters ){
 
 		// La tarea vuelve a quedar en un estado de espera por un tiempo indefinido
 		xTaskNotifyWait(0,0,NULL,portMAX_DELAY);
- 80014d2:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
+ 80014d2:	f04f 33ff 	mov.w	r3, #4294967295
  80014d6:	9300      	str	r3, [sp, #0]
  80014d8:	2300      	movs	r3, #0
  80014da:	2200      	movs	r2, #0
@@ -2372,7 +2372,7 @@ void vTask_Commands( void * pvParameters ){
 
 	   //Esperamos la notificacion desde la interrupcion
 	   notify_status = xTaskNotifyWait(0,0,NULL,portMAX_DELAY); // Esoerar hasta que la notificacion salte
- 8001526:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
+ 8001526:	f04f 33ff 	mov.w	r3, #4294967295
  800152a:	9300      	str	r3, [sp, #0]
  800152c:	2300      	movs	r3, #0
  800152e:	2200      	movs	r2, #0
@@ -2409,7 +2409,7 @@ void vTask_Stop( void * pvParameters ){
 	while(1){
 		 //Esperamos la notificacion desde la interrupcion de comandos
 		 xTaskNotifyWait(0,0,NULL,portMAX_DELAY); // Esoerar hasta que la notificacion salte
- 8001554:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
+ 8001554:	f04f 33ff 	mov.w	r3, #4294967295
  8001558:	9300      	str	r3, [sp, #0]
  800155a:	2300      	movs	r3, #0
  800155c:	2200      	movs	r2, #0
@@ -2435,7 +2435,7 @@ void vTask_Go( void * pvParameters ){
 
 		//Esperamos la notificacion desde la interrupcion de comandos
 		 xTaskNotifyWait(0,0,NULL,portMAX_DELAY); // Esoerar hasta que la notificacion salte
- 8001570:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
+ 8001570:	f04f 33ff 	mov.w	r3, #4294967295
  8001574:	9300      	str	r3, [sp, #0]
  8001576:	2300      	movs	r3, #0
  8001578:	2200      	movs	r2, #0
@@ -2494,7 +2494,7 @@ void vTask_Print( void * pvParameters ){
  80015b0:	4b07      	ldr	r3, [pc, #28]	; (80015d0 <vTask_Print+0x28>)
  80015b2:	681b      	ldr	r3, [r3, #0]
  80015b4:	f107 010c 	add.w	r1, r7, #12
- 80015b8:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
+ 80015b8:	f04f 32ff 	mov.w	r2, #4294967295
  80015bc:	4618      	mov	r0, r3
  80015be:	f000 ff43 	bl	8002448 <xQueueReceive>
 	   //usart write command
@@ -2590,7 +2590,7 @@ int extract_command (command_t *cmd){
  8001644:	2b00      	cmp	r3, #0
  8001646:	d102      	bne.n	800164e <extract_command+0x26>
 		return -1;
- 8001648:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
+ 8001648:	f04f 33ff 	mov.w	r3, #4294967295
  800164c:	e036      	b.n	80016bc <extract_command+0x94>
 	}
 
@@ -2661,7 +2661,7 @@ int extract_command (command_t *cmd){
 	}else{
 		cmd->functionType = -1;
  80016b2:	687b      	ldr	r3, [r7, #4]
- 80016b4:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
+ 80016b4:	f04f 32ff 	mov.w	r2, #4294967295
  80016b8:	60da      	str	r2, [r3, #12]
 	}
 
@@ -3664,7 +3664,7 @@ void vListInitialise( List_t * const pxList )
      * ensure it remains at the end of the list. */
     pxList->xListEnd.xItemValue = portMAX_DELAY;
  8001dcc:	687b      	ldr	r3, [r7, #4]
- 8001dce:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
+ 8001dce:	f04f 32ff 	mov.w	r2, #4294967295
  8001dd2:	609a      	str	r2, [r3, #8]
 
     /* The list end next and previous pointers point to itself so we know
@@ -3807,7 +3807,7 @@ void vListInsert( List_t * const pxList,
      * first, and the algorithm slightly modified if necessary. */
     if( xValueOfInsertion == portMAX_DELAY )
  8001e6c:	68bb      	ldr	r3, [r7, #8]
- 8001e6e:	f1b3 3fff 	cmp.w	r3, #4294967295	; 0xffffffff
+ 8001e6e:	f1b3 3fff 	cmp.w	r3, #4294967295
  8001e72:	d103      	bne.n	8001e7c <vListInsert+0x20>
     {
         pxIterator = pxList->xListEnd.pxPrevious;
@@ -4541,7 +4541,7 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
  800224e:	6b3b      	ldr	r3, [r7, #48]	; 0x30
  8002250:	f893 3044 	ldrb.w	r3, [r3, #68]	; 0x44
  8002254:	b25b      	sxtb	r3, r3
- 8002256:	f1b3 3fff 	cmp.w	r3, #4294967295	; 0xffffffff
+ 8002256:	f1b3 3fff 	cmp.w	r3, #4294967295
  800225a:	d103      	bne.n	8002264 <xQueueGenericSend+0x16c>
  800225c:	6b3b      	ldr	r3, [r7, #48]	; 0x30
  800225e:	2200      	movs	r2, #0
@@ -4549,7 +4549,7 @@ BaseType_t xQueueGenericSend( QueueHandle_t xQueue,
  8002264:	6b3b      	ldr	r3, [r7, #48]	; 0x30
  8002266:	f893 3045 	ldrb.w	r3, [r3, #69]	; 0x45
  800226a:	b25b      	sxtb	r3, r3
- 800226c:	f1b3 3fff 	cmp.w	r3, #4294967295	; 0xffffffff
+ 800226c:	f1b3 3fff 	cmp.w	r3, #4294967295
  8002270:	d103      	bne.n	800227a <xQueueGenericSend+0x182>
  8002272:	6b3b      	ldr	r3, [r7, #48]	; 0x30
  8002274:	2200      	movs	r2, #0
@@ -4788,7 +4788,7 @@ BaseType_t xQueueGenericSendFromISR( QueueHandle_t xQueue,
              * be done when the queue is unlocked later. */
             if( cTxLock == queueUNLOCKED )
  80023ca:	f997 3033 	ldrsb.w	r3, [r7, #51]	; 0x33
- 80023ce:	f1b3 3fff 	cmp.w	r3, #4294967295	; 0xffffffff
+ 80023ce:	f1b3 3fff 	cmp.w	r3, #4294967295
  80023d2:	d112      	bne.n	80023fa <xQueueGenericSendFromISR+0x106>
                             }
                         }
@@ -5090,7 +5090,7 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
  8002554:	6abb      	ldr	r3, [r7, #40]	; 0x28
  8002556:	f893 3044 	ldrb.w	r3, [r3, #68]	; 0x44
  800255a:	b25b      	sxtb	r3, r3
- 800255c:	f1b3 3fff 	cmp.w	r3, #4294967295	; 0xffffffff
+ 800255c:	f1b3 3fff 	cmp.w	r3, #4294967295
  8002560:	d103      	bne.n	800256a <xQueueReceive+0x122>
  8002562:	6abb      	ldr	r3, [r7, #40]	; 0x28
  8002564:	2200      	movs	r2, #0
@@ -5098,7 +5098,7 @@ BaseType_t xQueueReceive( QueueHandle_t xQueue,
  800256a:	6abb      	ldr	r3, [r7, #40]	; 0x28
  800256c:	f893 3045 	ldrb.w	r3, [r3, #69]	; 0x45
  8002570:	b25b      	sxtb	r3, r3
- 8002572:	f1b3 3fff 	cmp.w	r3, #4294967295	; 0xffffffff
+ 8002572:	f1b3 3fff 	cmp.w	r3, #4294967295
  8002576:	d103      	bne.n	8002580 <xQueueReceive+0x138>
  8002578:	6abb      	ldr	r3, [r7, #40]	; 0x28
  800257a:	2200      	movs	r2, #0
@@ -5304,7 +5304,7 @@ BaseType_t xQueueReceiveFromISR( QueueHandle_t xQueue,
              * locked. */
             if( cRxLock == queueUNLOCKED )
  80026a8:	f997 302f 	ldrsb.w	r3, [r7, #47]	; 0x2f
- 80026ac:	f1b3 3fff 	cmp.w	r3, #4294967295	; 0xffffffff
+ 80026ac:	f1b3 3fff 	cmp.w	r3, #4294967295
  80026b0:	d112      	bne.n	80026d8 <xQueueReceiveFromISR+0xd0>
             {
                 if( listLIST_IS_EMPTY( &( pxQueue->xTasksWaitingToSend ) ) == pdFALSE )
@@ -6053,7 +6053,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
  8002a38:	697b      	ldr	r3, [r7, #20]
  8002a3a:	f893 3044 	ldrb.w	r3, [r3, #68]	; 0x44
  8002a3e:	b25b      	sxtb	r3, r3
- 8002a40:	f1b3 3fff 	cmp.w	r3, #4294967295	; 0xffffffff
+ 8002a40:	f1b3 3fff 	cmp.w	r3, #4294967295
  8002a44:	d103      	bne.n	8002a4e <vQueueWaitForMessageRestricted+0x2a>
  8002a46:	697b      	ldr	r3, [r7, #20]
  8002a48:	2200      	movs	r2, #0
@@ -6061,7 +6061,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
  8002a4e:	697b      	ldr	r3, [r7, #20]
  8002a50:	f893 3045 	ldrb.w	r3, [r3, #69]	; 0x45
  8002a54:	b25b      	sxtb	r3, r3
- 8002a56:	f1b3 3fff 	cmp.w	r3, #4294967295	; 0xffffffff
+ 8002a56:	f1b3 3fff 	cmp.w	r3, #4294967295
  8002a5a:	d103      	bne.n	8002a64 <vQueueWaitForMessageRestricted+0x40>
  8002a5c:	697b      	ldr	r3, [r7, #20]
  8002a5e:	2200      	movs	r2, #0
@@ -6199,7 +6199,7 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
         else
         {
             xReturn = errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY;
- 8002afe:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
+ 8002afe:	f04f 33ff 	mov.w	r3, #4294967295
  8002b02:	61bb      	str	r3, [r7, #24]
         }
 
@@ -6688,7 +6688,7 @@ void vTaskStartScheduler( void )
 
         xNextTaskUnblockTime = portMAX_DELAY;
  8002d5a:	4b14      	ldr	r3, [pc, #80]	; (8002dac <vTaskStartScheduler+0x94>)
- 8002d5c:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
+ 8002d5c:	f04f 32ff 	mov.w	r2, #4294967295
  8002d60:	601a      	str	r2, [r3, #0]
         xSchedulerRunning = pdTRUE;
  8002d62:	4b13      	ldr	r3, [pc, #76]	; (8002db0 <vTaskStartScheduler+0x98>)
@@ -6713,7 +6713,7 @@ void vTaskStartScheduler( void )
          * or the timer task. */
         configASSERT( xReturn != errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY );
  8002d74:	68fb      	ldr	r3, [r7, #12]
- 8002d76:	f1b3 3fff 	cmp.w	r3, #4294967295	; 0xffffffff
+ 8002d76:	f1b3 3fff 	cmp.w	r3, #4294967295
  8002d7a:	d10a      	bne.n	8002d92 <vTaskStartScheduler+0x7a>
         __asm volatile
  8002d7c:	f04f 0350 	mov.w	r3, #80	; 0x50
@@ -7146,7 +7146,7 @@ BaseType_t xTaskIncrementTick( void )
                      * next time through. */
                     xNextTaskUnblockTime = portMAX_DELAY; /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
  8002fac:	4b2f      	ldr	r3, [pc, #188]	; (800306c <xTaskIncrementTick+0x13c>)
- 8002fae:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
+ 8002fae:	f04f 32ff 	mov.w	r2, #4294967295
  8002fb2:	601a      	str	r2, [r3, #0]
                     break;
  8002fb4:	e03e      	b.n	8003034 <xTaskIncrementTick+0x104>
@@ -7506,7 +7506,7 @@ void vTaskPlaceOnEventList( List_t * const pxEventList,
  80031be:	d002      	beq.n	80031c6 <vTaskPlaceOnEventListRestricted+0x42>
         {
             xTicksToWait = portMAX_DELAY;
- 80031c0:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
+ 80031c0:	f04f 33ff 	mov.w	r3, #4294967295
  80031c4:	60bb      	str	r3, [r7, #8]
         }
 
@@ -7749,7 +7749,7 @@ BaseType_t xTaskCheckForTimeOut( TimeOut_t * const pxTimeOut,
             if( *pxTicksToWait == portMAX_DELAY )
  8003322:	683b      	ldr	r3, [r7, #0]
  8003324:	681b      	ldr	r3, [r3, #0]
- 8003326:	f1b3 3fff 	cmp.w	r3, #4294967295	; 0xffffffff
+ 8003326:	f1b3 3fff 	cmp.w	r3, #4294967295
  800332a:	d102      	bne.n	8003332 <xTaskCheckForTimeOut+0x66>
             {
                 /* If INCLUDE_vTaskSuspend is set to 1 and the block time
@@ -8107,7 +8107,7 @@ static void prvResetNextTaskUnblockTime( void )
          * there is an item in the delayed list. */
         xNextTaskUnblockTime = portMAX_DELAY;
  80034ea:	4b09      	ldr	r3, [pc, #36]	; (8003510 <prvResetNextTaskUnblockTime+0x34>)
- 80034ec:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
+ 80034ec:	f04f 32ff 	mov.w	r2, #4294967295
  80034f0:	601a      	str	r2, [r3, #0]
          * the item at the head of the delayed list.  This is the time at
          * which the task at the head of the delayed list should be removed
@@ -9208,7 +9208,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
         {
             if( ( xTicksToWait == portMAX_DELAY ) && ( xCanBlockIndefinitely != pdFALSE ) )
  8003b42:	687b      	ldr	r3, [r7, #4]
- 8003b44:	f1b3 3fff 	cmp.w	r3, #4294967295	; 0xffffffff
+ 8003b44:	f1b3 3fff 	cmp.w	r3, #4294967295
  8003b48:	d10a      	bne.n	8003b60 <prvAddCurrentTaskToDelayedList+0x58>
  8003b4a:	683b      	ldr	r3, [r7, #0]
  8003b4c:	2b00      	cmp	r3, #0
@@ -10656,7 +10656,7 @@ static void prvTaskExitError( void )
     configASSERT( uxCriticalNesting == ~0UL );
  8004322:	4b12      	ldr	r3, [pc, #72]	; (800436c <prvTaskExitError+0x54>)
  8004324:	681b      	ldr	r3, [r3, #0]
- 8004326:	f1b3 3fff 	cmp.w	r3, #4294967295	; 0xffffffff
+ 8004326:	f1b3 3fff 	cmp.w	r3, #4294967295
  800432a:	d00a      	beq.n	8004342 <prvTaskExitError+0x2a>
         __asm volatile
  800432c:	f04f 0350 	mov.w	r3, #80	; 0x50
@@ -22719,7 +22719,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
 08008e88 <memcpy>:
  8008e88:	440a      	add	r2, r1
  8008e8a:	4291      	cmp	r1, r2
- 8008e8c:	f100 33ff 	add.w	r3, r0, #4294967295	; 0xffffffff
+ 8008e8c:	f100 33ff 	add.w	r3, r0, #4294967295
  8008e90:	d100      	bne.n	8008e94 <memcpy+0xc>
  8008e92:	4770      	bx	lr
  8008e94:	b510      	push	{r4, lr}
@@ -22833,7 +22833,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8008f78:	f000 f87c 	bl	8009074 <_sbrk_r>
  8008f7c:	3001      	adds	r0, #1
  8008f7e:	d101      	bne.n	8008f84 <sbrk_aligned+0x38>
- 8008f80:	f04f 34ff 	mov.w	r4, #4294967295	; 0xffffffff
+ 8008f80:	f04f 34ff 	mov.w	r4, #4294967295
  8008f84:	4620      	mov	r0, r4
  8008f86:	bd70      	pop	{r4, r5, r6, pc}
  8008f88:	20013188 	.word	0x20013188
@@ -23015,7 +23015,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800910a:	1c4b      	adds	r3, r1, #1
  800910c:	4614      	mov	r4, r2
  800910e:	d103      	bne.n	8009118 <_sungetc_r+0x10>
- 8009110:	f04f 35ff 	mov.w	r5, #4294967295	; 0xffffffff
+ 8009110:	f04f 35ff 	mov.w	r5, #4294967295
  8009114:	4628      	mov	r0, r5
  8009116:	bd38      	pop	{r3, r4, r5, pc}
  8009118:	8993      	ldrh	r3, [r2, #12]
@@ -23089,7 +23089,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  80091ae:	89a3      	ldrh	r3, [r4, #12]
  80091b0:	f043 0320 	orr.w	r3, r3, #32
  80091b4:	81a3      	strh	r3, [r4, #12]
- 80091b6:	f04f 30ff 	mov.w	r0, #4294967295	; 0xffffffff
+ 80091b6:	f04f 30ff 	mov.w	r0, #4294967295
  80091ba:	e7f3      	b.n	80091a4 <__ssrefill_r+0x22>
 
 080091bc <__ssvfiscanf_r>:
@@ -23258,7 +23258,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800936c:	9844      	ldr	r0, [sp, #272]	; 0x110
  800936e:	2800      	cmp	r0, #0
  8009370:	f040 808d 	bne.w	800948e <__ssvfiscanf_r+0x2d2>
- 8009374:	f04f 30ff 	mov.w	r0, #4294967295	; 0xffffffff
+ 8009374:	f04f 30ff 	mov.w	r0, #4294967295
  8009378:	e08f      	b.n	800949a <__ssvfiscanf_r+0x2de>
  800937a:	9a41      	ldr	r2, [sp, #260]	; 0x104
  800937c:	f042 0220 	orr.w	r2, r2, #32
@@ -23385,7 +23385,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800948e:	89a3      	ldrh	r3, [r4, #12]
  8009490:	f013 0f40 	tst.w	r3, #64	; 0x40
  8009494:	bf18      	it	ne
- 8009496:	f04f 30ff 	movne.w	r0, #4294967295	; 0xffffffff
+ 8009496:	f04f 30ff 	movne.w	r0, #4294967295
  800949a:	f50d 7d22 	add.w	sp, sp, #648	; 0x288
  800949e:	e8bd 87f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, pc}
  80094a2:	9844      	ldr	r0, [sp, #272]	; 0x110
@@ -23404,7 +23404,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  80094bc:	2a00      	cmp	r2, #0
  80094be:	bf0c      	ite	eq
  80094c0:	2201      	moveq	r2, #1
- 80094c2:	f04f 32ff 	movne.w	r2, #4294967295	; 0xffffffff
+ 80094c2:	f04f 32ff 	movne.w	r2, #4294967295
  80094c6:	608a      	str	r2, [r1, #8]
  80094c8:	6822      	ldr	r2, [r4, #0]
  80094ca:	f8df 9090 	ldr.w	r9, [pc, #144]	; 800955c <_scanf_chars+0xb0>
@@ -23581,7 +23581,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8009660:	f1b9 0f00 	cmp.w	r9, #0
  8009664:	d003      	beq.n	800966e <_scanf_i+0x10e>
  8009666:	3301      	adds	r3, #1
- 8009668:	f109 39ff 	add.w	r9, r9, #4294967295	; 0xffffffff
+ 8009668:	f109 39ff 	add.w	r9, r9, #4294967295
  800966c:	60a3      	str	r3, [r4, #8]
  800966e:	6873      	ldr	r3, [r6, #4]
  8009670:	3b01      	subs	r3, #1
@@ -23626,7 +23626,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  80096d0:	4632      	mov	r2, r6
  80096d2:	4650      	mov	r0, sl
  80096d4:	4798      	blx	r3
- 80096d6:	f105 39ff 	add.w	r9, r5, #4294967295	; 0xffffffff
+ 80096d6:	f105 39ff 	add.w	r9, r5, #4294967295
  80096da:	464d      	mov	r5, r9
  80096dc:	42bd      	cmp	r5, r7
  80096de:	d02d      	beq.n	800973c <_scanf_i+0x1dc>
@@ -23766,7 +23766,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8009812:	2310      	movs	r3, #16
  8009814:	3502      	adds	r5, #2
  8009816:	f107 4800 	add.w	r8, r7, #2147483648	; 0x80000000
- 800981a:	f108 38ff 	add.w	r8, r8, #4294967295	; 0xffffffff
+ 800981a:	f108 38ff 	add.w	r8, r8, #4294967295
  800981e:	f04f 0c00 	mov.w	ip, #0
  8009822:	fbb8 f9f3 	udiv	r9, r8, r3
  8009826:	4666      	mov	r6, ip
@@ -23803,7 +23803,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800987a:	d804      	bhi.n	8009886 <_strtol_l.constprop.0+0xc6>
  800987c:	3c57      	subs	r4, #87	; 0x57
  800987e:	e7db      	b.n	8009838 <_strtol_l.constprop.0+0x78>
- 8009880:	f04f 3cff 	mov.w	ip, #4294967295	; 0xffffffff
+ 8009880:	f04f 3cff 	mov.w	ip, #4294967295
  8009884:	e7e6      	b.n	8009854 <_strtol_l.constprop.0+0x94>
  8009886:	f1bc 0f00 	cmp.w	ip, #0
  800988a:	da05      	bge.n	8009898 <_strtol_l.constprop.0+0xd8>
@@ -23865,7 +23865,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8009900:	786c      	ldrb	r4, [r5, #1]
  8009902:	2310      	movs	r3, #16
  8009904:	3502      	adds	r5, #2
- 8009906:	f04f 38ff 	mov.w	r8, #4294967295	; 0xffffffff
+ 8009906:	f04f 38ff 	mov.w	r8, #4294967295
  800990a:	2700      	movs	r7, #0
  800990c:	fbb8 f8f3 	udiv	r8, r8, r3
  8009910:	fb03 f908 	mul.w	r9, r3, r8
@@ -23903,13 +23903,13 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8009964:	d804      	bhi.n	8009970 <_strtoul_l.constprop.0+0xa8>
  8009966:	3c57      	subs	r4, #87	; 0x57
  8009968:	e7dd      	b.n	8009926 <_strtoul_l.constprop.0+0x5e>
- 800996a:	f04f 37ff 	mov.w	r7, #4294967295	; 0xffffffff
+ 800996a:	f04f 37ff 	mov.w	r7, #4294967295
  800996e:	e7e6      	b.n	800993e <_strtoul_l.constprop.0+0x76>
  8009970:	2f00      	cmp	r7, #0
  8009972:	da07      	bge.n	8009984 <_strtoul_l.constprop.0+0xbc>
  8009974:	2322      	movs	r3, #34	; 0x22
  8009976:	f8ce 3000 	str.w	r3, [lr]
- 800997a:	f04f 30ff 	mov.w	r0, #4294967295	; 0xffffffff
+ 800997a:	f04f 30ff 	mov.w	r0, #4294967295
  800997e:	b932      	cbnz	r2, 800998e <_strtoul_l.constprop.0+0xc6>
  8009980:	e8bd 83f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, pc}
  8009984:	b106      	cbz	r6, 8009988 <_strtoul_l.constprop.0+0xc0>
@@ -23945,7 +23945,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  80099c0:	f44f 6180 	mov.w	r1, #1024	; 0x400
  80099c4:	f7ff fae2 	bl	8008f8c <_malloc_r>
  80099c8:	b918      	cbnz	r0, 80099d2 <__submore+0x22>
- 80099ca:	f04f 30ff 	mov.w	r0, #4294967295	; 0xffffffff
+ 80099ca:	f04f 30ff 	mov.w	r0, #4294967295
  80099ce:	e8bd 81f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, pc}
  80099d2:	f44f 6380 	mov.w	r3, #1024	; 0x400
  80099d6:	63a3      	str	r3, [r4, #56]	; 0x38
@@ -24121,7 +24121,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8009b9a:	ec41 0b10 	vmov	d0, r0, r1
  8009b9e:	bd70      	pop	{r4, r5, r6, pc}
  8009ba0:	f2a5 4613 	subw	r6, r5, #1043	; 0x413
- 8009ba4:	f04f 35ff 	mov.w	r5, #4294967295	; 0xffffffff
+ 8009ba4:	f04f 35ff 	mov.w	r5, #4294967295
  8009ba8:	40f5      	lsrs	r5, r6
  8009baa:	4228      	tst	r0, r5
  8009bac:	d0f5      	beq.n	8009b9a <round+0x5a>
@@ -24334,7 +24334,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8009dfa:	4572      	cmp	r2, lr
  8009dfc:	d10f      	bne.n	8009e1e <__ieee754_atan2+0xb6>
  8009dfe:	4293      	cmp	r3, r2
- 8009e00:	f104 34ff 	add.w	r4, r4, #4294967295	; 0xffffffff
+ 8009e00:	f104 34ff 	add.w	r4, r4, #4294967295
  8009e04:	d107      	bne.n	8009e16 <__ieee754_atan2+0xae>
  8009e06:	2c02      	cmp	r4, #2
  8009e08:	d84c      	bhi.n	8009ea4 <__ieee754_atan2+0x13c>
@@ -25460,7 +25460,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800aa42:	a389      	add	r3, pc, #548	; (adr r3, 800ac68 <__ieee754_rem_pio2+0x308>)
  800aa44:	e9d3 2300 	ldrd	r2, r3, [r3]
  800aa48:	f7f5 fc38 	bl	80002bc <__adddf3>
- 800aa4c:	f04f 3bff 	mov.w	fp, #4294967295	; 0xffffffff
+ 800aa4c:	f04f 3bff 	mov.w	fp, #4294967295
  800aa50:	e9ca 0102 	strd	r0, r1, [sl, #8]
  800aa54:	e7c4      	b.n	800a9e0 <__ieee754_rem_pio2+0x80>
  800aa56:	a386      	add	r3, pc, #536	; (adr r3, 800ac70 <__ieee754_rem_pio2+0x310>)
@@ -25518,7 +25518,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800aaee:	460d      	mov	r5, r1
  800aaf0:	dc0d      	bgt.n	800ab0e <__ieee754_rem_pio2+0x1ae>
  800aaf2:	4b6e      	ldr	r3, [pc, #440]	; (800acac <__ieee754_rem_pio2+0x34c>)
- 800aaf4:	f10b 32ff 	add.w	r2, fp, #4294967295	; 0xffffffff
+ 800aaf4:	f10b 32ff 	add.w	r2, fp, #4294967295
  800aaf8:	f853 3022 	ldr.w	r3, [r3, r2, lsl #2]
  800aafc:	4543      	cmp	r3, r8
  800aafe:	d006      	beq.n	800ab0e <__ieee754_rem_pio2+0x1ae>
@@ -25714,7 +25714,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800ad22:	e9d5 0104 	ldrd	r0, r1, [r5, #16]
  800ad26:	46c3      	mov	fp, r8
  800ad28:	3d08      	subs	r5, #8
- 800ad2a:	f108 38ff 	add.w	r8, r8, #4294967295	; 0xffffffff
+ 800ad2a:	f108 38ff 	add.w	r8, r8, #4294967295
  800ad2e:	f7f5 fee3 	bl	8000af8 <__aeabi_dcmpeq>
  800ad32:	2800      	cmp	r0, #0
  800ad34:	d1f3      	bne.n	800ad1e <__ieee754_rem_pio2+0x3be>
@@ -25826,7 +25826,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800ae52:	1a09      	subs	r1, r1, r0
  800ae54:	459c      	cmp	ip, r3
  800ae56:	bf88      	it	hi
- 800ae58:	f101 31ff 	addhi.w	r1, r1, #4294967295	; 0xffffffff
+ 800ae58:	f101 31ff 	addhi.w	r1, r1, #4294967295
  800ae5c:	eba3 030c 	sub.w	r3, r3, ip
  800ae60:	4432      	add	r2, r6
  800ae62:	4640      	mov	r0, r8
@@ -26033,7 +26033,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800b08a:	f853 3021 	ldr.w	r3, [r3, r1, lsl #2]
  800b08e:	9302      	str	r3, [sp, #8]
  800b090:	9b08      	ldr	r3, [sp, #32]
- 800b092:	f103 33ff 	add.w	r3, r3, #4294967295	; 0xffffffff
+ 800b092:	f103 33ff 	add.w	r3, r3, #4294967295
  800b096:	bfa8      	it	ge
  800b098:	1ed4      	subge	r4, r2, #3
  800b09a:	9306      	str	r3, [sp, #24]
@@ -26225,7 +26225,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800b2aa:	f84b 0b04 	str.w	r0, [fp], #4
  800b2ae:	ec51 0b18 	vmov	r0, r1, d8
  800b2b2:	f7f5 f803 	bl	80002bc <__adddf3>
- 800b2b6:	f109 39ff 	add.w	r9, r9, #4294967295	; 0xffffffff
+ 800b2b6:	f109 39ff 	add.w	r9, r9, #4294967295
  800b2ba:	4606      	mov	r6, r0
  800b2bc:	460f      	mov	r7, r1
  800b2be:	e75b      	b.n	800b178 <__kernel_rem_pio2+0x108>
@@ -26434,7 +26434,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800b4fc:	4630      	mov	r0, r6
  800b4fe:	4639      	mov	r1, r7
  800b500:	f7f5 f892 	bl	8000628 <__aeabi_dmul>
- 800b504:	f10a 3aff 	add.w	sl, sl, #4294967295	; 0xffffffff
+ 800b504:	f10a 3aff 	add.w	sl, sl, #4294967295
  800b508:	4606      	mov	r6, r0
  800b50a:	460f      	mov	r7, r1
  800b50c:	e70f      	b.n	800b32e <__kernel_rem_pio2+0x2be>
@@ -26601,7 +26601,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800b6c8:	ed9d 7b02 	vldr	d7, [sp, #8]
  800b6cc:	e9c4 0102 	strd	r0, r1, [r4, #8]
  800b6d0:	ed84 7b00 	vstr	d7, [r4]
- 800b6d4:	f10a 3aff 	add.w	sl, sl, #4294967295	; 0xffffffff
+ 800b6d4:	f10a 3aff 	add.w	sl, sl, #4294967295
  800b6d8:	e755      	b.n	800b586 <__kernel_rem_pio2+0x516>
  800b6da:	e974 2302 	ldrd	r2, r3, [r4, #-8]!
  800b6de:	f7f4 fded 	bl	80002bc <__adddf3>
@@ -26845,7 +26845,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800b958:	f7f5 f8f6 	bl	8000b48 <__aeabi_dcmpgt>
  800b95c:	2800      	cmp	r0, #0
  800b95e:	d1e6      	bne.n	800b92e <atan+0x3e>
- 800b960:	f04f 3aff 	mov.w	sl, #4294967295	; 0xffffffff
+ 800b960:	f04f 3aff 	mov.w	sl, #4294967295
  800b964:	e02b      	b.n	800b9be <atan+0xce>
  800b966:	f000 f963 	bl	800bc30 <fabs>
  800b96a:	4bab      	ldr	r3, [pc, #684]	; (800bc18 <atan+0x328>)
@@ -26962,7 +26962,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800baa4:	4622      	mov	r2, r4
  800baa6:	462b      	mov	r3, r5
  800baa8:	f7f4 fdbe 	bl	8000628 <__aeabi_dmul>
- 800baac:	f1ba 3fff 	cmp.w	sl, #4294967295	; 0xffffffff
+ 800baac:	f1ba 3fff 	cmp.w	sl, #4294967295
  800bab0:	4602      	mov	r2, r0
  800bab2:	460b      	mov	r3, r1
  800bab4:	d14b      	bne.n	800bb4e <atan+0x25e>
@@ -27168,7 +27168,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800bcf0:	ec41 0b10 	vmov	d0, r0, r1
  800bcf4:	e8bd 81f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, pc}
  800bcf8:	f2a7 4713 	subw	r7, r7, #1043	; 0x413
- 800bcfc:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
+ 800bcfc:	f04f 33ff 	mov.w	r3, #4294967295
  800bd00:	fa23 f707 	lsr.w	r7, r3, r7
  800bd04:	4207      	tst	r7, r0
  800bd06:	d0f3      	beq.n	800bcf0 <floor+0x98>
