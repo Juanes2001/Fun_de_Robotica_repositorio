@@ -1,6 +1,8 @@
 MemberFilterActionGroup.COutlineViewer.4=true
 eclipse.preferences.version=1
 markOccurrences=false
+matchingBracketsColor=128,128,128
+sourceHoverBackgroundColor=47,47,47
 spelling_locale_initialized=true
 useAnnotationsPrefPage=true
 useQuickDiffPrefPage=true

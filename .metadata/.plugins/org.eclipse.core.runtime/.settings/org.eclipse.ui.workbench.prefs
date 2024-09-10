@@ -1,5 +1,7 @@
 //org.eclipse.ui.commands/state/com.st.stm32cube.ide.mcu.buildanalyzer.showstate/org.eclipse.ui.commands.radioState=human
 //org.eclipse.ui.commands/state/org.eclipse.ui.navigator.resources.nested.changeProjectPresentation/org.eclipse.ui.commands.radioState=false
+ColorsAndFontsPreferencePage.expandedCategories=Torg.eclipse.cdt.ui.presentation\tTorg.eclipse.compare.contentmergeviewer.TextMergeViewer\tTorg.eclipse.ui.presentation.default
+ColorsAndFontsPreferencePage.selectedElement=Torg.eclipse.cdt.ui.CEditor.presentation
 UIActivities.org.eclipse.cdt.debug.dsfgdbActivity=true
 eclipse.preferences.version=1
 org.eclipse.cdt.ui.ColoredLabels.match_highlight=206,92,0
