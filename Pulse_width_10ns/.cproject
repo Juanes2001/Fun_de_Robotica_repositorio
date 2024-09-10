@@ -182,7 +182,7 @@
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
 		<configuration configurationName="Debug">
-			<resource resourceType="PROJECT" workspacePath="/Pruebas_sin_FreeRTOS"/>
+			<resource resourceType="PROJECT" workspacePath="/Pulse_width_10ns"/>
 		</configuration>
 		<configuration configurationName="Release">
 			<resource resourceType="PROJECT" workspacePath="/Pruebas_sin_FreeRTOS"/>

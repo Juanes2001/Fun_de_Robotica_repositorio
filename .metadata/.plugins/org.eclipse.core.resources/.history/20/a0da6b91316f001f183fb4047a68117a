@@ -35,7 +35,7 @@
 #define STACK_SIZE 200
 
 /*definicion de variables del sistema */
-//uint32_t SystemCoreClock = 100000000;
+uint32_t SystemCoreClock = 100000000;
 
 /* Definición de Perifericos del nuestras librerias para controlar un LED (1)*/
 GPIO_Handler_t handlerLedPin = {0};
