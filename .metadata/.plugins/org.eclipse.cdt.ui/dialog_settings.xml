@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section name="Workbench">
-	<item key="org.eclipse.cdt.utils.ui.controls.FileListControl" value="../Inc"/>
+	<item key="org.eclipse.cdt.utils.ui.controls.FileListControl" value="/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio//STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include"/>
 	<item key="LastUsedSourceTemplate" value="Default C source template"/>
 	<item key="LastUsedHeaderTemplate" value="Default C header template"/>
 	<item key="LexicalSortingAction.sort" value="false"/>

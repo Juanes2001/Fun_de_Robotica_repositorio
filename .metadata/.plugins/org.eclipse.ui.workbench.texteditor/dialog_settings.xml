@@ -8,6 +8,7 @@
 		<item key="incremental" value="false"/>
 		<item key="isRegEx" value="false"/>
 		<list key="findhistory">
+			<item value="Base_FreeRTOS"/>
 			<item value="juan"/>
 			<item value="home"/>
 			<item value="tool"/>
@@ -18,11 +19,13 @@
 			<item value="dataI"/>
 		</list>
 		<list key="replacehistory">
+			<item value="Base_FreeRTOS_Org"/>
+			<item value="B"/>
 		</list>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
-		<item key="DIALOG_X_ORIGIN" value="134"/>
-		<item key="DIALOG_Y_ORIGIN" value="472"/>
+		<item key="DIALOG_X_ORIGIN" value="247"/>
+		<item key="DIALOG_Y_ORIGIN" value="471"/>
 		<item key="DIALOG_WIDTH" value="338"/>
 		<item key="DIALOG_HEIGHT" value="430"/>
 		<item key="DIALOG_FONT_NAME" value="1|Ubuntu|10.0|0|GTK|1|"/>
