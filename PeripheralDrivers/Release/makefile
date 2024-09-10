@@ -9,6 +9,7 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include Src/STMpointCsSources/subdir.mk
 -include Src/subdir.mk
 -include objects.mk
 
@@ -32,31 +33,31 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := PeripheralDriver
+BUILD_ARTIFACT_NAME := PeripheralDrivers
 BUILD_ARTIFACT_EXTENSION := a
 BUILD_ARTIFACT_PREFIX := lib
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 ARCHIVES += \
-libPeripheralDriver.a \
+libPeripheralDrivers.a \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: libPeripheralDriver.a secondary-outputs
+main-build: libPeripheralDrivers.a secondary-outputs
 
 # Tool invocations
-libPeripheralDriver.a: $(OBJS) $(USER_OBJS) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-ar -r  "libPeripheralDriver.a" @"objects.list" $(USER_OBJS) $(LIBS)
+libPeripheralDrivers.a: $(OBJS) $(USER_OBJS) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-ar -r  "libPeripheralDrivers.a" @"objects.list" $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) libPeripheralDriver.a
+	-$(RM) libPeripheralDrivers.a
 	-@echo ' '
 
 secondary-outputs:

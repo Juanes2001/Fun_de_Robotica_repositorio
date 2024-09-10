@@ -41,34 +41,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := Base_FreeRTOS
+BUILD_ARTIFACT_NAME := Base_FreeRTOS_Org
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-Base_FreeRTOS.elf \
+Base_FreeRTOS_Org.elf \
 
 MAP_FILES += \
-Base_FreeRTOS.map \
+Base_FreeRTOS_Org.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-Base_FreeRTOS.list \
+Base_FreeRTOS_Org.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: Base_FreeRTOS.elf secondary-outputs
+main-build: Base_FreeRTOS_Org.elf secondary-outputs
 
 # Tool invocations
-Base_FreeRTOS.elf Base_FreeRTOS.map: $(OBJS) $(USER_OBJS) /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Base_FreeRTOS.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Base_FreeRTOS.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Base_FreeRTOS_Org.elf Base_FreeRTOS_Org.map: $(OBJS) $(USER_OBJS) C:\Users\juane\OneDrive\Desktop\Robotica\Fun_de_Robotica_repositorio\Base_FreeRTOS_Org\STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Base_FreeRTOS_Org.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\juane\OneDrive\Desktop\Robotica\Fun_de_Robotica_repositorio\Base_FreeRTOS_Org\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Base_FreeRTOS_Org.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -77,14 +77,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-Base_FreeRTOS.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "Base_FreeRTOS.list"
+Base_FreeRTOS_Org.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "Base_FreeRTOS_Org.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) Base_FreeRTOS.elf Base_FreeRTOS.list Base_FreeRTOS.map default.size.stdout
+	-$(RM) Base_FreeRTOS_Org.elf Base_FreeRTOS_Org.list Base_FreeRTOS_Org.map default.size.stdout
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
