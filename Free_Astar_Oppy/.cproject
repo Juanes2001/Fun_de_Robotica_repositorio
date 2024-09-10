@@ -54,9 +54,9 @@
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/ThirdParty/SEGGER/OS&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/ThirdParty/SEGGER/SEGGER&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/${ProjName}/Inc&quot;"/>
-									<listOptionValue builtIn="false" value="/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include"/>
-									<listOptionValue builtIn="false" value="/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PeripheralDriver/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.294137717" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -88,9 +88,6 @@
 							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.1049061741" name="MCU Output Converter Motorola S-rec with symbols" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.29232324.1208064818" name="main3.c" rcbsApplicability="disable" resourcePath="Src/main3.c" toolsToInvoke="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1384165257.510021662">
-						<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1384165257.510021662" name="MCU GCC Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1384165257"/>
-					</fileInfo>
 					<folderInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.29232324.1184093643" name="/" resourcePath="ThirdParty/SEGGER">
 						<toolChain id="com.st.stm32cube.ide.mcu.gnu.managedbuild.toolchain.exe.debug.1789042098" name="MCU ARM GCC" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.toolchain.exe.debug" unusedChildren="">
 							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_mcu.844803393.457706747" name="MCU" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_mcu.844803393"/>
@@ -212,15 +209,6 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
-	<storageModule moduleId="scannerConfiguration">
-		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.release.906774081;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.release.906774081.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1264448747;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1385883359">
-			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.29232324;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.29232324.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1384165257;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.294137717">
-			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-	</storageModule>
 	<storageModule moduleId="refreshScope" versionNumber="2">
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/Base_FreeRTOS"/>
@@ -228,5 +216,14 @@
 		<configuration configurationName="Release">
 			<resource resourceType="PROJECT" workspacePath="/Base_FreeRTOS"/>
 		</configuration>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.29232324;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.29232324.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1384165257;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.294137717">
+			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.release.906774081;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.release.906774081.;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.1264448747;com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1385883359">
+			<autodiscovery enabled="false" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 	</storageModule>
 </cproject>
