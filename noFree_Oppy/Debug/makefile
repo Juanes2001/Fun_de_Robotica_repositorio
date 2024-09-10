@@ -59,8 +59,8 @@ all: main-build
 main-build: noFree_Oppy.elf secondary-outputs
 
 # Tool invocations
-noFree_Oppy.elf noFree_Oppy.map: $(OBJS) $(USER_OBJS) C:\Users\juane\OneDrive\Desktop\Robotica\Fun_de_Robotica_repositorio\noFree_Oppy\STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "noFree_Oppy.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\juane\OneDrive\Desktop\Robotica\Fun_de_Robotica_repositorio\noFree_Oppy\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="noFree_Oppy.map" -Wl,--gc-sections -static -LC:\Users\juane\OneDrive\Desktop\Robotica\Fun_de_Robotica_repositorio/PeripheralDrivers/Debug --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
+noFree_Oppy.elf noFree_Oppy.map: $(OBJS) $(USER_OBJS) /home/juan/Github/Fun_de_Robotica_repositorio/noFree_Oppy/STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "noFree_Oppy.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/juan/Github/Fun_de_Robotica_repositorio/noFree_Oppy/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="noFree_Oppy.map" -Wl,--gc-sections -static -L"/home/juan/Github/Fun_de_Robotica_repositorio/PeripheralDrivers/Debug" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
