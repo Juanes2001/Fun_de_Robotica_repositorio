@@ -5,7 +5,7 @@
  *      Author: juan
  */
 
- // FUNCIONO LOS CAMBIOS AHORA SI FUNCIONO
+ // FUNCIONO LOS CAMBIOS
 #include <stm32f4xx.h>
 
 //LIBRERIAS FREERTOS
