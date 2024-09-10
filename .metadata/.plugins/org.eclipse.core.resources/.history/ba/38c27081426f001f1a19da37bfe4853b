@@ -1,0 +1,8 @@
+../Src/PosRobt.c:14:6:build_Operation	56	static
+../Src/PosRobt.c:42:6:add_Operation	40	static
+../Src/PosRobt.c:52:6:change_position	40	static
+../Src/PosRobt.c:67:6:change_coordinates_position	40	static
+../Src/PosRobt.c:82:6:calculation_parameter_distance	64	static
+../Src/PosRobt.c:119:8:distance_to_straight_line	48	static
+../Src/PosRobt.c:128:8:distance_traveled	48	static
+../Src/PosRobt.c:139:8:calculed_ang_turn	64	static

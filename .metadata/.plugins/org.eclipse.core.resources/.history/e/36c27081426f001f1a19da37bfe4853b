@@ -1,0 +1,3 @@
+Src/PosRobt.o: ../Src/PosRobt.c \
+ /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDrivers/Inc/PosRobt.h
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDrivers/Inc/PosRobt.h:

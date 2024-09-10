@@ -1,0 +1,16 @@
+../Src/PwmDriver.c:15:6:pwm_Config	16	static,ignoring_inline_asm
+../Src/PwmDriver.c:139:6:startPwmSignal	16	static
+../Src/PwmDriver.c:145:6:stopPwmSignal	16	static
+../Src/PwmDriver.c:150:9:enableOutput	16	static
+../Src/PwmDriver.c:236:6:setFrequency	24	static
+../Src/PwmDriver.c:323:6:updateFrequency	16	static
+../Src/PwmDriver.c:334:6:setDuttyCycle	56	static
+../Src/PwmDriver.c:371:6:setDuttyCycleAfOpt	56	static
+../Src/PwmDriver.c:408:9:showPWM	24	static
+../Src/PwmDriver.c:445:9:showPWMBfOpt	24	static
+../Src/PwmDriver.c:484:6:updateDuttyCycle	16	static
+../Src/PwmDriver.c:493:6:updateDuttyCycleAfOpt	16	static
+../Src/PwmDriver.c:503:6:enableEvent	16	static
+../Src/PwmDriver.c:527:6:disableEvent	16	static
+../Src/PwmDriver.c:552:9:disableOutput	16	static
+../Src/PwmDriver.c:591:6:PWMx_Toggle	16	static

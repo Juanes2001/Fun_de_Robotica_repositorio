@@ -1,0 +1,13 @@
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include/core_cm4.h:1688:22:__NVIC_EnableIRQ	16	static
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include/core_cm4.h:1816:22:__NVIC_SetPriority	16	static
+../Src/AdcDriver.c:13:6:adc_Config	16	static,ignoring_inline_asm
+../Src/AdcDriver.c:128:6:startSingleADC	4	static
+../Src/AdcDriver.c:147:6:startContinousADC	4	static
+../Src/AdcDriver.c:162:10:getADC	4	static
+../Src/AdcDriver.c:171:6:ADC_IRQHandler	8	static
+../Src/AdcDriver.c:187:29:adcComplete_Callback	4	static,ignoring_inline_asm
+../Src/AdcDriver.c:196:6:configAnalogPin	16	static
+../Src/AdcDriver.c:318:6:adcExternalEXTIConfig	4	static
+../Src/AdcDriver.c:326:6:adcTimerEventConfig	4	static
+../Src/AdcDriver.c:335:6:ADC_ConfigMultichannel	24	static,ignoring_inline_asm
+../Src/AdcDriver.c:470:6:adc_Set_Priority	16	static,ignoring_inline_asm

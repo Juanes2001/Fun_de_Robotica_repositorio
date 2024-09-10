@@ -1,0 +1,4 @@
+../Src/MotorsDriver.c:12:6:updateDuttyMotor	16	static
+../Src/MotorsDriver.c:21:6:updateFrequencyMotor	24	static
+../Src/MotorsDriver.c:30:6:updateDirMotor	16	static
+../Src/MotorsDriver.c:39:8:map	80	static

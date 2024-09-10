@@ -1,0 +1,2 @@
+../Src/SysTickDriver.c:25:6:config_SysTicksMs	4	static
+../Src/SysTickDriver.c:53:6:delay_Ms	24	static

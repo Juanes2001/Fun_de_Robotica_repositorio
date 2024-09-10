@@ -1,0 +1,7 @@
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include/core_cm4.h:1688:22:__NVIC_EnableIRQ	16	static
+../Src/CaptureFreqDriver.c:12:6:capture_Config	16	static,ignoring_inline_asm
+../Src/CaptureFreqDriver.c:204:6:startCapture	16	static,ignoring_inline_asm
+../Src/CaptureFreqDriver.c:233:6:stopCapture	16	static,ignoring_inline_asm
+../Src/CaptureFreqDriver.c:270:10:timeStamp	24	static
+../Src/CaptureFreqDriver.c:313:10:getFreq	32	static,ignoring_inline_asm
+../Src/CaptureFreqDriver.c:341:6:clean	16	static

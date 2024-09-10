@@ -1,0 +1,27 @@
+Src/MPUAccel.o: ../Src/MPUAccel.c \
+ /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDrivers/Inc/MPUAccel.h \
+ /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h \
+ /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f411xe.h \
+ /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include/core_cm4.h \
+ /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include/cmsis_version.h \
+ /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include/cmsis_compiler.h \
+ /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include/cmsis_gcc.h \
+ /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include/mpu_armv7.h \
+ /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h \
+ /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDrivers/Inc/I2CDriver.h \
+ /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDrivers/Inc/GPIOxDriver.h \
+ /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDrivers/Inc/I2CDriver.h \
+ /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDrivers/Inc/GPIOxDriver.h
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDrivers/Inc/MPUAccel.h:
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h:
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f411xe.h:
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include/core_cm4.h:
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include/cmsis_version.h:
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include/cmsis_compiler.h:
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include/cmsis_gcc.h:
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include/mpu_armv7.h:
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h:
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDrivers/Inc/I2CDriver.h:
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDrivers/Inc/GPIOxDriver.h:
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDrivers/Inc/I2CDriver.h:
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDrivers/Inc/GPIOxDriver.h:

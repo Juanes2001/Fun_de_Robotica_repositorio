@@ -1,0 +1,15 @@
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include/core_cm4.h:1688:22:__NVIC_EnableIRQ	16	static
+/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include/core_cm4.h:1816:22:__NVIC_SetPriority	16	static
+../Src/USARTxDriver.c:23:6:USART_Config	24	static,ignoring_inline_asm
+../Src/USARTxDriver.c:306:10:brrCalculus	24	static,ignoring_inline_asm
+../Src/USARTxDriver.c:409:6:writeChar	16	static,ignoring_inline_asm
+../Src/USARTxDriver.c:419:6:writeMsg	16	static
+../Src/USARTxDriver.c:427:28:usart2Rx_Callback	4	static,ignoring_inline_asm
+../Src/USARTxDriver.c:430:28:usart1Rx_Callback	4	static,ignoring_inline_asm
+../Src/USARTxDriver.c:433:28:usart6Rx_Callback	4	static,ignoring_inline_asm
+../Src/USARTxDriver.c:439:9:getRxData	4	static
+../Src/USARTxDriver.c:443:6:USART2_IRQHandler	8	static
+../Src/USARTxDriver.c:459:6:USART1_IRQHandler	8	static
+../Src/USARTxDriver.c:477:6:USART6_IRQHandler	8	static
+../Src/USARTxDriver.c:487:7:roundToNDecimals	24	static
+../Src/USARTxDriver.c:500:6:usart_Set_Priority	16	static,ignoring_inline_asm

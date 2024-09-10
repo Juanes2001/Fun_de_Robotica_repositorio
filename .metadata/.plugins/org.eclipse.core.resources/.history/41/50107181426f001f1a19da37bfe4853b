@@ -1,0 +1,5 @@
+../Src/SPIDriver.c:10:6:spi_config	16	static
+../Src/SPIDriver.c:92:6:spi_transmit	32	static,ignoring_inline_asm
+../Src/SPIDriver.c:130:6:spi_receive	24	static,ignoring_inline_asm
+../Src/SPIDriver.c:154:6:spi_selectSlave	16	static
+../Src/SPIDriver.c:160:6:spi_unselectSlave	16	static

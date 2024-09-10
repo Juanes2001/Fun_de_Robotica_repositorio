@@ -5,5 +5,5 @@
 
 USER_OBJS :=
 
-LIBS := -lPeripheralDriver
+LIBS := -lPeripheralDrivers
 

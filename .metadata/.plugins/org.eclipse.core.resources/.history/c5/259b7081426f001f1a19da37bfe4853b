@@ -1,0 +1,11 @@
+../Src/MPUAccel.c:13:6:configMPUAccel	24	static
+../Src/MPUAccel.c:118:6:writeData	16	static,ignoring_inline_asm
+../Src/MPUAccel.c:150:9:readData	24	static,ignoring_inline_asm
+../Src/MPUAccel.c:192:6:readContinuousData	24	static,ignoring_inline_asm
+../Src/MPUAccel.c:243:9:WHOIAM	24	static
+../Src/MPUAccel.c:265:7:readAccel_X	32	static
+../Src/MPUAccel.c:315:7:readAccel_Y	32	static
+../Src/MPUAccel.c:366:7:readAccel_Z	32	static
+../Src/MPUAccel.c:416:7:readGyro_X	32	static
+../Src/MPUAccel.c:466:7:readGyro_Y	32	static
+../Src/MPUAccel.c:515:7:readGyro_Z	32	static
