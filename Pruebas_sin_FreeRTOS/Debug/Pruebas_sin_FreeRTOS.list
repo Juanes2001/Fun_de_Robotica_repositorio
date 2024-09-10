@@ -1941,12 +1941,12 @@ void BasicTimer2_Callback(void){
  8001224:	701a      	strb	r2, [r3, #0]
 
 	//Verificamos el modo
-	if(Mode == sLine)
+	if(Mode == sLine){ // Levantamos la vandera que calcula todos los parametros necesarios para el control
  8001226:	4bb7      	ldr	r3, [pc, #732]	; (8001504 <BasicTimer2_Callback+0x2ec>)
  8001228:	781b      	ldrb	r3, [r3, #0]
  800122a:	2b00      	cmp	r3, #0
  800122c:	f040 80cd 	bne.w	80013ca <BasicTimer2_Callback+0x1b2>
-	{
+
 		//Acumulamos los angulos
 		sum_ang += parameters_Pos_Robot.grad_relativo;
  8001230:	4bb5      	ldr	r3, [pc, #724]	; (8001508 <BasicTimer2_Callback+0x2f0>)

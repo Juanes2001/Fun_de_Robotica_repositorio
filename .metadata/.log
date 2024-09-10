@@ -6942,3 +6942,41 @@ Command-line arguments:  -os linux -ws gtk -arch x86_64
 
 !ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2024-09-09 19:21:19.681
 !MESSAGE Started RMI Server, listening on port 41337
+!SESSION 2024-09-09 20:03:02.166 -----------------------------------------------
+eclipse.buildId=Version 1.10.1
+java.version=11.0.14.1
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=linux, ARCH=x86_64, WS=gtk, NL=en_US
+Command-line arguments:  -os linux -ws gtk -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2024-09-09 20:03:08.669
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2024-09-09 20:03:08.733
+!MESSAGE Log4j initialized with config file /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/.metadata/.log4j.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2024-09-09 20:03:13.006
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-09-09 20:17:58.283
+!MESSAGE Indexed 'Base_FreeRTOS' (11 sources, 97 headers) in 2.08 sec: 6,637 declarations; 16,826 references; 0 unresolved inclusions; 108 syntax errors; 9 unresolved names (0.038%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-09-09 20:20:55.929
+!MESSAGE Indexed 'PeripheralDriver' (22 sources, 90 headers) in 1.52 sec: 5,357 declarations; 16,556 references; 0 unresolved inclusions; 1 syntax errors; 2 unresolved names (0.0091%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-09-09 20:21:45.983
+!MESSAGE Indexed 'Prueba_Astar' (2 sources, 90 headers) in 0.985 sec: 4,822 declarations; 6,606 references; 0 unresolved inclusions; 1 syntax errors; 0 unresolved names (0%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-09-09 20:22:58.211
+!MESSAGE Indexed 'Pruebas_sin_FreeRTOS' (2 sources, 86 headers) in 0.591 sec: 4,721 declarations; 6,696 references; 0 unresolved inclusions; 1 syntax errors; 0 unresolved names (0%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2024-09-09 20:24:06.523
+!MESSAGE Indexed 'Pulse_width_10ns' (2 sources, 81 headers) in 0.684 sec: 4,383 declarations; 5,897 references; 0 unresolved inclusions; 1 syntax errors; 0 unresolved names (0%)
+
+!ENTRY com.st.stm32cube.ide.mcu.stackanalyzer 4 0 2024-09-09 20:24:20.987
+!MESSAGE Stackanalyzer failed to analyze input
+!STACK 0
+java.lang.NullPointerException
+	at com.st.stm32cube.ide.mcu.stackanalyzer.ui.StackAnalyzerView.inputChanged(StackAnalyzerView.java:913)
+	at com.st.stm32cube.ide.mcu.stackanalyzer.ui.StackAnalyzerView.lambda$15(StackAnalyzerView.java:1257)
+	at java.base/java.lang.Thread.run(Thread.java:829)

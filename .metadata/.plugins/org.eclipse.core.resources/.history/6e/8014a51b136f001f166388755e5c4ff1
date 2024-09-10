@@ -192,7 +192,7 @@ void inSystem (void){
 
 
 	// Activamos la maxima velocidad del microcontrolador
-	RCC_enableMaxFrequencies(RCC_100MHz);
+	RCC_enableMaxFrequencies();
 	//Config del pin A8 salida de la velocidad del micro
 
 //	handlerMCO2Show.pGPIOx                             = GPIOC;
