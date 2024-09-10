@@ -9,6 +9,8 @@
 		<item key="SmartImportRootWizardPage.STORE_NESTED_PROJECTS" value="true"/>
 		<item key="SmartImportRootWizardPage.STORE_CONFIGURE_NATURES" value="true"/>
 		<list key="org.eclipse.ui.internal.wizards.datatransfer.SmartImportRootWizardPage.knownSources">
+			<item value="/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Pruebas_sin_FreeRTOS"/>
+			<item value="/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/PeripheralDriver"/>
 			<item value="/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/EjemploLED_FreeRTOS"/>
 			<item value="/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Base_FreeRTOS"/>
 			<item value="/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Blinky"/>
