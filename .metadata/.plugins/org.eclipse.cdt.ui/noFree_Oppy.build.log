@@ -1,4 +1,4 @@
-08:08:06 **** Incremental Build of configuration Debug for project noFree_Oppy ****
+12:29:49 **** Incremental Build of configuration Debug for project noFree_Oppy ****
 make -j12 all 
 arm-none-eabi-gcc -o "noFree_Oppy.elf" @"objects.list"  -lPeripheralDrivers -mcpu=cortex-m4 -T"C:\Users\juane\OneDrive\Desktop\Robotica\Fun_de_Robotica_repositorio\noFree_Oppy\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="noFree_Oppy.map" -Wl,--gc-sections -static -LC:\Users\juane\OneDrive\Desktop\Robotica\Fun_de_Robotica_repositorio/PeripheralDrivers/Debug --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 c:\st\stm32cubeide_1.10.1\stm32cubeide\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.10.3-2021.10.win32_1.0.0.202111181127\tools\arm-none-eabi\bin\ld.exe: cannot find -lPeripheralDrivers
@@ -6,5 +6,5 @@ collect2.exe: error: ld returned 1 exit status
 make: *** [makefile:63: noFree_Oppy.elf] Error 1
 "make -j12 all" terminated with exit code 2. Build might be incomplete.
 
-08:08:06 Build Failed. 2 errors, 0 warnings. (took 657ms)
+12:29:50 Build Failed. 2 errors, 0 warnings. (took 915ms)
 
