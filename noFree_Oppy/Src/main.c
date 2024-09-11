@@ -36,13 +36,6 @@
 #include "MotorsDriver.h"
 #include "PosRobt.h"
 
-/*definicion de variables del sistema*/
-
-void inSystem (void);
-void parseCommands(char *stringVector);
-float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis);
-void getAngle(MPUAccel_Config *ptrMPUAccel,float angle_init,uint8_t flag, float calibr,Parameters_Position_t realPos);
-void On_Off_motor(uint8_t status);
 
 //Definición Handlers
 //GPIO
@@ -104,9 +97,7 @@ I2C_Handler_t handler_I2C1 = {0};
 MPUAccel_Config handler_MPUAccel_6050 ={0};
 
 // Motor Drivers
-Motor_Handler_t handler_Motor_1 = {0};
-Motor_Handler_t handler_Motor_2 = {0};// Handler para motor izquierdo
-
+Motor_Handler_t *handler_Motor_Array[2]; // Handler para cada motor, 0--> izquierdo; 1--> derecho
 
 // Estructura de estados
 typedef enum{
@@ -114,11 +105,20 @@ typedef enum{
 	sRoll
 }state_t;
 
+//DEFINICION DE FUNCIONES
+
+void inSystem (void);
+void parseCommands(char *stringVector);
+float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis);
+void getAngle(MPUAccel_Config *ptrMPUAccel,float angle_init, double calibr,Parameters_Position_t *ptrParameter_position);
+void On_Off_motor(Motor_Handler_t *ptrMotorhandler[2], uint8_t status);
+void get_measuremets_parameters(BasicTimer_Handler_t *ptrTimer ,Motor_Handler_t *ptrMotorHandler[2], Parameters_Position_t *ptrParameter_position, state_t operation_mode);
+
 
 //-----Macros------
-#define distanceBetweenWheels 10600             //Distacia entre ruedas     10430
-#define D1 5170                                 //Diametro rueda izquierda
-#define D2 5145                                 //Diametro rueda Derecha
+#define distanceBetweenWheels 10600             //Distacia entre ruedas     10430 [mm]
+#define D1 5170                                 //Diametro rueda izquierda [mm]
+#define D2 5145                                 //Diametro rueda Derecha   [mm]
 #define Ce 72                                   //Numero de interrupciones en el incoder
 
 
@@ -134,9 +134,10 @@ unsigned int thirdParameter;
 char userMsg[64];
 
 //////Banderas y estados-----------
-state_t Mode   = sLine;
-uint8_t flag_action = 0;
-uint8_t flag_angulo = 0;
+state_t Mode              = sLine;
+uint8_t flag_action       = 0;
+uint8_t flag_angulo       = 0;
+uint8_t flag_measurements = 0;
 
 
 // TIEMPOS DE SAMPLEO Y CONTEO PARA DEFINICION DE PARAMETROS
@@ -155,9 +156,9 @@ double cal_Gyro = 0;   // variable que almacena la calibración del giroscopio
 float ang_d = 0;
 float sum_ang = 0;
 float promAng = 0;
-float cm_1 = ((M_PI*D1)/(100*Ce)); // Numero de milimetros por paso de la rueda izquierda
-float cm_2 = ((M_PI*D2)/(100*Ce)); // Numero de milimetros por paso de la rueda derecha
-double ang_for_Displament_ICR = 0;
+float paso_mm_1 = ((M_PI*D1)/(Ce)); // Numero de milimetros por paso de la rueda izquierda [mm]
+float paso_mm_2 = ((M_PI*D2)/(Ce)); // Numero de milimetros por paso de la rueda derecha   [mm]
+double ang_for_Displament = 0;
 double ang_complementary = 0;
 
 // VARIABLES VARIAS DEL ROBOT
@@ -167,17 +168,10 @@ double ang_complementary = 0;
 int main(void)
 {
 
-
 	//Activamos el FPU o la unidad de punto flotante
  	SCB -> CPACR |= (0xF << 20);
 
-
-
-
 	inSystem ();
-
-
-
 
     /* Loop forever */
 	while(1){
@@ -208,6 +202,28 @@ int main(void)
 
 		}
 
+
+
+
+
+		////////////////////////////////////////BLOQUE DE MEDICION Y CONTROL//////////////////////////////////////////////////////
+
+		//En este primera medicion se mide el el angulo actual del robot con respecto a una referencia.
+		if (flag_angulo){
+
+			// Medimos el angulo actual
+			getAngle(&handler_MPUAccel_6050, 0, cal_Gyro, &parameters_Pos_Robot);
+			// bajamos la bandera
+			flag_angulo = RESET;
+		}
+		// En la siguiente medicion medimos todos los parametros necesarios para el control posterior
+		if (flag_measurements){
+
+			// Medimos el angulo actual
+			get_measuremets_parameters(&handlerTIM2_PARAMETROS_MOVIMIENTO, handler_Motor_Array, &parameters_Pos_Robot, Mode);
+			// bajamos la bandera
+			flag_angulo = RESET;
+		}
 
 
 
@@ -492,7 +508,7 @@ void parseCommands(char *stringVector){
 
 	}else if (strcmp(cmd, "goto") == 0){
 
-		On_Off_motor(SET); // Encendemos los motores para irnos hacia adelante y con una velocidad fija
+		On_Off_motor(handler_Motor_Array,SET); // Encendemos los motores para irnos hacia adelante y con una velocidad fija
 		startTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Comenzamos el muestreo de datos con los que aplicaremos un control adecuado
 	}
 
@@ -528,71 +544,12 @@ void BasicTimer2_Callback(void){
 	// Levantamos bandera que calcula el angulo actual
 	flag_angulo = SET;
 
-	//Verificamos el modo
-	if(Mode == sLine){ // Levantamos la vandera que calcula todos los parametros necesarios para el control
+	// Levantamos la bandera que corresponde con los calculos  odometricos del robot, como la distancia
+	// Recorrida, la posicion actual y la velocidad
 
-		//Acumulamos los angulos
-		sum_ang += parameters_Pos_Robot.grad_relativo;
-		//Se acumula el tiempo
-		time_accumulated += handlerTIM2_PARAMETROS_MOVIMIENTO.TIMx_Config.TIMx_period;
+	flag_measurements = SET;
 
-		//----------------Accion a realizar con un tiempo especifico--------------------
-		if(counting_action>=timeAction_TIMER_Sampling)
-		{
-			//Guardamos el tiempo entre acciones especificas
-			time_accion = time_accumulated;
-			//Calculamos el angulo promedio y la establecemis como el angulo relativo
-			promAng = sum_ang/counting_action;
-			parameters_Pos_Robot.phi_relativo = (promAng*M_PI)/180;          //[rad]
-			parameters_Pos_Robot.phi_relativo = atan2(sin(parameters_Pos_Robot.phi_relativo),cos(parameters_Pos_Robot.phi_relativo));
-			//Calculamos la velocidad
-			handler_Motor_1.parametersMotor.dis = (cm_1*handler_Motor_1.parametersMotor.counts);                   //[mm]
-			handler_Motor_2.parametersMotor.dis = (cm_2*handler_Motor_2.parametersMotor.counts);				   //[mm]
-			handler_Motor_1.parametersMotor.vel = handler_Motor_1.parametersMotor.dis/time_accion;      //[m/s]
-			handler_Motor_2.parametersMotor.vel = handler_Motor_2.parametersMotor.dis/time_accion;      //[m/s]
-			//Reiniciamos el numero de conteos
-			handler_Motor_1.parametersMotor.counts = 0;
-			handler_Motor_2.parametersMotor.counts = 0;
-			//Reiniciamos variable
-			sum_ang = 0;
-			//Reiniciamos tiempo
-			time_accumulated = 0;
-			//Reiniciamos el contador de accion
-			counting_action = 0;
-			//Levantamos bandera
-			flag_action = 1;
-		}
-		else{ counting_action++; }
-	}
-	else if(Mode == sRoll)
-	{
-		//----------------Accion a realizar con un tiempo especifico--------------------
-		if(counting_action>=timeAction_TIMER_Sampling)
-		{
-			//Guardamos el tiempo entre acciones especificas
-			time_accion = time_accumulated;
-			//Calculo de la distancia recorrida por cada rueda
-			handler_Motor_1.parametersMotor.dis = (cm_1*handler_Motor_1.parametersMotor.counts);                   //[mm]
-			handler_Motor_2.parametersMotor.dis = (cm_2*handler_Motor_2.parametersMotor.counts);				   //[mm]
-			handler_Motor_1.parametersMotor.vel = handler_Motor_1.parametersMotor.dis/time_accion;      //[m/s]
-			handler_Motor_2.parametersMotor.vel = handler_Motor_2.parametersMotor.dis/time_accion;      //[m/s]
-			//Reiniciamos el numero de conteos
-			handler_Motor_2.parametersMotor.counts = 0;
-			handler_Motor_1.parametersMotor.counts = 0;
-			//Calculo angulo debido al desplazamiento del ICR
-			ang_for_Displament_ICR += (((handler_Motor_2.parametersMotor.dis - handler_Motor_1.parametersMotor.dis)*100)
-					/distanceBetweenWheels)*(180/M_PI); //[rad]
-			//Reiniciamos tiempo
-			time_accumulated = 0;
-			//Reiniciamos el contador de accion
-			counting_action = 0;
-		}
-		else{counting_action++;}
-
-		//Combinar ambos ángulos
-		ang_complementary = parameters_Pos_Robot.grad_relativo + ang_for_Displament_ICR;
-	}
-	else{  __NOP(); }
+	// EN EL MAIN ESTAS DOS BANDERAS SE ANALIZARAN Y SE EJECUTARAN
 }
 
 
@@ -656,23 +613,94 @@ float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis){
 }
 
 
-void getAngle(MPUAccel_Config *ptrMPUAccel,float angle_init,uint8_t flag, float calibr, Parameters_Position_t realPos){
+void getAngle(MPUAccel_Config *ptrMPUAccel,float angle_init, double calibr, Parameters_Position_t *ptrParameter_position){
 
 	///////////////////////////MEDIDA DEL ANGULO ACUMULADO////////////////////////////////////
 
-	if (flag){
 	//----------------Accion a Realiza cada interrupción------------------
 		//Leemos el ángulo
 		//Lectura velocidad angular
-		float w = readGyro_Z(ptrMPUAccel) - cal_Gyro;
+		float w = readGyro_Z(ptrMPUAccel) - calibr;
 		//Calculo angulo
 		float ang_d = angle_init + (w * 16)/1000; // conversion de velocidad angular a grados absolutos con respecto al inicio del programa
 
-		realPos.grad_relativo = ang_d;
-	}
+		ptrParameter_position->grad_relativo = ang_d;
 }
 
-void On_Off_motor(uint8_t status){
+void get_measuremets_parameters(BasicTimer_Handler_t *ptrTimer ,Motor_Handler_t *ptrMotorHandler[2], Parameters_Position_t *ptrParameter_position, state_t operation_mode){
+
+	//Verificamos el modo
+	if(operation_mode == sLine){ // Levantamos la vandera que calcula todos los parametros necesarios para el control
+
+
+
+		//Acumulamos los angulos
+		sum_ang += ptrParameter_position->grad_relativo;
+		//Se acumula el tiempo
+		time_accumulated += ptrTimer->TIMx_Config.TIMx_period;
+
+		//----------------Accion a realizar con un tiempo especifico--------------------
+		if(counting_action >= timeAction_TIMER_Sampling)
+		{
+			//Guardamos el tiempo entre acciones especificas
+			time_accion = time_accumulated;
+			//Calculamos el angulo promedio y la establecemos como el angulo relativo
+			promAng = sum_ang / counting_action;
+			ptrParameter_position->phi_relativo = (promAng * M_PI) / 180;          //[rad]
+			// Con la siguiente accion lo que hacemos es conseguir un angulo con mucha mas precision decimal debido a la funcion atan2
+			ptrParameter_position->phi_relativo = atan2(sin(ptrParameter_position->phi_relativo),cos(ptrParameter_position->phi_relativo));
+			//Calculamos la velocidad
+			ptrMotorHandler[0]->parametersMotor.dis = (paso_mm_1 * ptrMotorHandler[0]->parametersMotor.counts);      //[mm]
+			ptrMotorHandler[1]->parametersMotor.dis = (paso_mm_2 * ptrMotorHandler[1]->parametersMotor.counts);      //[mm]
+			ptrMotorHandler[0]->parametersMotor.vel = ptrMotorHandler[0]->parametersMotor.dis / time_accion;      //[m/s]
+			ptrMotorHandler[1]->parametersMotor.vel = ptrMotorHandler[1]->parametersMotor.dis / time_accion;      //[m/s]
+			//Reiniciamos el numero de conteos
+			ptrMotorHandler[0]->parametersMotor.counts = 0;
+			ptrMotorHandler[1]->parametersMotor.counts = 0;
+			//Reiniciamos variable
+			sum_ang = 0;
+			//Reiniciamos tiempo
+			time_accumulated = 0;
+			//Reiniciamos el contador de accion
+			counting_action = 0;
+			//Levantamos bandera
+			flag_action = 1;
+		}
+		else{ counting_action++; }
+	}
+	else if(Mode == sRoll)
+	{
+		//----------------Accion a realizar con un tiempo especifico--------------------
+		if(counting_action>=timeAction_TIMER_Sampling)
+		{
+			//Guardamos el tiempo entre acciones especificas
+			time_accion = time_accumulated;
+			//Calculo de la distancia recorrida por cada rueda
+			ptrMotorHandler[0]->parametersMotor.dis = (paso_mm_1 * ptrMotorHandler[0]->parametersMotor.counts);// Calculamos la distancia recorrida contando cuantos pasos a dado la rueda izquierda //[mm]
+			ptrMotorHandler[1]->parametersMotor.dis = (paso_mm_2 * ptrMotorHandler[1]->parametersMotor.counts);// Calculamos la distancia recorrida contando cuantos pasos a dado la rueda derecha   //[mm]
+			ptrMotorHandler[0]->parametersMotor.vel = ptrMotorHandler[0]->parametersMotor.dis / time_accion; // Calculamos la velocidad de la rueda izquierda     //[m/s]
+			ptrMotorHandler[1]->parametersMotor.vel = ptrMotorHandler[1]->parametersMotor.dis / time_accion; // Calculamos la velocidad de la rueda derecha    //[m/s]
+			//Reiniciamos el numero de conteos
+			ptrMotorHandler[0]->parametersMotor.counts = 0;
+			ptrMotorHandler[1]->parametersMotor.counts = 0; // RESETEAMOS LAS CUENTAS
+
+			//Cálculo ángulo debido al desplazamiento del ICR
+			ang_for_Displament += ((ptrMotorHandler[1]->parametersMotor.dis - ptrMotorHandler[0]->parametersMotor.dis) / distanceBetweenWheels)*(180/M_PI); //[°]
+			//Reiniciamos tiempo
+			time_accumulated = 0;
+			//Reiniciamos el contador de acción
+			counting_action  = 0;
+		}
+		else{counting_action++;}
+
+		//Combinar ambos ángulos
+		ang_complementary = ptrParameter_position->grad_relativo + ang_for_Displament;
+	}
+	else{  __NOP(); }
+
+}
+
+void On_Off_motor(Motor_Handler_t *ptrMotorhandler[2], uint8_t status){
 
 
 	if(status == 1)
@@ -680,29 +708,29 @@ void On_Off_motor(uint8_t status){
 		//Activamos el motor
 		// ENCENCEMOS EL MOTOR 1 (LEFT)
 			// Se setea la direccion seleccionada
-			GPIO_WritePin_Afopt(handler_Motor_1.phandlerGPIOIN , SET); // Direccion hacia adelante
+			GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN , SET); // Direccion hacia adelante
 			//Se enciende el motor 1
-			enableOutput(handler_Motor_1.phandlerPWM);
-			GPIO_WritePin_Afopt(handler_Motor_1.phandlerGPIOEN,SET); // Encendemos el motor 1
+			enableOutput(ptrMotorhandler[0]->phandlerPWM);
+			GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOEN,SET); // Encendemos el motor 1
 
 			// ENCENCEMOS EL MOTOR 2 (Right)
 			// Se setea la direccion seleccionada
-			GPIO_WritePin_Afopt(handler_Motor_2.phandlerGPIOIN, SET); // Encendemos el motor 2
+			GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOIN, SET); // Encendemos el motor 2
 			//Se enciende el motor 2
-			enableOutput(handler_Motor_2.phandlerPWM);
-			GPIO_WritePin_Afopt (handler_Motor_2.phandlerGPIOEN,SET);
+			enableOutput(ptrMotorhandler[1]->phandlerPWM);
+			GPIO_WritePin_Afopt (ptrMotorhandler[1]->phandlerGPIOEN,SET);
 	}
 	else
 	{
 		//DESACTIVAMOS EL MOTOR
 		// APAGAMOS EL MOTOR 1 (LEFT)
 			//Se enciende el motor 1
-			disableOutput(handler_Motor_1.phandlerPWM);
-			GPIO_WritePin_Afopt(handler_Motor_1.phandlerGPIOEN, RESET); // Apagamos el motor 1
+			disableOutput(ptrMotorhandler[0]->phandlerPWM);
+			GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOEN, RESET); // Apagamos el motor 1
 			// APAGAMOS EL MOTOR 2 (Right)
 			//Se enciende el motor 2
-			disableOutput(handler_Motor_2.phandlerPWM);
-			GPIO_WritePin_Afopt (handler_Motor_2.phandlerGPIOEN,RESET);
+			disableOutput(ptrMotorhandler[1]->phandlerPWM);
+			GPIO_WritePin_Afopt (ptrMotorhandler[1]->phandlerGPIOEN,RESET);
 	}
 }
 
