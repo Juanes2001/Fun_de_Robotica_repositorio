@@ -59,8 +59,8 @@ all: main-build
 main-build: Pulse_width_10ns.elf secondary-outputs
 
 # Tool invocations
-Pulse_width_10ns.elf Pulse_width_10ns.map: $(OBJS) $(USER_OBJS) /home/juan/Github/Fun_de_Robotica_repositorio/Pulse_width_10ns/STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Pulse_width_10ns.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/juan/Github/Fun_de_Robotica_repositorio/Pulse_width_10ns/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Pulse_width_10ns.map" -Wl,--gc-sections -static -L"/home/juan/Github/Fun_de_Robotica_repositorio/PeripheralDrivers/Debug" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
+Pulse_width_10ns.elf Pulse_width_10ns.map: $(OBJS) $(USER_OBJS) C:\Users\juane\OneDrive\Desktop\STM_IDE\GitHub\Fun_de_Robotica_repositorio\Pulse_width_10ns\STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Pulse_width_10ns.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\juane\OneDrive\Desktop\STM_IDE\GitHub\Fun_de_Robotica_repositorio\Pulse_width_10ns\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Pulse_width_10ns.map" -Wl,--gc-sections -static -L"C:\Users\juane\OneDrive\Desktop\STM_IDE\GitHub\Fun_de_Robotica_repositorio/PeripheralDrivers/Debug" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

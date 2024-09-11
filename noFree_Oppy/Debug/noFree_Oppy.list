@@ -37,13 +37,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_macro  00010f30  00000000  00000000  00028978  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0000729f  00000000  00000000  000398a8  2**0
+ 17 .debug_line   0000767e  00000000  00000000  000398a8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    0005895a  00000000  00000000  00040b47  2**0
+ 18 .debug_str    00058994  00000000  00000000  00040f26  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000050  00000000  00000000  000994a1  2**0
+ 19 .comment      00000050  00000000  00000000  000998ba  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00002c40  00000000  00000000  000994f4  2**2
+ 20 .debug_frame  00002c40  00000000  00000000  0009990c  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -773,7 +773,7 @@ Disassembly of section .text:
  8000a2a:	e712      	b.n	8000852 <__aeabi_dmul+0x24a>
 
 08000a2c <__gedf2>:
- 8000a2c:	f04f 3cff 	mov.w	ip, #4294967295	; 0xffffffff
+ 8000a2c:	f04f 3cff 	mov.w	ip, #4294967295
  8000a30:	e006      	b.n	8000a40 <__cmpdf2+0x4>
  8000a32:	bf00      	nop
 
@@ -950,7 +950,7 @@ Disassembly of section .text:
  8000be4:	4770      	bx	lr
  8000be6:	ea50 3001 	orrs.w	r0, r0, r1, lsl #12
  8000bea:	d102      	bne.n	8000bf2 <__aeabi_d2uiz+0x3a>
- 8000bec:	f04f 30ff 	mov.w	r0, #4294967295	; 0xffffffff
+ 8000bec:	f04f 30ff 	mov.w	r0, #4294967295
  8000bf0:	4770      	bx	lr
  8000bf2:	f04f 0000 	mov.w	r0, #0
  8000bf6:	4770      	bx	lr
@@ -2402,7 +2402,7 @@ int _kill(int pid, int sig)
  80015e8:	2216      	movs	r2, #22
  80015ea:	601a      	str	r2, [r3, #0]
 	return -1;
- 80015ec:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
+ 80015ec:	f04f 33ff 	mov.w	r3, #4294967295
 }
  80015f0:	4618      	mov	r0, r3
  80015f2:	3708      	adds	r7, #8
@@ -2418,7 +2418,7 @@ void _exit (int status)
  80015fc:	af00      	add	r7, sp, #0
  80015fe:	6078      	str	r0, [r7, #4]
 	_kill(status, -1);
- 8001600:	f04f 31ff 	mov.w	r1, #4294967295	; 0xffffffff
+ 8001600:	f04f 31ff 	mov.w	r1, #4294967295
  8001604:	6878      	ldr	r0, [r7, #4]
  8001606:	f7ff ffe7 	bl	80015d8 <_kill>
 	while (1) {}		/* Make sure we hang here */
@@ -2519,7 +2519,7 @@ int _close(int file)
  8001682:	af00      	add	r7, sp, #0
  8001684:	6078      	str	r0, [r7, #4]
 	return -1;
- 8001686:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
+ 8001686:	f04f 33ff 	mov.w	r3, #4294967295
 }
  800168a:	4618      	mov	r0, r3
  800168c:	370c      	adds	r7, #12
@@ -12353,7 +12353,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  80054c0:	f000 fce6 	bl	8005e90 <_sbrk_r>
  80054c4:	3001      	adds	r0, #1
  80054c6:	d101      	bne.n	80054cc <sbrk_aligned+0x38>
- 80054c8:	f04f 34ff 	mov.w	r4, #4294967295	; 0xffffffff
+ 80054c8:	f04f 34ff 	mov.w	r4, #4294967295
  80054cc:	4620      	mov	r0, r4
  80054ce:	bd70      	pop	{r4, r5, r6, pc}
  80054d0:	200004e8 	.word	0x200004e8
@@ -12564,7 +12564,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  80056aa:	fb07 1516 	mls	r5, r7, r6, r1
  80056ae:	3530      	adds	r5, #48	; 0x30
  80056b0:	2a63      	cmp	r2, #99	; 0x63
- 80056b2:	f104 34ff 	add.w	r4, r4, #4294967295	; 0xffffffff
+ 80056b2:	f104 34ff 	add.w	r4, r4, #4294967295
  80056b6:	f80e 5c01 	strb.w	r5, [lr, #-1]
  80056ba:	4631      	mov	r1, r6
  80056bc:	dcf1      	bgt.n	80056a2 <__exponent+0x22>
@@ -12626,12 +12626,12 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8005754:	ee08 0a10 	vmov	s16, r0
  8005758:	4b9f      	ldr	r3, [pc, #636]	; (80059d8 <_printf_float+0x2dc>)
  800575a:	e9dd 0106 	ldrd	r0, r1, [sp, #24]
- 800575e:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
+ 800575e:	f04f 32ff 	mov.w	r2, #4294967295
  8005762:	f7fb f9eb 	bl	8000b3c <__aeabi_dcmpun>
  8005766:	bb88      	cbnz	r0, 80057cc <_printf_float+0xd0>
  8005768:	e9dd 0106 	ldrd	r0, r1, [sp, #24]
  800576c:	4b9a      	ldr	r3, [pc, #616]	; (80059d8 <_printf_float+0x2dc>)
- 800576e:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
+ 800576e:	f04f 32ff 	mov.w	r2, #4294967295
  8005772:	f7fb f9c5 	bl	8000b00 <__aeabi_dcmple>
  8005776:	bb48      	cbnz	r0, 80057cc <_printf_float+0xd0>
  8005778:	2200      	movs	r2, #0
@@ -12662,7 +12662,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  80057b4:	f000 f9d8 	bl	8005b68 <_printf_common>
  80057b8:	3001      	adds	r0, #1
  80057ba:	f040 8090 	bne.w	80058de <_printf_float+0x1e2>
- 80057be:	f04f 30ff 	mov.w	r0, #4294967295	; 0xffffffff
+ 80057be:	f04f 30ff 	mov.w	r0, #4294967295
  80057c2:	b00d      	add	sp, #52	; 0x34
  80057c4:	ecbd 8b02 	vpop	{d8}
  80057c8:	e8bd 8ff0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
@@ -13124,7 +13124,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8005c06:	47c0      	blx	r8
  8005c08:	3001      	adds	r0, #1
  8005c0a:	d103      	bne.n	8005c14 <_printf_common+0xac>
- 8005c0c:	f04f 30ff 	mov.w	r0, #4294967295	; 0xffffffff
+ 8005c0c:	f04f 30ff 	mov.w	r0, #4294967295
  8005c10:	e8bd 87f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, pc}
  8005c14:	3501      	adds	r5, #1
  8005c16:	e7c6      	b.n	8005ba6 <_printf_common+0x3e>
@@ -13272,7 +13272,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8005d84:	bfde      	ittt	le
  8005d86:	2330      	movle	r3, #48	; 0x30
  8005d88:	f805 3c01 	strble.w	r3, [r5, #-1]
- 8005d8c:	f105 35ff 	addle.w	r5, r5, #4294967295	; 0xffffffff
+ 8005d8c:	f105 35ff 	addle.w	r5, r5, #4294967295
  8005d90:	1b52      	subs	r2, r2, r5
  8005d92:	6122      	str	r2, [r4, #16]
  8005d94:	f8cd a000 	str.w	sl, [sp]
@@ -13283,7 +13283,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8005da0:	f7ff fee2 	bl	8005b68 <_printf_common>
  8005da4:	3001      	adds	r0, #1
  8005da6:	d14c      	bne.n	8005e42 <_printf_i+0x1fe>
- 8005da8:	f04f 30ff 	mov.w	r0, #4294967295	; 0xffffffff
+ 8005da8:	f04f 30ff 	mov.w	r0, #4294967295
  8005dac:	b004      	add	sp, #16
  8005dae:	e8bd 87f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, pc}
  8005db2:	4835      	ldr	r0, [pc, #212]	; (8005e88 <_printf_i+0x244>)
@@ -13900,7 +13900,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800638e:	2300      	movs	r3, #0
  8006390:	9306      	str	r3, [sp, #24]
  8006392:	9508      	str	r5, [sp, #32]
- 8006394:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
+ 8006394:	f04f 33ff 	mov.w	r3, #4294967295
  8006398:	e9cd 3302 	strd	r3, r3, [sp, #8]
  800639c:	2200      	movs	r2, #0
  800639e:	2312      	movs	r3, #18
@@ -14631,7 +14631,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8006aa8:	4620      	mov	r0, r4
  8006aaa:	f000 fbb1 	bl	8007210 <__mdiff>
  8006aae:	68c2      	ldr	r2, [r0, #12]
- 8006ab0:	f109 3bff 	add.w	fp, r9, #4294967295	; 0xffffffff
+ 8006ab0:	f109 3bff 	add.w	fp, r9, #4294967295
  8006ab4:	4605      	mov	r5, r0
  8006ab6:	bb02      	cbnz	r2, 8006afa <_dtoa_r+0xa62>
  8006ab8:	4601      	mov	r1, r0
@@ -14833,7 +14833,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
 08006ca0 <memcpy>:
  8006ca0:	440a      	add	r2, r1
  8006ca2:	4291      	cmp	r1, r2
- 8006ca4:	f100 33ff 	add.w	r3, r0, #4294967295	; 0xffffffff
+ 8006ca4:	f100 33ff 	add.w	r3, r0, #4294967295
  8006ca8:	d100      	bne.n	8006cac <memcpy+0xc>
  8006caa:	4770      	bx	lr
  8006cac:	b510      	push	{r4, lr}
@@ -15382,7 +15382,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8007204:	4283      	cmp	r3, r0
  8007206:	d3f3      	bcc.n	80071f0 <__mcmp+0x18>
  8007208:	e7fa      	b.n	8007200 <__mcmp+0x28>
- 800720a:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
+ 800720a:	f04f 32ff 	mov.w	r2, #4294967295
  800720e:	e7f7      	b.n	8007200 <__mcmp+0x28>
 
 08007210 <__mdiff>:
@@ -15737,7 +15737,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8007558:	89a3      	ldrh	r3, [r4, #12]
  800755a:	f043 0340 	orr.w	r3, r3, #64	; 0x40
  800755e:	81a3      	strh	r3, [r4, #12]
- 8007560:	f04f 30ff 	mov.w	r0, #4294967295	; 0xffffffff
+ 8007560:	f04f 30ff 	mov.w	r0, #4294967295
  8007564:	e78e      	b.n	8007484 <__sflush_r+0x1c>
  8007566:	4407      	add	r7, r0
  8007568:	eba8 0800 	sub.w	r8, r8, r0
@@ -16127,7 +16127,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  80078be:	6e6b      	ldr	r3, [r5, #100]	; 0x64
  80078c0:	07dc      	lsls	r4, r3, #31
  80078c2:	d50e      	bpl.n	80078e2 <_vfiprintf_r+0x6a>
- 80078c4:	f04f 30ff 	mov.w	r0, #4294967295	; 0xffffffff
+ 80078c4:	f04f 30ff 	mov.w	r0, #4294967295
  80078c8:	b01d      	add	sp, #116	; 0x74
  80078ca:	e8bd 8ff0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
  80078ce:	4b7b      	ldr	r3, [pc, #492]	; (8007abc <_vfiprintf_r+0x244>)
@@ -16177,7 +16177,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800793c:	2b00      	cmp	r3, #0
  800793e:	f000 80a2 	beq.w	8007a86 <_vfiprintf_r+0x20e>
  8007942:	2300      	movs	r3, #0
- 8007944:	f04f 32ff 	mov.w	r2, #4294967295	; 0xffffffff
+ 8007944:	f04f 32ff 	mov.w	r2, #4294967295
  8007948:	e9cd 2305 	strd	r2, r3, [sp, #20]
  800794c:	f10a 0a01 	add.w	sl, sl, #1
  8007950:	9304      	str	r3, [sp, #16]
@@ -16244,7 +16244,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  80079e0:	9203      	str	r2, [sp, #12]
  80079e2:	2b00      	cmp	r3, #0
  80079e4:	bfb8      	it	lt
- 80079e6:	f04f 33ff 	movlt.w	r3, #4294967295	; 0xffffffff
+ 80079e6:	f04f 33ff 	movlt.w	r3, #4294967295
  80079ea:	3402      	adds	r4, #2
  80079ec:	9305      	str	r3, [sp, #20]
  80079ee:	f8df a0e4 	ldr.w	sl, [pc, #228]	; 8007ad4 <_vfiprintf_r+0x25c>
@@ -16410,7 +16410,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8007b60:	f000 f81a 	bl	8007b98 <__swsetup_r>
  8007b64:	2800      	cmp	r0, #0
  8007b66:	d0cb      	beq.n	8007b00 <__swbuf_r+0x28>
- 8007b68:	f04f 37ff 	mov.w	r7, #4294967295	; 0xffffffff
+ 8007b68:	f04f 37ff 	mov.w	r7, #4294967295
  8007b6c:	e7ea      	b.n	8007b44 <__swbuf_r+0x6c>
  8007b6e:	bf00      	nop
  8007b70:	0800a624 	.word	0x0800a624
@@ -16424,7 +16424,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8007b82:	238a      	movhi	r3, #138	; 0x8a
  8007b84:	6003      	strhi	r3, [r0, #0]
  8007b86:	700a      	strbls	r2, [r1, #0]
- 8007b88:	f04f 30ff 	movhi.w	r0, #4294967295	; 0xffffffff
+ 8007b88:	f04f 30ff 	movhi.w	r0, #4294967295
  8007b8c:	bf98      	it	ls
  8007b8e:	2001      	movls	r0, #1
  8007b90:	4770      	bx	lr
@@ -16457,7 +16457,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8007bc6:	6033      	str	r3, [r6, #0]
  8007bc8:	f042 0340 	orr.w	r3, r2, #64	; 0x40
  8007bcc:	81a3      	strh	r3, [r4, #12]
- 8007bce:	f04f 30ff 	mov.w	r0, #4294967295	; 0xffffffff
+ 8007bce:	f04f 30ff 	mov.w	r0, #4294967295
  8007bd2:	e03e      	b.n	8007c52 <__swsetup_r+0xba>
  8007bd4:	4b25      	ldr	r3, [pc, #148]	; (8007c6c <__swsetup_r+0xd4>)
  8007bd6:	429c      	cmp	r4, r3
@@ -16628,7 +16628,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8007d54:	d904      	bls.n	8007d60 <_raise_r+0x14>
  8007d56:	2316      	movs	r3, #22
  8007d58:	6003      	str	r3, [r0, #0]
- 8007d5a:	f04f 30ff 	mov.w	r0, #4294967295	; 0xffffffff
+ 8007d5a:	f04f 30ff 	mov.w	r0, #4294967295
  8007d5e:	bd38      	pop	{r3, r4, r5, pc}
  8007d60:	6c42      	ldr	r2, [r0, #68]	; 0x44
  8007d62:	b112      	cbz	r2, 8007d6a <_raise_r+0x1e>
@@ -16809,7 +16809,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8007f1a:	ec41 0b10 	vmov	d0, r0, r1
  8007f1e:	bd70      	pop	{r4, r5, r6, pc}
  8007f20:	f2a5 4613 	subw	r6, r5, #1043	; 0x413
- 8007f24:	f04f 35ff 	mov.w	r5, #4294967295	; 0xffffffff
+ 8007f24:	f04f 35ff 	mov.w	r5, #4294967295
  8007f28:	40f5      	lsrs	r5, r6
  8007f2a:	4228      	tst	r0, r5
  8007f2c:	d0f5      	beq.n	8007f1a <round+0x5a>
@@ -17022,7 +17022,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800817a:	4572      	cmp	r2, lr
  800817c:	d10f      	bne.n	800819e <__ieee754_atan2+0xb6>
  800817e:	4293      	cmp	r3, r2
- 8008180:	f104 34ff 	add.w	r4, r4, #4294967295	; 0xffffffff
+ 8008180:	f104 34ff 	add.w	r4, r4, #4294967295
  8008184:	d107      	bne.n	8008196 <__ieee754_atan2+0xae>
  8008186:	2c02      	cmp	r4, #2
  8008188:	d84c      	bhi.n	8008224 <__ieee754_atan2+0x13c>
@@ -18148,7 +18148,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8008dc2:	a389      	add	r3, pc, #548	; (adr r3, 8008fe8 <__ieee754_rem_pio2+0x308>)
  8008dc4:	e9d3 2300 	ldrd	r2, r3, [r3]
  8008dc8:	f7f7 fa68 	bl	800029c <__adddf3>
- 8008dcc:	f04f 3bff 	mov.w	fp, #4294967295	; 0xffffffff
+ 8008dcc:	f04f 3bff 	mov.w	fp, #4294967295
  8008dd0:	e9ca 0102 	strd	r0, r1, [sl, #8]
  8008dd4:	e7c4      	b.n	8008d60 <__ieee754_rem_pio2+0x80>
  8008dd6:	a386      	add	r3, pc, #536	; (adr r3, 8008ff0 <__ieee754_rem_pio2+0x310>)
@@ -18206,7 +18206,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8008e6e:	460d      	mov	r5, r1
  8008e70:	dc0d      	bgt.n	8008e8e <__ieee754_rem_pio2+0x1ae>
  8008e72:	4b6e      	ldr	r3, [pc, #440]	; (800902c <__ieee754_rem_pio2+0x34c>)
- 8008e74:	f10b 32ff 	add.w	r2, fp, #4294967295	; 0xffffffff
+ 8008e74:	f10b 32ff 	add.w	r2, fp, #4294967295
  8008e78:	f853 3022 	ldr.w	r3, [r3, r2, lsl #2]
  8008e7c:	4543      	cmp	r3, r8
  8008e7e:	d006      	beq.n	8008e8e <__ieee754_rem_pio2+0x1ae>
@@ -18402,7 +18402,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  80090a2:	e9d5 0104 	ldrd	r0, r1, [r5, #16]
  80090a6:	46c3      	mov	fp, r8
  80090a8:	3d08      	subs	r5, #8
- 80090aa:	f108 38ff 	add.w	r8, r8, #4294967295	; 0xffffffff
+ 80090aa:	f108 38ff 	add.w	r8, r8, #4294967295
  80090ae:	f7f7 fd13 	bl	8000ad8 <__aeabi_dcmpeq>
  80090b2:	2800      	cmp	r0, #0
  80090b4:	d1f3      	bne.n	800909e <__ieee754_rem_pio2+0x3be>
@@ -18514,7 +18514,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  80091d2:	1a09      	subs	r1, r1, r0
  80091d4:	459c      	cmp	ip, r3
  80091d6:	bf88      	it	hi
- 80091d8:	f101 31ff 	addhi.w	r1, r1, #4294967295	; 0xffffffff
+ 80091d8:	f101 31ff 	addhi.w	r1, r1, #4294967295
  80091dc:	eba3 030c 	sub.w	r3, r3, ip
  80091e0:	4432      	add	r2, r6
  80091e2:	4640      	mov	r0, r8
@@ -18721,7 +18721,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800940a:	f853 3021 	ldr.w	r3, [r3, r1, lsl #2]
  800940e:	9302      	str	r3, [sp, #8]
  8009410:	9b08      	ldr	r3, [sp, #32]
- 8009412:	f103 33ff 	add.w	r3, r3, #4294967295	; 0xffffffff
+ 8009412:	f103 33ff 	add.w	r3, r3, #4294967295
  8009416:	bfa8      	it	ge
  8009418:	1ed4      	subge	r4, r2, #3
  800941a:	9306      	str	r3, [sp, #24]
@@ -18913,7 +18913,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800962a:	f84b 0b04 	str.w	r0, [fp], #4
  800962e:	ec51 0b18 	vmov	r0, r1, d8
  8009632:	f7f6 fe33 	bl	800029c <__adddf3>
- 8009636:	f109 39ff 	add.w	r9, r9, #4294967295	; 0xffffffff
+ 8009636:	f109 39ff 	add.w	r9, r9, #4294967295
  800963a:	4606      	mov	r6, r0
  800963c:	460f      	mov	r7, r1
  800963e:	e75b      	b.n	80094f8 <__kernel_rem_pio2+0x108>
@@ -19122,7 +19122,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800987c:	4630      	mov	r0, r6
  800987e:	4639      	mov	r1, r7
  8009880:	f7f6 fec2 	bl	8000608 <__aeabi_dmul>
- 8009884:	f10a 3aff 	add.w	sl, sl, #4294967295	; 0xffffffff
+ 8009884:	f10a 3aff 	add.w	sl, sl, #4294967295
  8009888:	4606      	mov	r6, r0
  800988a:	460f      	mov	r7, r1
  800988c:	e70f      	b.n	80096ae <__kernel_rem_pio2+0x2be>
@@ -19289,7 +19289,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8009a48:	ed9d 7b02 	vldr	d7, [sp, #8]
  8009a4c:	e9c4 0102 	strd	r0, r1, [r4, #8]
  8009a50:	ed84 7b00 	vstr	d7, [r4]
- 8009a54:	f10a 3aff 	add.w	sl, sl, #4294967295	; 0xffffffff
+ 8009a54:	f10a 3aff 	add.w	sl, sl, #4294967295
  8009a58:	e755      	b.n	8009906 <__kernel_rem_pio2+0x516>
  8009a5a:	e974 2302 	ldrd	r2, r3, [r4, #-8]!
  8009a5e:	f7f6 fc1d 	bl	800029c <__adddf3>
@@ -19533,7 +19533,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8009cd8:	f7f6 ff26 	bl	8000b28 <__aeabi_dcmpgt>
  8009cdc:	2800      	cmp	r0, #0
  8009cde:	d1e6      	bne.n	8009cae <atan+0x3e>
- 8009ce0:	f04f 3aff 	mov.w	sl, #4294967295	; 0xffffffff
+ 8009ce0:	f04f 3aff 	mov.w	sl, #4294967295
  8009ce4:	e02b      	b.n	8009d3e <atan+0xce>
  8009ce6:	f000 f963 	bl	8009fb0 <fabs>
  8009cea:	4bab      	ldr	r3, [pc, #684]	; (8009f98 <atan+0x328>)
@@ -19650,7 +19650,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  8009e24:	4622      	mov	r2, r4
  8009e26:	462b      	mov	r3, r5
  8009e28:	f7f6 fbee 	bl	8000608 <__aeabi_dmul>
- 8009e2c:	f1ba 3fff 	cmp.w	sl, #4294967295	; 0xffffffff
+ 8009e2c:	f1ba 3fff 	cmp.w	sl, #4294967295
  8009e30:	4602      	mov	r2, r0
  8009e32:	460b      	mov	r3, r1
  8009e34:	d14b      	bne.n	8009ece <atan+0x25e>
@@ -19856,7 +19856,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800a070:	ec41 0b10 	vmov	d0, r0, r1
  800a074:	e8bd 81f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, pc}
  800a078:	f2a7 4713 	subw	r7, r7, #1043	; 0x413
- 800a07c:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
+ 800a07c:	f04f 33ff 	mov.w	r3, #4294967295
  800a080:	fa23 f707 	lsr.w	r7, r3, r7
  800a084:	4207      	tst	r7, r0
  800a086:	d0f3      	beq.n	800a070 <floor+0x98>
