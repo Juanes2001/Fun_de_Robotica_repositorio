@@ -2,6 +2,7 @@
 "./Src/Astar.o"
 "./Src/BasicTimer.o"
 "./Src/CaptureFreqDriver.o"
+"./Src/DMA.o"
 "./Src/EXTIDriver.o"
 "./Src/FPUDriver.o"
 "./Src/GPIOxDriver.o"

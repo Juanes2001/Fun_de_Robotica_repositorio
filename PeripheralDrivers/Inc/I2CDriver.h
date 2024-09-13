@@ -10,9 +10,14 @@
 #define I2CDRIVER_H_
 
 #include <stm32f4xx.h>
+#include "BasicTimer.h"
+
 
 #define I2C_WRITE_DATA    0
 #define I2C_READ_DATA     1
+
+#define DMA_REQUEST_DIS 0
+#define DMA_REQUEST_EN  1
 
 #define MAIN_CLOCK_4_MHz_FOR_I2C   4
 #define MAIN_CLOCK_16_MHz_FOR_I2C  16
@@ -54,6 +59,7 @@ typedef struct
 	uint8_t		  modeI2C;
 	uint8_t       dataI2C;
 	uint8_t       clkSpeed;
+	uint8_t       dma_Request;
 
 }I2C_Config_t;
 

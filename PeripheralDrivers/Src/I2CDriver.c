@@ -13,7 +13,12 @@
 #include <math.h>
 
 #include "I2CDriver.h"
-#include "BasicTimer.h"
+#include "DMA.h"
+
+
+uint8_t flagRx = 0;
+uint8_t flagTx = 0;
+DMA_Handler_t *ptrDMA_handler;
 
 /*
  * Recordad que se debe configurar los pines para el I2C (SDA Y SCL),
@@ -192,6 +197,14 @@ void i2c_config(I2C_Handler_t *ptrHandlerI2C){
 	/* 5. Activamos el modulo I2C */
 	ptrHandlerI2C->ptrI2Cx->CR1 |= I2C_CR1_PE;
 
+	// Activamos el DMA request segun lo pedido por el usuario
+	if (ptrHandlerI2C->I2C_Config.dma_Request){
+		// Si estamos aqui e sporque queremos usar la DMA para la transaccion efectiva de datos
+		ptrHandlerI2C->ptrI2Cx->CR2 |= I2C_CR2_DMAEN;
+	}else{
+		// Si estamos aqui es porque no queremos usar un DMA request para la transaccion de datos
+	}
+
 }
 
 
@@ -249,11 +262,20 @@ void i2c_sendSlaveAddressRW(I2C_Handler_t *ptrHandlerI2C, uint8_t slaveAddress, 
 
 	/* 3. Enviamos la direccion del Slave y el bit que indica que deseamos escribir (0) */
 	/* (en el siguiente paso se envia la direccion de memoria que se desea escribir  */
-	ptrHandlerI2C->ptrI2Cx->DR = (slaveAddress << 1) | readOrWrite;
+//	ptrHandlerI2C->ptrI2Cx->DR = (slaveAddress << 1) | readOrWrite;
+	tx_buffer = (slaveAddress << 1) | readOrWrite;
+	ptrDMA_handler->ptrDMAStream->M0AR = (uint32_t)&tx_buffer; // mandamos
+
+	while(!flagTx){
+		// Esperamos hasta que salte la interrupción de que se envio correctamente el dato
+	}
+	flagTx =RESET; // Bajamos luego la bandera correspondiente
 
 	/* 3.1 Esperamos hasta que la bendera del evento "addr" se levante
 	 * (esto nos indica que la direccion fue enviada satisfactoriamente
 	 */
+
+
 	while( !(ptrHandlerI2C->ptrI2Cx->SR1 & I2C_SR1_ADDR)){
 		__NOP();
 	}
@@ -348,6 +370,18 @@ void i2c_writeSingleRegister(I2C_Handler_t *ptrHandlerI2C, uint8_t regToRead, ui
 
 	/* 5. Generamos la condicion Stop, para que el slave se detenga despues de 1 byte */
 	i2c_stopTransaction(ptrHandlerI2C);
+
+}
+
+
+void DMA1_Stream0_Callback_Rx(void){
+	// Con este calback buscamos el uso simple de banderas para continuar con la transaccion de datos de forma segura
+	flagRx = SET;
+}
+
+void DMA1_Stream6_Callback_Tx(void){
+	// Con este calback buscamos el uso simple de banderas para continuar con la transaccion de datos de forma segura
+	flagTx = SET;
 }
 
 
