@@ -35,6 +35,7 @@
 #include "MPUAccel.h"
 #include "MotorsDriver.h"
 #include "PosRobt.h"
+#include "DMA.h"
 
 
 //Definición Handlers
@@ -92,6 +93,9 @@ USART_Handler_t handlerUSART = {0};
 
 //I2C
 I2C_Handler_t handler_I2C1 = {0};
+
+//DMA
+DMA_Handler_t *handler_DMA1[2];
 
 //MPUAccel
 MPUAccel_Config handler_MPUAccel_6050 ={0};
@@ -180,7 +184,7 @@ int main(void)
 	//Calculamos el setpoint en la que queremos que el robot controle la velocidad de cada motor
 	velSetPoint = (0.00169*fixed_dutty + 0.0619);
 
-	On_motor_Straigh_Roll(handler_Motor_Array, *((uint8_t *) NULL), SET, sLine);
+//	On_motor_Straigh_Roll(handler_Motor_Array, *((uint8_t *) NULL), SET, sLine);
 
 	// calibramos el Giroscopio para que tengamos una medida de error controlable
 //	cal_Gyro = calibracionGyros(&handler_MPUAccel_6050, CALIB_Z);
@@ -465,6 +469,14 @@ void inSystem (void){
 
 		////////////////////////////////Configuracion PINES B8 (SCL) B9 (SDA) e I2C1 //////////////////////////////////////////////
 
+
+//	handler_DMA1[0]->ptrDMAType = DMA1;
+//	handler_DMA1[0]->ptrDMAStream = DMA1_Stream0;
+//
+//	handler_DMA1[1]->ptrDMAType = DMA1;
+//	handler_DMA1[1]->ptrDMAStream = DMA1_Stream6;
+//	config_DMA(handler_DMA1);
+
 	handler_PINB8_I2C1.pGPIOx                             = GPIOB;
 	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinAltFunMode  = AF4;
 	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
@@ -492,6 +504,8 @@ void inSystem (void){
 	handler_MPUAccel_6050.fullScaleACCEL  = ACCEL_2G;
 	handler_MPUAccel_6050.fullScaleGYRO   = GYRO_250;
 	configMPUAccel(&handler_MPUAccel_6050);
+
+
 
 }
 

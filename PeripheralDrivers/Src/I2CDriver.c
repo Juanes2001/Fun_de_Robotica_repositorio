@@ -18,7 +18,7 @@
 
 uint8_t flagRx = 0;
 uint8_t flagTx = 0;
-DMA_Handler_t *ptrDMA_handler;
+DMA_Handler_t *ptrDMA_handler[2];
 
 /*
  * Recordad que se debe configurar los pines para el I2C (SDA Y SCL),
@@ -28,6 +28,14 @@ DMA_Handler_t *ptrDMA_handler;
  * y con la resistencias en modo pull-up.
  */
 void i2c_config(I2C_Handler_t *ptrHandlerI2C){
+
+	// Definimos los punteros para el DMA, si es necesario
+
+	ptrDMA_handler[0]->ptrDMAType = DMA1;
+	ptrDMA_handler[0]->ptrDMAStream = DMA1_Stream0;
+
+	ptrDMA_handler[1]->ptrDMAType = DMA1;
+	ptrDMA_handler[1]->ptrDMAStream = DMA1_Stream6;
 
 	/* 1 Activamos la señal de reloj para el modulo I2C seleccionado*/
 	if(ptrHandlerI2C->ptrI2Cx == I2C1){
@@ -197,13 +205,6 @@ void i2c_config(I2C_Handler_t *ptrHandlerI2C){
 	/* 5. Activamos el modulo I2C */
 	ptrHandlerI2C->ptrI2Cx->CR1 |= I2C_CR1_PE;
 
-	// Activamos el DMA request segun lo pedido por el usuario
-	if (ptrHandlerI2C->I2C_Config.dma_Request){
-		// Si estamos aqui e sporque queremos usar la DMA para la transaccion efectiva de datos
-		ptrHandlerI2C->ptrI2Cx->CR2 |= I2C_CR2_DMAEN;
-	}else{
-		// Si estamos aqui es porque no queremos usar un DMA request para la transaccion de datos
-	}
 
 }
 
@@ -215,6 +216,15 @@ void i2c_stopTransaction(I2C_Handler_t *ptrHandlerI2C){
 
 
 void i2c_startTransaction(I2C_Handler_t *ptrHandlerI2C){
+
+	// Activamos el DMA request segun lo pedido por el usuario
+	if (ptrHandlerI2C->I2C_Config.dma_Request){
+		// Si estamos aqui e sporque queremos usar la DMA para la transaccion efectiva de datos
+		ptrHandlerI2C->ptrI2Cx->CR2 |= I2C_CR2_DMAEN;
+	}else{
+		// Si estamos aqui es porque no queremos usar un DMA request para la transaccion de datos
+	}
+
 	/* 1. Verificamos que la linea no esta ocupada - bit "busy" en I2C_SR2 */
 	while(ptrHandlerI2C->ptrI2Cx->SR2 & I2C_SR2_BUSY){
 		__NOP();
@@ -232,6 +242,15 @@ void i2c_startTransaction(I2C_Handler_t *ptrHandlerI2C){
 
 /**/
 void i2c_reStartTransaction(I2C_Handler_t *ptrHandlerI2C){
+
+	// Activamos el DMA request segun lo pedido por el usuario
+	if (ptrHandlerI2C->I2C_Config.dma_Request){
+		// Si estamos aqui e sporque queremos usar la DMA para la transaccion efectiva de datos
+		ptrHandlerI2C->ptrI2Cx->CR2 |= I2C_CR2_DMAEN;
+	}else{
+		// Si estamos aqui es porque no queremos usar un DMA request para la transaccion de datos
+	}
+
 	/*2. Generamos la señal "start" */
 	ptrHandlerI2C->ptrI2Cx->CR1 |= I2C_CR1_START;
 
@@ -262,20 +281,11 @@ void i2c_sendSlaveAddressRW(I2C_Handler_t *ptrHandlerI2C, uint8_t slaveAddress, 
 
 	/* 3. Enviamos la direccion del Slave y el bit que indica que deseamos escribir (0) */
 	/* (en el siguiente paso se envia la direccion de memoria que se desea escribir  */
-//	ptrHandlerI2C->ptrI2Cx->DR = (slaveAddress << 1) | readOrWrite;
-	tx_buffer = (slaveAddress << 1) | readOrWrite;
-	ptrDMA_handler->ptrDMAStream->M0AR = (uint32_t)&tx_buffer; // mandamos
-
-	while(!flagTx){
-		// Esperamos hasta que salte la interrupción de que se envio correctamente el dato
-	}
-	flagTx =RESET; // Bajamos luego la bandera correspondiente
+	ptrHandlerI2C->ptrI2Cx->DR = (slaveAddress << 1) | readOrWrite;
 
 	/* 3.1 Esperamos hasta que la bendera del evento "addr" se levante
 	 * (esto nos indica que la direccion fue enviada satisfactoriamente
 	 */
-
-
 	while( !(ptrHandlerI2C->ptrI2Cx->SR1 & I2C_SR1_ADDR)){
 		__NOP();
 	}
@@ -290,6 +300,7 @@ void i2c_sendSlaveAddressRW(I2C_Handler_t *ptrHandlerI2C, uint8_t slaveAddress, 
 
 /**/
 void i2c_sendMemoryAddress(I2C_Handler_t *ptrHandlerI2C, uint8_t memAddr){
+
 	/* 4. Enviamos la direccion de memoria qe deseamos leer */
 	ptrHandlerI2C->ptrI2Cx->DR = memAddr;
 
@@ -336,7 +347,7 @@ uint8_t i2c_readSingleRegister(I2C_Handler_t *ptrHandlerI2C, uint8_t regToRead){
 	i2c_sendMemoryAddress(ptrHandlerI2C, regToRead);
 
 	/* 4. Creamos una condicion re Start */
-	i2c_reStartTransaction(ptrHandlerI2C);
+	i2c_startTransaction(ptrHandlerI2C);
 
 	/* 5. Enviamos la direccion del escalvo y la indicacion de LEER */
 	i2c_sendSlaveAddressRW(ptrHandlerI2C, ptrHandlerI2C->I2C_Config.slaveAddress, I2C_READ_DATA);

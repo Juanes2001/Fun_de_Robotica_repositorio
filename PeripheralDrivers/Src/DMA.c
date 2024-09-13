@@ -98,9 +98,9 @@ void config_DMA(DMA_Handler_t *ptrDMA_handler[2]){
 	ptrDMA_handler[1]->ptrDMAStream->CR |= (0b1 << 4); // habilitamos la interrupcion TCIE
 
 
-	// Habilitamos el stream
-	ptrDMA_handler[0]->ptrDMAStream->CR |= (0b1 << 0);  // Enable the stream
-	ptrDMA_handler[1]->ptrDMAStream->CR |= (0b1 << 0);  // Enable the stream
+//	// Habilitamos el stream
+//	ptrDMA_handler[0]->ptrDMAStream->CR |= (0b1 << 0);  // Enable the stream
+//	ptrDMA_handler[1]->ptrDMAStream->CR |= (0b1 << 0);  // Enable the stream
 
 
 	//Habilitamos en el NVIC la interrupcion de TCI
@@ -116,6 +116,8 @@ void config_DMA(DMA_Handler_t *ptrDMA_handler[2]){
 	__enable_irq();
 }
 
+
+//IRQs de los streams a usar
 
 // Se completo la interrupcion de Recepcion , se analiza la bandera correspondiente a la interrupcion dada y luego se baja
 void DMA1_Stream0_IRQHandler(void)
