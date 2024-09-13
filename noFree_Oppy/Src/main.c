@@ -111,16 +111,17 @@ void inSystem (void);
 void parseCommands(char *stringVector);
 float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis);
 void getAngle(MPUAccel_Config *ptrMPUAccel,float angle_init, double calibr,Parameters_Position_t *ptrParameter_position);
-void On_Off_motor(Motor_Handler_t *ptrMotorhandler[2], uint8_t status);
+void On_motor_Straigh_Roll(Motor_Handler_t *ptrMotorhandler[2], uint8_t dir_s, uint8_t dir_r, state_t operation_mode);
 void get_measuremets_parameters(BasicTimer_Handler_t *ptrTimer ,Motor_Handler_t *ptrMotorHandler[2], Parameters_Position_t *ptrParameter_position, state_t operation_mode);
-
+void change_dir_straigh_Roll(Motor_Handler_t *ptrMotorhandler[2], uint8_t dir_r, uint8_t dir_s, state_t operation_mode);
+void set_direction_straigh_roll (Motor_Handler_t *ptrMotorhandler[2], uint8_t dir_r, uint8_t dir_s, state_t operation_mode);
+void stop (Motor_Handler_t *ptrMotorhandler[2]);
 
 //-----Macros------
-#define distanceBetweenWheels 10600             //Distacia entre ruedas     10430 [mm]
-#define D1 5170                                 //Diametro rueda izquierda [mm]
-#define D2 5145                                 //Diametro rueda Derecha   [mm]
+#define distanceBetweenWheels 10600             //Distacia entre ruedas     106,00 [mm]
+#define D1 5170                                 //Diametro rueda izquierda  51,70  [mm]
+#define D2 5145                                 //Diametro rueda Derecha    51,45 [mm]
 #define Ce 72                                   //Numero de interrupciones en el incoder
-
 
 // Variables para los comandos
 char bufferReception[64] = {0};
@@ -128,9 +129,9 @@ uint8_t counterReception = 0;
 uint8_t doneTransaction = RESET;
 uint8_t rxData = '\0';
 char cmd[32];
-unsigned int firstParameter;
-unsigned int secondParameter;
-unsigned int thirdParameter;
+unsigned int firstParameter  = 0;
+unsigned int secondParameter = 0;
+unsigned int thirdParameter  = 0;
 char userMsg[64];
 
 //////Banderas y estados-----------
@@ -138,6 +139,8 @@ state_t Mode              = sLine;
 uint8_t flag_action       = 0;
 uint8_t flag_angulo       = 0;
 uint8_t flag_measurements = 0;
+uint8_t flag_Go_Straigh   = 0;
+uint8_t flag_GoTo_Straigh = 0;
 
 
 // TIEMPOS DE SAMPLEO Y CONTEO PARA DEFINICION DE PARAMETROS
@@ -156,10 +159,11 @@ double cal_Gyro = 0;   // variable que almacena la calibración del giroscopio
 float ang_d = 0;
 float sum_ang = 0;
 float promAng = 0;
-float paso_mm_1 = ((M_PI*D1)/(Ce)); // Numero de milimetros por paso de la rueda izquierda [mm]
-float paso_mm_2 = ((M_PI*D2)/(Ce)); // Numero de milimetros por paso de la rueda derecha   [mm]
+float paso_mm_1 = ((M_PI*D1)/(100*Ce)); // Numero de milimetros por paso de la rueda izquierda [mm]
+float paso_mm_2 = ((M_PI*D2)/(100*Ce)); // Numero de milimetros por paso de la rueda derecha   [mm]
 double ang_for_Displament = 0;
 double ang_complementary = 0;
+float velSetPoint = 0;
 
 // VARIABLES VARIAS DEL ROBOT
 #define fixed_dutty 28 // Fixed dutty cycle, velocidad constante
@@ -170,14 +174,19 @@ int main(void)
 
 	//Activamos el FPU o la unidad de punto flotante
  	SCB -> CPACR |= (0xF << 20);
-
+	RCC_enableMaxFrequencies(RCC_100MHz);
 	inSystem ();
+
+	//Calculamos el setpoint en la que queremos que el robot controle la velocidad de cada motor
+	velSetPoint = (0.00169*fixed_dutty + 0.0619);
+
+	On_motor_Straigh_Roll(handler_Motor_Array, *((uint8_t *) NULL), SET, sLine);
+
+	// calibramos el Giroscopio para que tengamos una medida de error controlable
+//	cal_Gyro = calibracionGyros(&handler_MPUAccel_6050, CALIB_Z);
 
     /* Loop forever */
 	while(1){
-
-
-
 
 		if (rxData != '\0'){
 			writeChar(&handlerUSART, rxData);
@@ -208,6 +217,7 @@ int main(void)
 
 		////////////////////////////////////////BLOQUE DE MEDICION Y CONTROL//////////////////////////////////////////////////////
 
+
 		//En este primera medicion se mide el el angulo actual del robot con respecto a una referencia.
 		if (flag_angulo){
 
@@ -222,12 +232,16 @@ int main(void)
 			// Medimos el angulo actual
 			get_measuremets_parameters(&handlerTIM2_PARAMETROS_MOVIMIENTO, handler_Motor_Array, &parameters_Pos_Robot, Mode);
 			// bajamos la bandera
-			flag_angulo = RESET;
+			flag_measurements = RESET;
 		}
 
 
+		// En esta parte ya usamos las medidas halladas para mover el robot en linea recta dependiendo de la operacion y el comando deseado
+		if (flag_Go_Straigh){
 
+			// Si estamos aqui se quiere solo que el robot vaya hacia adelante y el linea recta
 
+		}
 
 
 
@@ -239,9 +253,6 @@ int main(void)
 
 void inSystem (void){
 
-
-	// Activamos la maxima velocidad del microcontrolador
-	RCC_enableMaxFrequencies(RCC_100MHz);
 	//Config del pin A8 salida de la velocidad del micro
 
 //	handlerMCO2Show.pGPIOx                             = GPIOC;
@@ -266,9 +277,13 @@ void inSystem (void){
 	handlerTimerBlinky.TIMx_Config.TIMx_interruptEnable  = BTIMER_ENABLE_INTERRUPT;
 	handlerTimerBlinky.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
 	handlerTimerBlinky.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_100us;
-	handlerTimerBlinky.TIMx_Config.TIMx_period           = 1000;
+	handlerTimerBlinky.TIMx_Config.TIMx_period           = 500;
 	BasicTimer_Config(&handlerTimerBlinky);
 	startTimer(&handlerTimerBlinky);
+
+
+	// DEFINICION DEL TIM4 PARA DELAY
+	inTIM4();
 
 
 	//////////////////////////////////////////////////// Velocidad de motores //////////////////////////////////////////////
@@ -478,18 +493,6 @@ void inSystem (void){
 	handler_MPUAccel_6050.fullScaleGYRO   = GYRO_250;
 	configMPUAccel(&handler_MPUAccel_6050);
 
-
-	//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
-
-	////////////////////////////////Timer 5 para contador de tiempo ////////////////////////////////////
-
-	handlerTIM4_time.ptrTIMx                           = TIM4;
-	handlerTIM4_time.TIMx_Config.TIMx_interruptEnable  = BTIMER_DISABLE_INTERRUPT;
-	handlerTIM4_time.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
-	handlerTIM4_time.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_100us;
-	handlerTIM4_time.TIMx_Config.TIMx_period           = 1;
-	BasicTimer_Config(&handlerTIM4_time);
-
 }
 
 
@@ -503,13 +506,36 @@ void parseCommands(char *stringVector){
 	if (strcmp(cmd, "help") == 0){
 
 		writeMsg(&handlerUSART, "HELP MENU CMD : \n");
-		writeMsg(&handlerUSART, "1)  goto #Distance \n");
+		writeMsg(&handlerUSART, "1)  go #dir 1--> Ahead , 0-->back Ward\n");
+		writeMsg(&handlerUSART, "2)  goto #dir #Distance \n");
 		writeMsg(&handlerUSART, " \n");
 
-	}else if (strcmp(cmd, "goto") == 0){
-
-		On_Off_motor(handler_Motor_Array,SET); // Encendemos los motores para irnos hacia adelante y con una velocidad fija
+	}else if (strcmp(cmd, "go") == 0){
+		NULL;
+		// Si llegamos a este comando, lo que se quiere es ir en linea recta usando un control PID
+		On_motor_Straigh_Roll(handler_Motor_Array,*((uint8_t *) NULL), firstParameter, Mode); // Encendemos los motores para irnos hacia adelante y con una velocidad fija
 		startTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Comenzamos el muestreo de datos con los que aplicaremos un control adecuado
+		flag_Go_Straigh = SET;
+
+	}else if (strcmp(cmd, "goto") == 0){
+		// Si estamos aqui es porque se quiere ir recorriendo una distancia especifica
+		On_motor_Straigh_Roll(handler_Motor_Array,*((uint8_t *) NULL), firstParameter, Mode); // Encendemos los motores para irnos hacia adelante y con una velocidad fija
+		startTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Comenzamos el muestreo de datos con los que aplicaremos un control adecuado
+		parameters_Path_Robot.line_Distance = secondParameter; // almacenamos la distancia en milimrtros a recorrer
+		flag_GoTo_Straigh = SET;
+
+	}else if (strcmp(cmd, "roll") == 0){
+		// si estamos aqui, este comando lo que hara es girar el robot indefinidamente
+
+	}
+
+
+
+
+	else if (strcmp(cmd, "stop") == 0){
+		 // Este comando lo que busca es apagar el robot y detenerlo de su estado de movimiento
+		stop(handler_Motor_Array); // Apagamos los motores
+		stopTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Detenemos los muestreos
 	}
 
 
@@ -579,27 +605,30 @@ float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis){
 	float    promedio   = 0;
 
 	switch (axis) {
-		case 'x':{
+		case 0:{
 			while (contador < numMedidas){
 				medidas = readGyro_X(ptrMPUAccel);
 				suma += medidas;
 				contador++;
+				delay_ms(1); // esperamos 1 milisegundo
 			}
 			promedio = suma / numMedidas;
 			break;
-		}case 'y':{
+		}case 1:{
 			while (contador < numMedidas){
 				medidas = readGyro_Y(ptrMPUAccel);
 				suma += medidas;
 				contador++;
+				delay_ms(1); // esperamos 1 milisegundo
 			}
 			promedio = suma / numMedidas;
 			break;
-		}case 'z':{
+		}case 2:{
 			while (contador < numMedidas){
 				medidas = readGyro_Z(ptrMPUAccel);
 				suma += medidas;
 				contador++;
+				delay_ms(1); // esperamos 1 milisegundo
 			}
 			promedio = suma / numMedidas;
 			break;
@@ -685,7 +714,7 @@ void get_measuremets_parameters(BasicTimer_Handler_t *ptrTimer ,Motor_Handler_t 
 			ptrMotorHandler[1]->parametersMotor.counts = 0; // RESETEAMOS LAS CUENTAS
 
 			//Cálculo ángulo debido al desplazamiento del ICR
-			ang_for_Displament += ((ptrMotorHandler[1]->parametersMotor.dis - ptrMotorHandler[0]->parametersMotor.dis) / distanceBetweenWheels)*(180/M_PI); //[°]
+			ang_for_Displament += (((ptrMotorHandler[1]->parametersMotor.dis - ptrMotorHandler[0]->parametersMotor.dis) * 100)/ distanceBetweenWheels)*(180/M_PI); //[°]
 			//Reiniciamos tiempo
 			time_accumulated = 0;
 			//Reiniciamos el contador de acción
@@ -700,51 +729,235 @@ void get_measuremets_parameters(BasicTimer_Handler_t *ptrTimer ,Motor_Handler_t 
 
 }
 
-void On_Off_motor(Motor_Handler_t *ptrMotorhandler[2], uint8_t status){
+void On_motor_Straigh_Roll(Motor_Handler_t *ptrMotorhandler[2], uint8_t dir_s, uint8_t dir_r, state_t operation_mode){
 
 
-	if(status == 1)
-	{
-		//Activamos el motor
-		// ENCENCEMOS EL MOTOR 1 (LEFT)
-			// Se setea la direccion seleccionada
-			GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN , SET); // Direccion hacia adelante
-			//Se enciende el motor 1
-			enableOutput(ptrMotorhandler[0]->phandlerPWM);
-			GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOEN,SET); // Encendemos el motor 1
+	if (operation_mode == sLine){
+				//Activamos el motor
+				// ENCENCEMOS EL MOTOR 1 (LEFT)
+					// Seteamos correctamente la direccion de cada motor
+					set_direction_straigh_roll(ptrMotorhandler, dir_r, dir_s, operation_mode);
 
-			// ENCENCEMOS EL MOTOR 2 (Right)
-			// Se setea la direccion seleccionada
-			GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOIN, SET); // Encendemos el motor 2
-			//Se enciende el motor 2
-			enableOutput(ptrMotorhandler[1]->phandlerPWM);
-			GPIO_WritePin_Afopt (ptrMotorhandler[1]->phandlerGPIOEN,SET);
+					enableOutput(ptrMotorhandler[0]->phandlerPWM);
+					GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOEN,SET); // Encendemos el motor 1
+
+					// ENCENCEMOS EL MOTOR 2 (Right)
+					//Se enciende el motor 2
+					enableOutput(ptrMotorhandler[1]->phandlerPWM);
+					GPIO_WritePin_Afopt (ptrMotorhandler[1]->phandlerGPIOEN,SET);
+
+
+	}else if (operation_mode == sRoll){
+				//Activamos el motor
+				// ENCENCEMOS EL MOTOR 1 (LEFT)
+					set_direction_straigh_roll(ptrMotorhandler, dir_r, dir_s, operation_mode);
+
+					//Se enciende el motor 1
+					enableOutput(ptrMotorhandler[0]->phandlerPWM);
+					GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOEN,SET); // Encendemos el motor 1
+
+					// ENCENCEMOS EL MOTOR 2 (Right)
+					//Se enciende el motor 2
+					enableOutput(ptrMotorhandler[1]->phandlerPWM);
+					GPIO_WritePin_Afopt (ptrMotorhandler[1]->phandlerGPIOEN,SET);
+
+
 	}
-	else
-	{
-		//DESACTIVAMOS EL MOTOR
-		// APAGAMOS EL MOTOR 1 (LEFT)
-			//Se enciende el motor 1
-			disableOutput(ptrMotorhandler[0]->phandlerPWM);
-			GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOEN, RESET); // Apagamos el motor 1
-			// APAGAMOS EL MOTOR 2 (Right)
-			//Se enciende el motor 2
-			disableOutput(ptrMotorhandler[1]->phandlerPWM);
-			GPIO_WritePin_Afopt (ptrMotorhandler[1]->phandlerGPIOEN,RESET);
+
+}
+
+void set_direction_straigh_roll (Motor_Handler_t *ptrMotorhandler[2], uint8_t dir_r, uint8_t dir_s, state_t operation_mode){
+
+	// Esta funcion setea correctamente la direccion de los motores dependiendo de lo que se quiera.
+	if (operation_mode == sLine){
+		// Si estamos aqui es porque queremos Setear la direccion hacia adelante o hacia atras
+
+		// Si queremos ir hacia adelante
+
+		// Primero revisamos en que direccion se encuentra el robot para ver si si se aplica
+		// el cambio o no
+		if ((ptrMotorhandler[0]->configMotor.dir != dir_s)){
+			// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
+			GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, dir_s & SET); // La direccion estaba en RESET, la cambiamos a SET
+			PWMx_Toggle(ptrMotorhandler[0]->phandlerPWM);
+
+		}
+
+		if ((ptrMotorhandler[1]->configMotor.dir != dir_s)){
+			// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
+			GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN, dir_s & SET); // La direccion estaba en RESET, la cambiamos a SET
+			PWMx_Toggle(ptrMotorhandler[1]->phandlerPWM);
+		}
+		// Puede que no analice ningun if y simplemente no haga nada
+
+	}else if (operation_mode == sRoll){
+		// si estamos aca es porque queremos cambiar la direccion de rotacion
+
+
+		if (dir_r == 0){
+			// Si queremos ir en centido CW o horario
+
+			// Primero revisamos en que direccion se encuentra el robot para ver si si se aplica
+			// el cambio o no
+			if ((ptrMotorhandler[0]->configMotor.dir != !dir_r)){
+				// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
+				GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, !dir_r & SET); // La direccion estaba en RESET, la cambiamos a SET
+				PWMx_Toggle(ptrMotorhandler[0]->phandlerPWM);
+
+			}
+
+			if ((ptrMotorhandler[1]->configMotor.dir != dir_r)){
+				// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
+				GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN, dir_r & SET); // La direccion estaba en SET, la cambiamos a RESET
+				PWMx_Toggle(ptrMotorhandler[1]->phandlerPWM);
+			}
+			// Puede que no analice ningun if y simplemente no haga nada
+
+
+		}else{
+			// Si queremos ir en centido CCW o anti horario
+
+			// Primero revisamos en que direccion se encuentra el robot para ver si si se aplica
+			// el cambio o no
+			if ((ptrMotorhandler[0]->configMotor.dir != !dir_r)){
+				// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
+				GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, !dir_r & SET); // La direccion estaba en SET, la cambiamos a RESET
+				PWMx_Toggle(ptrMotorhandler[0]->phandlerPWM);
+
+			}
+
+			if ((ptrMotorhandler[1]->configMotor.dir != dir_r)){
+				// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
+				GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN, dir_r & SET); // La direccion estaba en RESET, la cambiamos a SET
+				PWMx_Toggle(ptrMotorhandler[1]->phandlerPWM);
+			}
+			// Puede que no analice ningun if y simplemente no haga nada
+
+
+		}
+
+	}
+}
+
+void change_dir_straigh_roll(Motor_Handler_t *ptrMotorhandler[2], uint8_t dir_s,uint8_t dir_r, state_t operation_mode){
+
+	if (operation_mode == sLine){
+		// Si estamos aqui es porque queremos cambiar la direccion en linea recta correctamente
+
+		// antes de cambiar la direccion apagamos los motores
+		GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOEN,RESET);
+		GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN,RESET);
+
+		// Primero revisamos en que direccion se encuentra el robot para ver si si se aplica
+		// el cambio o no
+		if ((ptrMotorhandler[0]->configMotor.dir != dir_s)){
+			// si estamos aqui es porque se quiere cambiar la direccion del robot
+
+			// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
+			GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, dir_s & SET); // La direccion estaba en RESET, la cambiamos a SET
+			PWMx_Toggle(ptrMotorhandler[0]->phandlerPWM);
+
+		}
+
+		if ((ptrMotorhandler[1]->configMotor.dir != dir_s)){
+			// si estamos aqui es porque se quiere cambiar la direccion del robot
+
+			// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
+			GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN, dir_s & SET); // La direccion estaba en RESET, la cambiamos a SET
+			PWMx_Toggle(ptrMotorhandler[1]->phandlerPWM);
+		}
+		// Puede que no analice ningún if y simplemente no haga nada
+
+
+		// volvemos a encender los motores
+		GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOEN,SET);
+		GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN,SET);
+
+
+
+
+
+	}else if (operation_mode == sRoll){
+		// si estamos aca es porque queremos cambiar la direccion de rotacion
+
+
+		if (dir_r == 0){
+			// Si queremos ir en centido CW o horario
+
+			// Primero revisamos en que direccion se encuentra el robot para ver si si se aplica
+			// el cambio o no
+			// si estamos aqui es porque se quiere cambiar la direccion DEL ROBOT A CW
+
+			// antes de cambiar la direccion apagamos los motores
+			GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOEN,RESET);
+			GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN,RESET);
+
+			if ((ptrMotorhandler[0]->configMotor.dir != !dir_r)){
+				// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
+				GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, !dir_r & SET); // La direccion estaba en RESET, la cambiamos a SET
+				PWMx_Toggle(ptrMotorhandler[0]->phandlerPWM);
+
+			}
+
+			if ((ptrMotorhandler[1]->configMotor.dir != dir_r)){
+				// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
+				GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN, dir_r & SET); // La direccion estaba en SET, la cambiamos a RESET
+				PWMx_Toggle(ptrMotorhandler[1]->phandlerPWM);
+			}
+			// Puede que no analice ningun if y simplemente no haga nada
+
+
+			// volvemos a encender los motores
+			GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOEN,SET);
+			GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN,SET);
+
+
+
+		}else{
+			// Si queremos ir en centido CCW o anti horario
+
+			// Primero revisamos en que direccion se encuentra el robot para ver si si se aplica
+			// el cambio o no
+			// si estamos aqui es porque se quiere cambiar la direccion del robot
+
+			// antes de cambiar la direccion apagamos los motores
+			GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOEN,RESET);
+			GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN,RESET);
+
+			if ((ptrMotorhandler[0]->configMotor.dir != !dir_r)){
+				// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
+				GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, !dir_r & SET); // La direccion estaba en SET, la cambiamos a RESET
+				PWMx_Toggle(ptrMotorhandler[0]->phandlerPWM);
+
+			}
+
+			if ((ptrMotorhandler[1]->configMotor.dir != dir_r)){
+				// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
+				GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN, dir_r & SET); // La direccion estaba en RESET, la cambiamos a SET
+				PWMx_Toggle(ptrMotorhandler[1]->phandlerPWM);
+			}
+			// Puede que no analice ningun if y simplemente no haga nada
+
+			// volvemos a encender los motores
+			GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOEN,SET);
+			GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN,SET);
+
+		}
 	}
 }
 
 
-void delay_ms(uint16_t time_to_wait_ms){
+void stop (Motor_Handler_t *ptrMotorhandler[2]){
 
-	startTimer(&handlerTIM4_time);
-	// definimos una variable que almacenara el valor del counter en el timer 4
-	uint16_t limit = (time_to_wait_ms * 10) - 1 ;
-	uint16_t CNT   = 0;
+	//DESACTIVAMOS EL MOTOR
+	// APAGAMOS EL MOTOR 1 (LEFT)
+		//Se enciende el motor 1
+		disableOutput(ptrMotorhandler[0]->phandlerPWM);
+		GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOEN, RESET); // Apagamos el motor 1
+		// APAGAMOS EL MOTOR 2 (Right)
+		//Se enciende el motor 2
+		disableOutput(ptrMotorhandler[1]->phandlerPWM);
+		GPIO_WritePin_Afopt (ptrMotorhandler[1]->phandlerGPIOEN,RESET);
 
-	// comparamos el counter con el limit, y comenzamos a que cuente cada que el timer 4 haga una cuenta nueva
-	while (CNT < limit){
-		if (handlerTIM4_time.ptrTIMx->CNT == handlerTIM4_time.ptrTIMx->ARR)  {CNT += handlerTIM4_time.ptrTIMx->CNT;}
-	}
-	stopTimer(&handlerTIM4_time);
+
 }

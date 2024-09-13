@@ -8,6 +8,7 @@
 #include "MPUAccel.h"
 #include "I2CDriver.h"
 #include "GPIOxDriver.h"
+#include "BasicTimer.h"
 
 
 void configMPUAccel (MPUAccel_Config *ptrMPUAccel){
@@ -27,10 +28,13 @@ void configMPUAccel (MPUAccel_Config *ptrMPUAccel){
 		rdy = WHOIAM(ptrMPUAccel);
 	}
 
+
 	//Paso 2, Colocamos en 0 el bit 7 del PM1, (registro 0x6B) ya que sin esto no se puede modificar ningun registro.
 	byte = readData(ptrMPUAccel, 0x6B);
+
 	byte &=  ~byte;
 	writeData(ptrMPUAccel, 0x6B, byte );
+
 	byte = readData(ptrMPUAccel, 0x6B);
 
 	// los siguientes pasos se activan dentro del mismo switch case ya que se requiere saber cual cantidad se desea medir
@@ -41,6 +45,7 @@ void configMPUAccel (MPUAccel_Config *ptrMPUAccel){
 		//Preguntamos por el range requerido por el usuario de aceleracion, puede ser +-2g,4g,8g,16g (# X la aceleracion
 		//de la gravedad)
 		byte = readData(ptrMPUAccel, 0x1C);
+
 		byte &= ~(0b00011000) ;
 		switch (ptrMPUAccel->fullScaleACCEL){
 			case ACCEL_2G :{
@@ -48,11 +53,13 @@ void configMPUAccel (MPUAccel_Config *ptrMPUAccel){
 				byte |= (ACCEL_2G << 3);
 				writeData(ptrMPUAccel, 0x1C, byte);
 
+
 				break;
 			}case ACCEL_4G :{
 
 				byte |= (ACCEL_4G << 3);
 				writeData(ptrMPUAccel, 0x1C, byte);
+
 
 				break;
 			}case ACCEL_8G :{
@@ -60,11 +67,13 @@ void configMPUAccel (MPUAccel_Config *ptrMPUAccel){
 				byte |= (ACCEL_8G << 3);
 				writeData(ptrMPUAccel, 0x1C, byte);
 
+
 				break;
 			}case ACCEL_16G :{
 
 				byte |= (ACCEL_16G << 3);
 				writeData(ptrMPUAccel, 0x1C, byte);
+
 
 				break;
 			}default:{
@@ -83,11 +92,13 @@ void configMPUAccel (MPUAccel_Config *ptrMPUAccel){
 				byte |= (GYRO_250 << 3);
 				writeData(ptrMPUAccel, 0x1B, byte);
 
+
 				break;
 			}case GYRO_500 :{
 
 				byte |= (GYRO_500 << 3);
 				writeData(ptrMPUAccel, 0x1B, byte);
+
 
 				break;
 			}case GYRO_1000 :{
@@ -95,11 +106,13 @@ void configMPUAccel (MPUAccel_Config *ptrMPUAccel){
 				byte |= (GYRO_1000 << 3);
 				writeData(ptrMPUAccel, 0x1B, byte);
 
+
 				break;
 			}case GYRO_2000 :{
 
 				byte |= (GYRO_2000 << 3);
 				writeData(ptrMPUAccel, 0x1B, byte);
+
 
 				break;
 			}default:{
@@ -160,7 +173,6 @@ uint8_t readData (MPUAccel_Config *ptrMPUAccel, uint8_t RA){
 
 	//Mandamos el Address correspondiente y el bit escribir
 	i2c_sendSlaveAddressRW(ptrMPUAccel->ptrI2Chandler, ptrMPUAccel->ptrI2Chandler->I2C_Config.slaveAddress, I2C_WRITE_DATA);
-
 	// Dentro de la funcion anterior ya esta la espera respectiva para el ACK que debe mandar el Slave
 	i2c_sendMemoryAddress(ptrMPUAccel->ptrI2Chandler, RA);
 
@@ -171,19 +183,14 @@ uint8_t readData (MPUAccel_Config *ptrMPUAccel, uint8_t RA){
 
 	// Comenzamos el reestar
 	i2c_reStartTransaction(ptrMPUAccel->ptrI2Chandler);
-
 	// Ya dentro de la anterior funcion esta la espera a que comience el bit de start
 	//Volvemos a mandar el Address con el bit de read (1)
 	i2c_sendSlaveAddressRW(ptrMPUAccel->ptrI2Chandler, ptrMPUAccel->ptrI2Chandler->I2C_Config.slaveAddress, I2C_READ_DATA);
-
 	// Mandamos el noAcknowledge despues de recibir el dato respectivo
 	i2c_sendNoAck(ptrMPUAccel->ptrI2Chandler);
-
 	// Paramos la transacción
 	i2c_stopTransaction(ptrMPUAccel->ptrI2Chandler);
-
 	auxRead = i2c_readDataByte(ptrMPUAccel->ptrI2Chandler);
-
 	return auxRead;
 }
 

@@ -47,6 +47,11 @@
 #define GYRO_1000_SENS 33
 #define GYRO_2000_SENS 16
 
+// TIPO DE EJE A CALIBRAR
+#define CALIB_X 0
+#define CALIB_Y 1
+#define CALIB_Z 2
+
 
 //Ejes
 

@@ -25,6 +25,23 @@
  *  el sistema global de interrupciones, activar la IRQ específica y luego volver a encender
  *  el sistema.
  */
+
+
+void inTIM4(void){
+
+	//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
+
+	////////////////////////////////Timer 4 para contador de tiempo ////////////////////////////////////
+
+	handlerTIM4_time.ptrTIMx                           = TIM4;
+	handlerTIM4_time.TIMx_Config.TIMx_interruptEnable  = BTIMER_DISABLE_INTERRUPT;
+	handlerTIM4_time.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
+	handlerTIM4_time.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_100us;
+	handlerTIM4_time.TIMx_Config.TIMx_period           = 10;
+	BasicTimer_Config(&handlerTIM4_time);
+
+}
+
 void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 
 	uint32_t period = 0;
@@ -156,33 +173,59 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 
 	/* 5. Activamos la interrupción debida al Timerx Utilizado
 	 * Modificar el registro encargado de activar la interrupcion generada por el TIMx*/
-	ptrBTimerHandler->ptrTIMx->DIER |= TIM_DIER_UIE;
+	if (ptrBTimerHandler->TIMx_Config.TIMx_interruptEnable == BTIMER_ENABLE_INTERRUPT){
 
-	/* 6. Activamos el canal del sistema NVIC para que lea la interrupción*/
+		ptrBTimerHandler->ptrTIMx->DIER |= TIM_DIER_UIE;
 
-	if(ptrBTimerHandler->ptrTIMx == TIM2){
-		// Activando en NVIC para la interrupción del TIM2
-		NVIC_EnableIRQ(TIM2_IRQn);
+		/* 6. Activamos el canal del sistema NVIC para que lea la interrupción*/
+
+		if(ptrBTimerHandler->ptrTIMx == TIM2){
+			// Activando en NVIC para la interrupción del TIM2
+			NVIC_EnableIRQ(TIM2_IRQn);
+		}
+		else if(ptrBTimerHandler->ptrTIMx == TIM3){
+			// Activando en NVIC para la interrupción del TIM3
+			NVIC_EnableIRQ(TIM3_IRQn);
+		}
+		else if(ptrBTimerHandler->ptrTIMx == TIM4){
+			// Activando en NVIC para la interrupción del TIM4
+			NVIC_EnableIRQ(TIM4_IRQn);
+		}
+		else if(ptrBTimerHandler->ptrTIMx == TIM5){
+			// Activando en NVIC para la interrupción del TIM5
+			NVIC_EnableIRQ(TIM5_IRQn);
+		}
+		else{
+			__NOP();
+		}
+
+
+	}else{
+		ptrBTimerHandler->ptrTIMx->DIER &= ~TIM_DIER_UIE;
 	}
-	else if(ptrBTimerHandler->ptrTIMx == TIM3){
-		// Activando en NVIC para la interrupción del TIM3
-		NVIC_EnableIRQ(TIM3_IRQn);
-	}
-	else if(ptrBTimerHandler->ptrTIMx == TIM4){
-		// Activando en NVIC para la interrupción del TIM4
-		NVIC_EnableIRQ(TIM4_IRQn);
-	}
-	else if(ptrBTimerHandler->ptrTIMx == TIM5){
-		// Activando en NVIC para la interrupción del TIM5
-		NVIC_EnableIRQ(TIM5_IRQn);
-	}
-	else{
-		__NOP();
-	}
+
 
 	/* 7. Volvemos a activar las interrupciones del sistema */
 	__enable_irq();
 }
+
+void delay_ms(uint16_t time_to_wait_ms){
+
+	startTimer(&handlerTIM4_time);
+	// definimos una variable que almacenara el valor del counter en el timer 4
+	uint16_t limit = (time_to_wait_ms * 10) - 1 ;
+	uint16_t CNT   = 0;
+
+	// comparamos el counter con el limit, y comenzamos a que cuente cada que el timer 4 haga una cuenta nueva
+	while (CNT < limit){
+		if (handlerTIM4_time.ptrTIMx->SR & TIM_SR_UIF)  {
+			CNT += handlerTIM4_time.ptrTIMx->ARR + 1;
+			handlerTIM4_time.ptrTIMx->SR &= ~TIM_SR_UIF;
+		}
+	}
+	stopTimer(&handlerTIM4_time);
+}
+
 
 void TIM_SetPriority (BasicTimer_Handler_t *ptrBTimerHandler, uint8_t newPriority){
 

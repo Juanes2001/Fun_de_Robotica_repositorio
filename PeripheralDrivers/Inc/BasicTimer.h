@@ -89,8 +89,12 @@ typedef struct
 	BasicTimer_Config_t	TIMx_Config;
 }BasicTimer_Handler_t;
 
+extern BasicTimer_Handler_t handlerTIM4_time;
+
 void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler);
 void TIM_SetPriority (BasicTimer_Handler_t *ptrBTimerHandler, uint8_t newPriority);
+void delay_ms(uint16_t time_to_wait_ms);
+void inTIM4(void);
 
 void BasicTimer1_Callback(void);
 void BasicTimer2_Callback(void); /* Esta función debe ser sobre-escrita en el main para que el sistema funcione*/

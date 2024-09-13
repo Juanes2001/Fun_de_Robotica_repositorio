@@ -41,34 +41,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := Pruebas_sin_FreeRTOS
+BUILD_ARTIFACT_NAME := noFree_Oppy
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-Pruebas_sin_FreeRTOS.elf \
+noFree_Oppy.elf \
 
 MAP_FILES += \
-Pruebas_sin_FreeRTOS.map \
+noFree_Oppy.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-Pruebas_sin_FreeRTOS.list \
+noFree_Oppy.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: Pruebas_sin_FreeRTOS.elf secondary-outputs
+main-build: noFree_Oppy.elf secondary-outputs
 
 # Tool invocations
-Pruebas_sin_FreeRTOS.elf Pruebas_sin_FreeRTOS.map: $(OBJS) $(USER_OBJS) /home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Pruebas_sin_FreeRTOS/STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Pruebas_sin_FreeRTOS.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/juan/FundamentosDeRobotica/Fun_de_Robotica_repositorio/Pruebas_sin_FreeRTOS/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Pruebas_sin_FreeRTOS.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+noFree_Oppy.elf noFree_Oppy.map: $(OBJS) $(USER_OBJS) C:\Users\juane\OneDrive\Desktop\STM_IDE\GitHub\Fun_de_Robotica_repositorio\noFree_Oppy\STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "noFree_Oppy.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\juane\OneDrive\Desktop\STM_IDE\GitHub\Fun_de_Robotica_repositorio\noFree_Oppy\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="noFree_Oppy.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -77,14 +77,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-Pruebas_sin_FreeRTOS.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "Pruebas_sin_FreeRTOS.list"
+noFree_Oppy.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "noFree_Oppy.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) Pruebas_sin_FreeRTOS.elf Pruebas_sin_FreeRTOS.list Pruebas_sin_FreeRTOS.map default.size.stdout
+	-$(RM) default.size.stdout noFree_Oppy.elf noFree_Oppy.list noFree_Oppy.map
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)

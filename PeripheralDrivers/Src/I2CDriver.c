@@ -11,7 +11,9 @@
 
 #include <stdint.h>
 #include <math.h>
+
 #include "I2CDriver.h"
+#include "BasicTimer.h"
 
 /*
  * Recordad que se debe configurar los pines para el I2C (SDA Y SCL),
@@ -25,8 +27,6 @@ void i2c_config(I2C_Handler_t *ptrHandlerI2C){
 	/* 1 Activamos la señal de reloj para el modulo I2C seleccionado*/
 	if(ptrHandlerI2C->ptrI2Cx == I2C1){
 		RCC -> APB1ENR |= RCC_APB1ENR_I2C1EN;
-		RCC ->APB1RSTR |= RCC_APB1RSTR_I2C1RST;
-		RCC ->APB1RSTR &= ~RCC_APB1RSTR_I2C1RST;
 	}
 
 	else if(ptrHandlerI2C->ptrI2Cx == I2C2){
@@ -48,11 +48,7 @@ void i2c_config(I2C_Handler_t *ptrHandlerI2C){
 	/* 2. Reiniciamos el periferico, de forma que inicia en un estado conocido */
 	ptrHandlerI2C->ptrI2Cx->CR1 |= I2C_CR1_SWRST;
 
-	//Esperamos un rato
-	for(uint32_t i = 0 ; i < 16 * pow(10,6); i++){
-		__NOP();
-	}
-
+	__NOP();
 
 	ptrHandlerI2C->ptrI2Cx->CR1 &= ~ I2C_CR1_SWRST;
 
@@ -188,6 +184,7 @@ void i2c_config(I2C_Handler_t *ptrHandlerI2C){
 		}
 
 	}
+
 	while(ptrHandlerI2C->ptrI2Cx->SR2 & I2C_SR2_BUSY){
 		__NOP();
 	}

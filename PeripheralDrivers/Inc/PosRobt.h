@@ -69,6 +69,7 @@ typedef struct
 	double start_position_y;
 	double goal_Position_x;                    //Posicion destino al ejecutar la linea recta
 	double goal_Position_y;
+
 }Parameters_Path_t;
 
 //Definicion de cabeceras de las funciones
