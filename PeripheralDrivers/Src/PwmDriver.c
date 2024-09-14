@@ -247,16 +247,16 @@ void setFrequency(PWM_Handler_t *ptrPwmHandler){
 	// antes de hacer un update y reload.
 
 
-	if((speed == PWM_SPEED_16MHz_10us )
-     ||(speed == PWM_SPEED_20MHz_10us)
-     ||(speed == PWM_SPEED_30MHz_10us)
-     ||(speed == PWM_SPEED_40MHz_10us)
-     ||(speed == PWM_SPEED_50MHz_10us)
-     ||(speed == PWM_SPEED_60MHz_10us)
-     ||(speed == PWM_SPEED_70MHz_10us)
-     ||(speed == PWM_SPEED_80MHz_10us)
-     ||(speed == PWM_SPEED_90MHz_10us)
-     ||(speed == PWM_SPEED_100MHz_10us)){
+	if((speed == PWM_SPEED_16MHz_1us )
+     ||(speed == PWM_SPEED_20MHz_1us)
+     ||(speed == PWM_SPEED_30MHz_1us)
+     ||(speed == PWM_SPEED_40MHz_1us)
+     ||(speed == PWM_SPEED_50MHz_1us)
+     ||(speed == PWM_SPEED_60MHz_1us)
+     ||(speed == PWM_SPEED_70MHz_1us)
+     ||(speed == PWM_SPEED_80MHz_1us)
+     ||(speed == PWM_SPEED_90MHz_1us)
+     ||(speed == PWM_SPEED_100MHz_1us)){
 
 		periodo = ptrPwmHandler->config.periodo * 1000 ;
 

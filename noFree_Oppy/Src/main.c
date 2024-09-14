@@ -102,6 +102,9 @@ MPUAccel_Config handler_MPUAccel_6050 ={0};
 
 // Motor Drivers
 Motor_Handler_t *handler_Motor_Array[2]; // Handler para cada motor, 0--> izquierdo; 1--> derecho
+Motor_Handler_t handlerMotor1_t;
+Motor_Handler_t handlerMotor2_t;
+
 
 // Estructura de estados
 typedef enum{
@@ -117,9 +120,10 @@ float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis);
 void getAngle(MPUAccel_Config *ptrMPUAccel,float angle_init, double calibr,Parameters_Position_t *ptrParameter_position);
 void On_motor_Straigh_Roll(Motor_Handler_t *ptrMotorhandler[2], uint8_t dir_s, uint8_t dir_r, state_t operation_mode);
 void get_measuremets_parameters(BasicTimer_Handler_t *ptrTimer ,Motor_Handler_t *ptrMotorHandler[2], Parameters_Position_t *ptrParameter_position, state_t operation_mode);
-void change_dir_straigh_Roll(Motor_Handler_t *ptrMotorhandler[2], uint8_t dir_r, uint8_t dir_s, state_t operation_mode);
+void change_dir_straigh_Roll(Motor_Handler_t *ptrMotorhandler[2], uint8_t dir_s, uint8_t dir_r, state_t operation_mode);
 void set_direction_straigh_roll (Motor_Handler_t *ptrMotorhandler[2], uint8_t dir_r, uint8_t dir_s, state_t operation_mode);
 void stop (Motor_Handler_t *ptrMotorhandler[2]);
+void int_Config_Motor(void);
 
 //-----Macros------
 #define distanceBetweenWheels 10600             //Distacia entre ruedas     106,00 [mm]
@@ -168,6 +172,7 @@ float paso_mm_2 = ((M_PI*D2)/(100*Ce)); // Numero de milimetros por paso de la r
 double ang_for_Displament = 0;
 double ang_complementary = 0;
 float velSetPoint = 0;
+int counter;
 
 // VARIABLES VARIAS DEL ROBOT
 #define fixed_dutty 28 // Fixed dutty cycle, velocidad constante
@@ -184,16 +189,14 @@ int main(void)
 	//Calculamos el setpoint en la que queremos que el robot controle la velocidad de cada motor
 	velSetPoint = (0.00169*fixed_dutty + 0.0619);
 
-//	On_motor_Straigh_Roll(handler_Motor_Array, *((uint8_t *) NULL), SET, sLine);
-
 	// calibramos el Giroscopio para que tengamos una medida de error controlable
-//	cal_Gyro = calibracionGyros(&handler_MPUAccel_6050, CALIB_Z);
+	cal_Gyro = calibracionGyros(&handler_MPUAccel_6050, CALIB_Z);
 
     /* Loop forever */
 	while(1){
 
 		if (rxData != '\0'){
-			writeChar(&handlerUSART, rxData);
+//			writeChar(&handlerUSART, rxData);
 			bufferReception[counterReception] = rxData;
 			counterReception++;
 
@@ -209,11 +212,43 @@ int main(void)
 				memset(bufferReception, 0, sizeof(bufferReception));
 				counterReception = 0;
 				writeMsg(&handlerUSART, "Buffer Vaciado\n \r");
+				rxData = '\0';
 			}
 
-				rxData = '\0';
+
+//			else if (rxData == '+'){
+//				if (counter >= 100){
+//					counter = 100;
+//				}else{
+//					counter++;
+//				}
+//
+//				updateDuttyCycleAfOpt(handler_Motor_Array[0]->phandlerPWM, counter);
+//				updateDuttyCycleAfOpt(handler_Motor_Array[1]->phandlerPWM, counter);
+//				rxData = '\0';
+//			}
+//
+//
+//			else if (rxData == '-'){
+//				if (counter <= 0){
+//					counter = 0;
+//				}else{
+//					counter--;
+//				}
+//
+//				updateDuttyCycleAfOpt(handler_Motor_Array[0]->phandlerPWM, counter);
+//				updateDuttyCycleAfOpt(handler_Motor_Array[1]->phandlerPWM, counter);
+//				rxData = '\0';
+//			}
+
 
 		}
+
+//
+//		sprintf(userMsg, "%u\t%u\n", showPWMBfOpt(handler_Motor_Array[0]->phandlerPWM)
+//								 , showPWMBfOpt(handler_Motor_Array[1]->phandlerPWM));
+//
+//		writeMsg(&handlerUSART, userMsg);
 
 
 
@@ -290,6 +325,10 @@ void inSystem (void){
 	inTIM4();
 
 
+	//////////////////////////// INICIALIZAMOS EL ROBOT//////////////////////
+	int_Config_Motor();
+
+
 	//////////////////////////////////////////////////// Velocidad de motores //////////////////////////////////////////////
 
 
@@ -306,9 +345,9 @@ void inSystem (void){
 
 	handlerPWM_1.ptrTIMx            = TIM5;
 	handlerPWM_1.config.channel     = PWM_CHANNEL_1;
-	handlerPWM_1.config.duttyCicle  = 0;
-//	counter = 50;
-	handlerPWM_1.config.periodo     = 40; // se maneja 25 hz por testeo
+	handlerPWM_1.config.duttyCicle  = fixed_dutty;
+	counter = fixed_dutty;
+	handlerPWM_1.config.periodo     = 33; // se maneja 25 hz por testeo
 	handlerPWM_1.config.prescaler   = PWM_SPEED_100MHz_1us;
 	handlerPWM_1.config.polarity    = PWM_ENABLE_POLARITY;
 	handlerPWM_1.config.optocoupler = PWM_ENABLE_OPTOCOUPLER;
@@ -327,8 +366,8 @@ void inSystem (void){
 
 	handlerPWM_2.ptrTIMx            = TIM5;
 	handlerPWM_2.config.channel     = PWM_CHANNEL_2;
-	handlerPWM_2.config.duttyCicle  = 0;
-	handlerPWM_2.config.periodo     = 40;// se maneja 25 hz por testeo
+	handlerPWM_2.config.duttyCicle  = fixed_dutty;
+	handlerPWM_2.config.periodo     = 33;// se maneja 25 hz por testeo
 	handlerPWM_2.config.prescaler   = PWM_SPEED_100MHz_1us;
 	handlerPWM_2.config.polarity    = PWM_ENABLE_POLARITY;
 	handlerPWM_2.config.optocoupler = PWM_ENABLE_OPTOCOUPLER;
@@ -483,7 +522,7 @@ void inSystem (void){
 	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinNumber      = PIN_8;
 	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_OPENDRAIN;
 	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
+	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
 
 	handler_PINB9_I2C1.pGPIOx                             = GPIOB;
 	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinAltFunMode  = AF4;
@@ -491,7 +530,7 @@ void inSystem (void){
 	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinNumber      = PIN_9;
 	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_OPENDRAIN;
 	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
+	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
 
 	handler_I2C1.ptrI2Cx = I2C1;
 	handler_I2C1.I2C_Config.clkSpeed = MAIN_CLOCK_50_MHz_FOR_I2C;
@@ -504,8 +543,6 @@ void inSystem (void){
 	handler_MPUAccel_6050.fullScaleACCEL  = ACCEL_2G;
 	handler_MPUAccel_6050.fullScaleGYRO   = GYRO_250;
 	configMPUAccel(&handler_MPUAccel_6050);
-
-
 
 }
 
@@ -563,6 +600,8 @@ void parseCommands(char *stringVector){
 }
 
 
+
+
 // Interrupcion usart 1
 void usart2Rx_Callback(void){
 
@@ -612,7 +651,7 @@ void callback_extInt3(void){
 
 float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis){
 
-	uint16_t  numMedidas = 50;
+	uint16_t  numMedidas = 200;
 	float    medidas    = 0;
 	float    suma       = 0;
 	uint8_t  contador   = 0;
@@ -792,14 +831,16 @@ void set_direction_straigh_roll (Motor_Handler_t *ptrMotorhandler[2], uint8_t di
 		// el cambio o no
 		if ((ptrMotorhandler[0]->configMotor.dir != dir_s)){
 			// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
-			GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, dir_s & SET); // La direccion estaba en RESET, la cambiamos a SET
+			ptrMotorhandler[0]->configMotor.dir = dir_s;
+			GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, !ptrMotorhandler[0]->configMotor.dir); // La direccion estaba en RESET, la cambiamos a SET
 			PWMx_Toggle(ptrMotorhandler[0]->phandlerPWM);
 
 		}
 
 		if ((ptrMotorhandler[1]->configMotor.dir != dir_s)){
 			// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
-			GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN, dir_s & SET); // La direccion estaba en RESET, la cambiamos a SET
+			ptrMotorhandler[1]->configMotor.dir = dir_s;
+			GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOIN,!ptrMotorhandler[1]->configMotor.dir); // La direccion estaba en RESET, la cambiamos a SET
 			PWMx_Toggle(ptrMotorhandler[1]->phandlerPWM);
 		}
 		// Puede que no analice ningun if y simplemente no haga nada
@@ -815,14 +856,16 @@ void set_direction_straigh_roll (Motor_Handler_t *ptrMotorhandler[2], uint8_t di
 			// el cambio o no
 			if ((ptrMotorhandler[0]->configMotor.dir != !dir_r)){
 				// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
-				GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, !dir_r & SET); // La direccion estaba en RESET, la cambiamos a SET
+				ptrMotorhandler[0]->configMotor.dir  =  !dir_r;
+				GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, !ptrMotorhandler[0]->configMotor.dir  ); // La direccion estaba en RESET, la cambiamos a SET
 				PWMx_Toggle(ptrMotorhandler[0]->phandlerPWM);
 
 			}
 
 			if ((ptrMotorhandler[1]->configMotor.dir != dir_r)){
 				// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
-				GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN, dir_r & SET); // La direccion estaba en SET, la cambiamos a RESET
+				ptrMotorhandler[1]->configMotor.dir = dir_r;
+				GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOIN, !ptrMotorhandler[1]->configMotor.dir); // La direccion estaba en SET, la cambiamos a RESET
 				PWMx_Toggle(ptrMotorhandler[1]->phandlerPWM);
 			}
 			// Puede que no analice ningun if y simplemente no haga nada
@@ -835,14 +878,16 @@ void set_direction_straigh_roll (Motor_Handler_t *ptrMotorhandler[2], uint8_t di
 			// el cambio o no
 			if ((ptrMotorhandler[0]->configMotor.dir != !dir_r)){
 				// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
-				GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, !dir_r & SET); // La direccion estaba en SET, la cambiamos a RESET
+				ptrMotorhandler[0]->configMotor.dir = !dir_r;
+				GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, !ptrMotorhandler[0]->configMotor.dir); // La direccion estaba en SET, la cambiamos a RESET
 				PWMx_Toggle(ptrMotorhandler[0]->phandlerPWM);
 
 			}
 
 			if ((ptrMotorhandler[1]->configMotor.dir != dir_r)){
 				// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
-				GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN, dir_r & SET); // La direccion estaba en RESET, la cambiamos a SET
+				ptrMotorhandler[1]->configMotor.dir = dir_r;
+				GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOIN, !ptrMotorhandler[1]->configMotor.dir); // La direccion estaba en RESET, la cambiamos a SET
 				PWMx_Toggle(ptrMotorhandler[1]->phandlerPWM);
 			}
 			// Puede que no analice ningun if y simplemente no haga nada
@@ -853,7 +898,7 @@ void set_direction_straigh_roll (Motor_Handler_t *ptrMotorhandler[2], uint8_t di
 	}
 }
 
-void change_dir_straigh_roll(Motor_Handler_t *ptrMotorhandler[2], uint8_t dir_s,uint8_t dir_r, state_t operation_mode){
+void change_dir_straigh_Roll(Motor_Handler_t *ptrMotorhandler[2], uint8_t dir_s, uint8_t dir_r, state_t operation_mode){
 
 	if (operation_mode == sLine){
 		// Si estamos aqui es porque queremos cambiar la direccion en linea recta correctamente
@@ -868,16 +913,17 @@ void change_dir_straigh_roll(Motor_Handler_t *ptrMotorhandler[2], uint8_t dir_s,
 			// si estamos aqui es porque se quiere cambiar la direccion del robot
 
 			// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
-			GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, dir_s & SET); // La direccion estaba en RESET, la cambiamos a SET
+			ptrMotorhandler[0]->configMotor.dir = dir_s;
+			GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, !ptrMotorhandler[0]->configMotor.dir); // La direccion estaba en RESET, la cambiamos a SET
 			PWMx_Toggle(ptrMotorhandler[0]->phandlerPWM);
 
 		}
 
 		if ((ptrMotorhandler[1]->configMotor.dir != dir_s)){
 			// si estamos aqui es porque se quiere cambiar la direccion del robot
-
+			ptrMotorhandler[1]->configMotor.dir = dir_s;
 			// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
-			GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN, dir_s & SET); // La direccion estaba en RESET, la cambiamos a SET
+			GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOIN, !ptrMotorhandler[1]->configMotor.dir); // La direccion estaba en RESET, la cambiamos a SET
 			PWMx_Toggle(ptrMotorhandler[1]->phandlerPWM);
 		}
 		// Puede que no analice ningún if y simplemente no haga nada
@@ -908,14 +954,16 @@ void change_dir_straigh_roll(Motor_Handler_t *ptrMotorhandler[2], uint8_t dir_s,
 
 			if ((ptrMotorhandler[0]->configMotor.dir != !dir_r)){
 				// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
-				GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, !dir_r & SET); // La direccion estaba en RESET, la cambiamos a SET
+				ptrMotorhandler[0]->configMotor.dir = !dir_r;
+				GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, !ptrMotorhandler[0]->configMotor.dir ); // La direccion estaba en RESET, la cambiamos a SET
 				PWMx_Toggle(ptrMotorhandler[0]->phandlerPWM);
 
 			}
 
 			if ((ptrMotorhandler[1]->configMotor.dir != dir_r)){
 				// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
-				GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN, dir_r & SET); // La direccion estaba en SET, la cambiamos a RESET
+				ptrMotorhandler[1]->configMotor.dir = dir_r;
+				GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOIN, !ptrMotorhandler[1]->configMotor.dir); // La direccion estaba en SET, la cambiamos a RESET
 				PWMx_Toggle(ptrMotorhandler[1]->phandlerPWM);
 			}
 			// Puede que no analice ningun if y simplemente no haga nada
@@ -940,14 +988,16 @@ void change_dir_straigh_roll(Motor_Handler_t *ptrMotorhandler[2], uint8_t dir_s,
 
 			if ((ptrMotorhandler[0]->configMotor.dir != !dir_r)){
 				// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
-				GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, !dir_r & SET); // La direccion estaba en SET, la cambiamos a RESET
+				ptrMotorhandler[0]->configMotor.dir = !dir_r;
+				GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, !ptrMotorhandler[0]->configMotor.dir); // La direccion estaba en SET, la cambiamos a RESET
 				PWMx_Toggle(ptrMotorhandler[0]->phandlerPWM);
 
 			}
 
 			if ((ptrMotorhandler[1]->configMotor.dir != dir_r)){
 				// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
-				GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN, dir_r & SET); // La direccion estaba en RESET, la cambiamos a SET
+				ptrMotorhandler[1]->configMotor.dir = dir_r;
+				GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOIN, !ptrMotorhandler[1]->configMotor.dir); // La direccion estaba en RESET, la cambiamos a SET
 				PWMx_Toggle(ptrMotorhandler[1]->phandlerPWM);
 			}
 			// Puede que no analice ningun if y simplemente no haga nada
@@ -974,4 +1024,57 @@ void stop (Motor_Handler_t *ptrMotorhandler[2]){
 		GPIO_WritePin_Afopt (ptrMotorhandler[1]->phandlerGPIOEN,RESET);
 
 
+}
+
+
+void int_Config_Motor(void){
+
+	//---------------Motor Izquierdo----------------
+	handler_Motor_Array[0] = &handlerMotor1_t;
+
+	//Parametro de la señal del dutty
+	handler_Motor_Array[0]->configMotor.dutty =  fixed_dutty;
+	handler_Motor_Array[0]->configMotor.dir = SET; // Por defecto dejamos el bit de direccion en SET
+	//handler de los perifericos
+	handler_Motor_Array[0]->phandlerGPIOEN = &handlerEn1PinC10;
+	handler_Motor_Array[0]->phandlerGPIOIN = &handlerIn1PinC12;
+	handler_Motor_Array[0]->phandlerPWM = &handlerPWM_1;
+	//definicion de parametros
+	handler_Motor_Array[0]->parametersMotor.pid->e0 = 0;
+	handler_Motor_Array[0]->parametersMotor.pid->e_prev = 0;
+	handler_Motor_Array[0]->parametersMotor.pid->u = 0;
+	handler_Motor_Array[0]->parametersMotor.pid->e_int = 0;
+	//Calculo de Constantes PID
+	handler_Motor_Array[0]->parametersMotor.pid->kp = 250;
+	handler_Motor_Array[0]->parametersMotor.pid->ki = 0;
+	handler_Motor_Array[0]->parametersMotor.pid->kd = 100;
+
+	//---------------Motor Derecho----------------
+	//Parametro de la señal del dutty
+	handler_Motor_Array[1] = &handlerMotor2_t;
+
+	handler_Motor_Array[1]->configMotor.dutty =  fixed_dutty;
+	handler_Motor_Array[1]->configMotor.dir = SET; // Por defecto dejamos el bit de direccion en SET
+	//handler de los perifericos
+	handler_Motor_Array[1]->phandlerGPIOEN = &handlerEn2PinC11;
+	handler_Motor_Array[1]->phandlerGPIOIN = &handlerIn2PinD2;
+	handler_Motor_Array[1]->phandlerPWM = &handlerPWM_2;
+	//definicion de parametros
+	handler_Motor_Array[1]->parametersMotor.pid->e0 =  0;
+	handler_Motor_Array[1]->parametersMotor.pid->e_prev = 0;
+	handler_Motor_Array[1]->parametersMotor.pid->u =  0;
+	handler_Motor_Array[1]->parametersMotor.pid->e_int = 0;
+	//Calculo de Constantes PID
+	handler_Motor_Array[1]->parametersMotor.pid->kp = 250;
+	handler_Motor_Array[1]->parametersMotor.pid->ki = 0;
+	handler_Motor_Array[1]->parametersMotor.pid->kd = 100;
+
+	//---------------PID del la distancia-----------------
+	//definicion de parametros
+	parameter_PID_distace.e0 = parameter_PID_distace.e_prev = 0;
+	parameter_PID_distace.u =  parameter_PID_distace.e_int = 0;
+	//Calculo de Constantes PID
+	parameter_PID_distace.kp = 1.0;
+	parameter_PID_distace.ki = 0.1;
+	parameter_PID_distace.kd = 0.8;
 }

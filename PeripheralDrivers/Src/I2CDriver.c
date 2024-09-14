@@ -30,12 +30,12 @@ DMA_Handler_t *ptrDMA_handler[2];
 void i2c_config(I2C_Handler_t *ptrHandlerI2C){
 
 	// Definimos los punteros para el DMA, si es necesario
-
-	ptrDMA_handler[0]->ptrDMAType = DMA1;
-	ptrDMA_handler[0]->ptrDMAStream = DMA1_Stream0;
-
-	ptrDMA_handler[1]->ptrDMAType = DMA1;
-	ptrDMA_handler[1]->ptrDMAStream = DMA1_Stream6;
+//
+//	ptrDMA_handler[0]->ptrDMAType = DMA1;
+//	ptrDMA_handler[0]->ptrDMAStream = DMA1_Stream0;
+//
+//	ptrDMA_handler[1]->ptrDMAType = DMA1;
+//	ptrDMA_handler[1]->ptrDMAStream = DMA1_Stream6;
 
 	/* 1 Activamos la señal de reloj para el modulo I2C seleccionado*/
 	if(ptrHandlerI2C->ptrI2Cx == I2C1){
@@ -49,6 +49,8 @@ void i2c_config(I2C_Handler_t *ptrHandlerI2C){
 	else if(ptrHandlerI2C->ptrI2Cx == I2C3){
 		RCC -> APB1ENR |= RCC_APB1ENR_I2C3EN;
 	}
+
+
 
 	/* 0. desactivamos el modulo I2C */
 	ptrHandlerI2C->ptrI2Cx->CR1 &= ~I2C_CR1_PE;
@@ -76,6 +78,10 @@ void i2c_config(I2C_Handler_t *ptrHandlerI2C){
 
 		ptrHandlerI2C->ptrI2Cx->CR2 |= (MAIN_CLOCK_16_MHz_FOR_I2C << I2C_CR2_FREQ_Pos);
 
+	}else if(ptrHandlerI2C->I2C_Config.clkSpeed == MAIN_CLOCK_25_MHz_FOR_I2C){
+
+		ptrHandlerI2C->ptrI2Cx->CR2 |= (MAIN_CLOCK_25_MHz_FOR_I2C << I2C_CR2_FREQ_Pos);
+
 	}else if (ptrHandlerI2C->I2C_Config.clkSpeed == MAIN_CLOCK_50_MHz_FOR_I2C){
 
 		ptrHandlerI2C->ptrI2Cx->CR2 |= (MAIN_CLOCK_50_MHz_FOR_I2C << I2C_CR2_FREQ_Pos);
@@ -89,8 +95,6 @@ void i2c_config(I2C_Handler_t *ptrHandlerI2C){
 	 * y el tiempo máximo para el cambio de la señal (T-Rise).
 	 * Todo comienza con los dos registros en 0
 	 */
-	//Nos aseguramos de que el periferico está desactivado
-	ptrHandlerI2C->ptrI2Cx->CR1 &= ~(0b1);
 
 	ptrHandlerI2C->ptrI2Cx->CCR = 0;
 	ptrHandlerI2C->ptrI2Cx->TRISE = 0;
@@ -120,12 +124,12 @@ void i2c_config(I2C_Handler_t *ptrHandlerI2C){
 				ptrHandlerI2C->ptrI2Cx->TRISE |= I2C_MAX_RISE_TIME_SM_16MHz;
 
 				break;
-			}case MAIN_CLOCK_20_MHz_FOR_I2C:{
+			}case MAIN_CLOCK_25_MHz_FOR_I2C:{
 
-				ptrHandlerI2C->ptrI2Cx->CCR |=(I2C_MODE_SM_SPEED_100KHz_20MHz << I2C_CCR_CCR_Pos);
+				ptrHandlerI2C->ptrI2Cx->CCR |=(I2C_MODE_SM_SPEED_100KHz_25MHz << I2C_CCR_CCR_Pos);
 
 				//Configuramos el registro que controla el tiempo T-Rise máximo
-				ptrHandlerI2C->ptrI2Cx->TRISE |= I2C_MAX_RISE_TIME_SM_20MHz;
+				ptrHandlerI2C->ptrI2Cx->TRISE |= I2C_MAX_RISE_TIME_SM_25MHz;
 
 				break;
 			}case MAIN_CLOCK_50_MHz_FOR_I2C:{
@@ -172,12 +176,12 @@ void i2c_config(I2C_Handler_t *ptrHandlerI2C){
 				ptrHandlerI2C->ptrI2Cx->TRISE |= I2C_MAX_RISE_TIME_FM_16MHz;
 
 				break;
-			}case MAIN_CLOCK_20_MHz_FOR_I2C:{
+			}case MAIN_CLOCK_25_MHz_FOR_I2C:{
 
-				ptrHandlerI2C->ptrI2Cx->CCR |=(I2C_MODE_FM_SPEED_400KHz_20MHz << I2C_CCR_CCR_Pos);
+				ptrHandlerI2C->ptrI2Cx->CCR |=(I2C_MODE_FM_SPEED_400KHz_25MHz << I2C_CCR_CCR_Pos);
 
 				//Configuramos el registro que controla el tiempo T-Rise máximo
-				ptrHandlerI2C->ptrI2Cx->TRISE |= I2C_MAX_RISE_TIME_FM_20MHz;
+				ptrHandlerI2C->ptrI2Cx->TRISE |= I2C_MAX_RISE_TIME_FM_25MHz;
 
 				break;
 			}case MAIN_CLOCK_50_MHz_FOR_I2C:{

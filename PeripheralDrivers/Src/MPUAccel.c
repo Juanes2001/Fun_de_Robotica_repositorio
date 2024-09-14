@@ -17,8 +17,8 @@ void configMPUAccel (MPUAccel_Config *ptrMPUAccel){
 	uint8_t byte = 0;
 	// Paso 1 se configuran los pines GPIO y el perisferico I2C respectivo para poder configurar a partir del
 	//MCU el sensor, se tiene en cuenta tanto la lectura del pin SDA como el SCL
-	GPIO_Config(ptrMPUAccel->ptrGPIOhandlerSDA);
 	GPIO_Config(ptrMPUAccel->ptrGPIOhandlerSCL);
+	GPIO_Config(ptrMPUAccel->ptrGPIOhandlerSDA);
 	i2c_config(ptrMPUAccel->ptrI2Chandler);
 
 
