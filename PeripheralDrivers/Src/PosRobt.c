@@ -116,20 +116,20 @@ void calculation_parameter_distance(Parameters_Path_t  *ptrParameterPath)
 }
 
 //------------Funciones para el calculo de la respectiva distancia------------------------
-double distance_to_straight_line(Parameters_Path_t  *ptrParameterPath, double position_x, double position_y)
+double distance_to_straight_line(Parameters_Path_t  *ptrParameterPath, double current_pos_x, double current_pos_y)
 {
 	// Calculo de la distancia del robot a la linea recta usando los parametros
-	double distance = -1*((ptrParameterPath->dis_point_Parte_1 * position_x + ptrParameterPath->dis_point_Parte_2 * position_y
+	double distance = -1*((ptrParameterPath->dis_point_Parte_1 * current_pos_x + ptrParameterPath->dis_point_Parte_2 * current_pos_y
 				       + ptrParameterPath->dis_point_Parte_1_2) / ptrParameterPath->magnitude_director);
 
 	return distance;
 }
 
-double distance_traveled(Parameters_Path_t  *ptrParameterPath, double position_x, double position_y)
+double distance_traveled(Parameters_Path_t  *ptrParameterPath, double current_pos_x, double current_pos_y)
 {
 	//Calculo de la distancia viajada relativo a la linea recta
-	double distance_Tra = (ptrParameterPath->proy_Parte_1 * position_x + ptrParameterPath->proy_Parte_2 * position_y
-			+ ptrParameterPath->proy_Parte_1_2)/ptrParameterPath->magnitude_director;
+	double distance_Tra = (ptrParameterPath->proy_Parte_1 * current_pos_x + ptrParameterPath->proy_Parte_2 * current_pos_y
+			+ ptrParameterPath->proy_Parte_1_2) / ptrParameterPath->magnitude_director;
 	//Retornar
 	return distance_Tra;
 }

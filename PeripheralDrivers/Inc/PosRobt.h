@@ -40,11 +40,11 @@ typedef struct
 typedef struct
 {
 	double grad_relativo;                                 //Angulo relativo      [grados]
-	double phi_relativo;                                                      // [rad]
-	double grad_grobal;                                   //Angulo acumulado     [grados]
+	double rad_relativo,rad_global;                                                      // [rad]
+	double grad_global;                                   //Angulo acumulado     [grados]
 	double xr_position, yr_position;        		      //Coordenadas relativas [mm]
 	double xg_position_inicial, yg_position_inicial;      //Coordenadas gloabales iniciales [mm]
-	double xg_position,yg_position;         			  //Coordenadas gloabales [mm]
+	double xg_position , yg_position;         			  //Coordenadas gloabales [mm]
 }Parameters_Position_t;
 
 
@@ -78,11 +78,10 @@ void add_Operation(Parameters_Operation_t *prtList, uint8_t num_operation, uint8
 void change_position(Parameters_Path_t *ptrParameterPath, int distance);
 void change_coordinates_position(Parameters_Path_t *ptrParameterPath, double coor_x, double coor_y);
 void calculation_parameter_distance(Parameters_Path_t  *ptrParameterPath);
-double distance_to_straight_line(Parameters_Path_t  *ptrParameterPath, double position_x, double position_y);
-double distance_traveled(Parameters_Path_t  *ptrParameterPath, double position_x, double position_y);
+double distance_to_straight_line(Parameters_Path_t  *ptrParameterPath, double current_pos_x, double current_pos_y);
+double distance_traveled(Parameters_Path_t  *ptrParameterPath, double current_pos_x, double current_pos_y);
 //Definicion de cabeceras de funciones auxiliares
 double calculed_ang_turn(double vector_a[2], double vector_b[2]);
-
 
 
 #endif /* POSROBT_H_ */
