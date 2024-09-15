@@ -356,7 +356,7 @@ int main(void)
 					"Task-MENU",            // Nombre con el que se puede definir la tarea
 					STACK_SIZE,             // Tamaño de la tarea en el heap
 					NULL,                   // parametro pasado a la tarea
-					2,                      // Prioridad de la tarea
+					3,                      // Prioridad de la tarea
 					&xHandleTask_Menu );    // Handler de la tarea respectiva
 
 
@@ -365,13 +365,13 @@ int main(void)
 
 	/////////////////////////////////TAREA DE IMPRESIÓN//////////////////////////////////////
 
-	xReturned = xTaskCreate(vTask_Print, "Task-Print",STACK_SIZE,NULL,2,&xHandleTask_Print );
+	xReturned = xTaskCreate(vTask_Print, "Task-Print",STACK_SIZE,NULL,3,&xHandleTask_Print );
 
 	 configASSERT( xReturned == pdPASS ); // Nos aseguramos de que se creo la tarea de una forma correcta
 
 	 /////////////////////////////////TAREA DE COMANDOS //////////////////////////////////////
 
-	xReturned = xTaskCreate(vTask_Commands,"Task-Commands",STACK_SIZE,NULL,2,&xHandleTask_Commands );
+	xReturned = xTaskCreate(vTask_Commands,"Task-Commands",STACK_SIZE,NULL,3,&xHandleTask_Commands );
 
 	 configASSERT( xReturned == pdPASS );// Nos aseguramos de que se creo la tarea de una forma correcta
 
@@ -399,7 +399,7 @@ int main(void)
 	 //Creacion de colas
 	 // Para cada funcion de crear se tiene que definir el largo de la cola,, y el
 	 // largo de cada elemento de la cola.
-	 xQueue_InputData = xQueueCreate(10,sizeof(char));
+	 xQueue_InputData = xQueueCreate(20,sizeof(char));
 	 configASSERT(xQueue_InputData != NULL);// Verificamos que se creo la cola correctamente
 
 	 //XQueue_Print = xQueueCreate (10, sizeof (struct AMessage *))
@@ -606,7 +606,7 @@ void inSystem (void){
 	handlerPinTx.GPIO_PinConfig.GPIO_PinAltFunMode  = AF7;
 	handlerPinTx.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
 	handlerPinTx.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
-	handlerPinTx.GPIO_PinConfig.GPIO_PinNumber      = PIN_2;
+	handlerPinTx.GPIO_PinConfig.GPIO_PinNumber      = PIN_9;
 	handlerPinTx.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	handlerPinTx.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
 	GPIO_Config(&handlerPinTx);
@@ -615,13 +615,13 @@ void inSystem (void){
 	handlerPinRx.GPIO_PinConfig.GPIO_PinAltFunMode  = AF7;
 	handlerPinRx.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
 	handlerPinRx.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
-	handlerPinRx.GPIO_PinConfig.GPIO_PinNumber      = PIN_3;
+	handlerPinRx.GPIO_PinConfig.GPIO_PinNumber      = PIN_10;
 	handlerPinRx.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	handlerPinRx.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
 	GPIO_Config(&handlerPinRx);
 
-	handlerUSART.ptrUSARTx                      = USART2;
-	handlerUSART.USART_Config.USART_MCUvelocity = USART_50MHz_VELOCITY;
+	handlerUSART.ptrUSARTx                      = USART1;
+	handlerUSART.USART_Config.USART_MCUvelocity = USART_100MHz_VELOCITY;
 	handlerUSART.USART_Config.USART_baudrate    = USART_BAUDRATE_19200;
 	handlerUSART.USART_Config.USART_enableInRx  = USART_INTERRUPT_RX_ENABLE;
 	handlerUSART.USART_Config.USART_enableInTx  = USART_INTERRUPT_TX_DISABLE;
@@ -696,7 +696,7 @@ void vTask_Menu( void * pvParameters ){
 	uint32_t cmd_addr;
 	command_t *cmd;
 
-	const char* msg_menu = "===============================================\n"
+	const char* msg_menu = "\n===============================================\n"
 						   "|                     MENU                    |\n"
 						   "sGo #dir ---------> 1--> Adelante , 0--> Atras \n"
 						   "Enter your choice here:";
@@ -720,7 +720,7 @@ void vTask_Menu( void * pvParameters ){
 					xQueueSend(xQueue_Print,&msg_option_1,portMAX_DELAY);
 					// Aca se deberia notificar para cambiar la variable next_state y notification
 					next_state = sGo;
-					xTaskNotify(xHandleTask_Go, 0 ,eNoAction);
+					xTaskNotify(xHandleTask_Go, 0 ,eNoAction); // NOS VAMOS AL ESTADO sGo
 
 
 					break;
@@ -758,7 +758,6 @@ void vTask_Menu( void * pvParameters ){
 			xQueueSend(xQueue_Print, &msg_invalid,portMAX_DELAY);
 			//Aca se deberia notificar cambiar la variable next_state y notificar
 			next_state = sMainMenu;
-			xTaskNotify(xHandleTask_Menu, 0, eNoAction);
 		}
 
 
@@ -836,7 +835,7 @@ void vTask_Go( void * pvParameters ){
 
 		// Si estamos aqui se quiere solo que el robot vaya hacia adelante y el linea recta
 		Mode_dir.Mode = Line;
-		Mode_dir.direction_s_r = 0;
+		Mode_dir.direction_s_r = fparam;
 
 		On_motor_Straigh_Roll(handler_Motor_Array,  Mode_dir); // Encendemos los motores para irnos hacia adelante y con una velocidad fija
 		startTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Comenzamos el muestreo de datos con los que aplicaremos un control adecuado
@@ -962,10 +961,10 @@ void callback_extInt3(void){
 
 
 //Interripcion USART2
-void usart2Rx_Callback(void){
+void usart1Rx_Callback(void){
 
 	rxData = getRxData();
-//
+	writeChar(&handlerUSART, rxData);
 	BaseType_t xHigerPriorituTaskWoken;
 	(void) xHigerPriorituTaskWoken;
 	xHigerPriorituTaskWoken = pdFALSE;
@@ -1711,7 +1710,7 @@ int extract_info ( command_t *cmd ,
 				   unsigned int *sparam,
 				   unsigned int *tparam){
 
-	uint8_t counter = 0;
+	int counter = 0;
 	uint8_t count_f = 0;
 	uint8_t count_s = 0;
 	uint8_t count_t = 0;
@@ -1818,11 +1817,43 @@ int extract_info ( command_t *cmd ,
 
 	// Si se llego aca es porque efectivamente hay algo en fistParameters que necesita ser convertido en un numero
 
-	for (uint8_t){
+	for (counter = len_f-1; counter > -1; counter--){
 
-
+		*fparam += (firstParameter[abs(counter - (len_f-1))] -48) * pow(10,counter);
 	}
 
+	// CONSTRUIDO EL PRIMER PARAMETRO, se hace lo mismo para el segundo y el tercero
+
+	// Comenzamos con el segundo parametro
+
+	if (len_s == 0){
+		return 2; // Si se llega aca es porque no hay segundo parametro, por lo que no habra tercer parametro
+	}
+
+	// Si se llego aca es porque efectivamente hay algo en secondParameter que necesita ser convertido en un numero
+
+	for (counter = len_s-1; counter > -1; counter--){
+
+		*sparam += (secondParameter[abs(counter - (len_s-1))]-48) * pow(10,counter);
+	}
+
+	// Comenzamos con el tercer parametro
+
+	if (len_t == 0){
+		return 3; // Si se llega aca es porque no hay tercer parametro, por lo que no habra tercer parametro
+	}
+
+	// Si se llego aca es porque efectivamente hay algo en thirdParameter que necesita ser convertido en un numero
+
+	for (counter = len_t-1; counter > -1; counter--){
+
+		*tparam += (thirdParameter[abs(counter - (len_t-1))] - 48) * pow(10,counter);
+	}
+
+
+	////////////// SI SE LLEGA HASTA ACA ES PORQUE YA TODO ESTA CONVERTIDO///////////////
+
+	return 0;
 }
 
 

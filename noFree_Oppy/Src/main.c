@@ -541,7 +541,7 @@ void inSystem (void){
 	handlerPinTx.GPIO_PinConfig.GPIO_PinAltFunMode  = AF7;
 	handlerPinTx.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
 	handlerPinTx.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
-	handlerPinTx.GPIO_PinConfig.GPIO_PinNumber      = PIN_2;
+	handlerPinTx.GPIO_PinConfig.GPIO_PinNumber      = PIN_9;
 	handlerPinTx.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	handlerPinTx.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
 	GPIO_Config(&handlerPinTx);
@@ -550,13 +550,13 @@ void inSystem (void){
 	handlerPinRx.GPIO_PinConfig.GPIO_PinAltFunMode  = AF7;
 	handlerPinRx.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
 	handlerPinRx.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
-	handlerPinRx.GPIO_PinConfig.GPIO_PinNumber      = PIN_3;
+	handlerPinRx.GPIO_PinConfig.GPIO_PinNumber      = PIN_10;
 	handlerPinRx.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	handlerPinRx.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
 	GPIO_Config(&handlerPinRx);
 
-	handlerUSART.ptrUSARTx                      = USART2;
-	handlerUSART.USART_Config.USART_MCUvelocity = USART_50MHz_VELOCITY;
+	handlerUSART.ptrUSARTx                      = USART1;
+	handlerUSART.USART_Config.USART_MCUvelocity = USART_100MHz_VELOCITY;
 	handlerUSART.USART_Config.USART_baudrate    = USART_BAUDRATE_19200;
 	handlerUSART.USART_Config.USART_enableInRx  = USART_INTERRUPT_RX_ENABLE;
 	handlerUSART.USART_Config.USART_enableInTx  = USART_INTERRUPT_TX_DISABLE;
@@ -740,7 +740,7 @@ void parseCommands(char *stringVector){
 
 
 // Interrupcion usart 1
-void usart2Rx_Callback(void){
+void usart1Rx_Callback(void){
 	rxData = getRxData();
 }
 

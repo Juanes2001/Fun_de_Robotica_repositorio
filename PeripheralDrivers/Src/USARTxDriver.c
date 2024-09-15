@@ -259,14 +259,17 @@ void USART_Config(USART_Handler_t *ptrUsartHandler){
 		if(ptrUsartHandler->ptrUSARTx == USART1){
 					// Activando en NVIC para la interrupción del USART1
 					__NVIC_EnableIRQ(USART1_IRQn);
+					__NVIC_SetPriority(USART1_IRQn, 1);
 		}
 		else if(ptrUsartHandler->ptrUSARTx == USART2){
 					// Activando en NVIC para la interrupción del USART2
 					__NVIC_EnableIRQ(USART2_IRQn);
+					__NVIC_SetPriority(USART2_IRQn, 1);
 		}
 		else if(ptrUsartHandler->ptrUSARTx == USART6){
 				// Activando en NVIC para la interrupción del USART6
 					__NVIC_EnableIRQ(USART6_IRQn);
+					__NVIC_SetPriority(USART6_IRQn, 1);
 		}
 		else{
 				__NOP();
