@@ -65,6 +65,7 @@ typedef struct
 	int rotative_Grad_Relative;                //Rotacion relativa en grados
 	int rotative_Grad;                         //Rotacion en grados
 	int line_Distance;                         //Distancia a recorrer
+	int angle;         						   //Angulo a rotar
 	double start_position_x;                   //Posicion de inicial al ejecutar la linea recta
 	double start_position_y;
 	double goal_Position_x;                    //Posicion destino al ejecutar la linea recta

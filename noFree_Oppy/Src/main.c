@@ -128,8 +128,12 @@ void get_measuremets_parameters(Motor_Handler_t *ptrMotorHandler[2], Parameters_
 void change_dir_straigh_Roll(Motor_Handler_t *ptrMotorhandler[2], state_dir_t operation_mode_dir);
 void set_direction_straigh_roll (Motor_Handler_t *ptrMotorhandler[2], state_dir_t operation_mode_dir);
 void stop (Motor_Handler_t *ptrMotorhandler[2]);
-void int_Config_Motor(Motor_Handler_t *ptrMotorhandler[2], PID_Parameters_t *ptrPIDHandler);
+void int_Config_Motor(Motor_Handler_t *ptrMotorhandler[2],
+					  Parameters_Position_t *ptrPosHandler,
+					  Parameters_Path_t *ptrPathHandler ,
+					  PID_Parameters_t *ptrPIDHandler);
 void PID_calc(PID_Parameters_t *ptrPIDHandler, float time_of_sampling, float setpoint, float current_measure);
+void fillComand(void);
 void PID_control(Motor_Handler_t *ptrMotorhandler[2],
 				 Parameters_Path_t *ptrPathHandler,
 				 Parameters_Position_t *ptrPosHandler,
@@ -142,9 +146,9 @@ void go(Motor_Handler_t *ptrMotorhandler[2],
 		PID_Parameters_t *ptrPIDHandler,
 		double calib ,
 		state_t mode,
-		uint8_t fAnglulo,
-		uint8_t fMeasurements,
-		uint8_t fcontrol,
+		uint8_t *fAnglulo,
+		uint8_t *fMeasurements,
+		uint8_t *fcontrol,
 		char buff[64],
 		state_dir_t operation_mode_dir);
 
@@ -155,12 +159,24 @@ int goTo(Motor_Handler_t *ptrMotorhandler[2],
 		 PID_Parameters_t *ptrPIDHandler,
 		 double calib ,
 		 state_t mode,
-		 uint8_t fAnglulo,
-		 uint8_t fMeasurements,
-		 uint8_t fcontrol,
+		 uint8_t *fAnglulo,
+		 uint8_t *fMeasurements,
+		 uint8_t *fcontrol,
 		 char buff[64],
 		 uint32_t distance_mm ,
 		 state_dir_t operation_mode_dir);
+
+void roll(Motor_Handler_t *ptrMotorhandler[2],
+		MPUAccel_Config *ptrMPUhandler,
+		Parameters_Position_t *ptrPosHandler ,
+		Parameters_Path_t *ptrPathHandler,
+		double calib ,
+		state_t mode,
+		uint8_t *fAnglulo,
+		uint8_t *fMeasurements,
+		uint8_t *fcontrol,
+		char buff[64],
+		state_dir_t operation_mode_dir);
 
 //-----Macros------
 #define distanceBetweenWheels 10600             //Distacia entre ruedas     106,00 [mm]
@@ -177,6 +193,7 @@ char cmd[32];
 unsigned int firstParameter  = 0;
 unsigned int secondParameter = 0;
 unsigned int thirdParameter  = 0;
+char data[64];
 char userMsg[64];
 
 //////Banderas y estados-----------
@@ -189,7 +206,7 @@ uint8_t flag_GoTo_Straigh = 0;
 uint8_t flag_control      = 0;
 uint8_t flag_Roll         = 0;
 uint8_t flag_RollTo         = 0;
-
+uint8_t Done = 0;
 
 // TIEMPOS DE SAMPLEO Y CONTEO PARA DEFINICION DE PARAMETROS
 uint8_t timeAction_TIMER_Sampling = 13;            // Cantidad de cuentas para
@@ -203,6 +220,7 @@ PID_Parameters_t parameter_PID_distace = {0};        //estructura para los param
 /// Variables para Odometria
 Parameters_Path_t parameters_Path_Robot    = {0};           //Estructura que almacena los parametros del camino a recorrer
 Parameters_Position_t parameters_Pos_Robot = {0}; 	//Estructura que almacena la posicion del robot
+
 double cal_Gyro = 0;   // variable que almacena la calibración del giroscopio
 float ang_d = 0;
 float sum_ang = 0;
@@ -234,32 +252,13 @@ int main(void)
 	// calibramos el Giroscopio para que tengamos una medida de error controlable
 	cal_Gyro = calibracionGyros(&handler_MPUAccel_6050, CALIB_Z); // Calibramos el giroscopio que usaremos
 
+	double angleToGo_Relative = 0;
+	double angle_start = 0;
+
     /* Loop forever */
 	while(1){
 
-		if (rxData != '\0'){
-//			writeChar(&handlerUSART, rxData);
-			bufferReception[counterReception] = rxData;
-			counterReception++;
-
-			if (rxData == '@'){
-				doneTransaction = SET;
-
-				bufferReception[counterReception-1] = '\0';
-
-				counterReception = 0;
-
-			}else if (rxData == 'z'){
-
-				memset(bufferReception, 0, sizeof(bufferReception));
-				counterReception = 0;
-				writeMsg(&handlerUSART, "Buffer Vaciado\n \r");
-				rxData = '\0';
-			}
-
-
-		}
-
+		fillComand();
 
 		// En esta parte ya usamos las medidas halladas para mover el robot en linea recta dependiendo de la operacion y el comando deseado
 		if (flag_Go_Straigh){
@@ -273,30 +272,87 @@ int main(void)
 			   &parameter_PID_distace,
 			   cal_Gyro,
 			   Mode,
-			   flag_angulo,
-			   flag_measurements,
-			   flag_control,
-			   userMsg,
+			   &flag_angulo,
+			   &flag_measurements,
+			   &flag_control,
+			   data,
 			   Mode_dir);
 		}
 
 		if (flag_GoTo_Straigh){
 
 			// SI llegamos a este comando, lo que se quiere es ir en linea recta a cierta distancia usando un control PID
-			goTo(handler_Motor_Array,
-				 &handler_MPUAccel_6050,
-				 &parameters_Pos_Robot,
-				 &parameters_Path_Robot,
-				 &parameter_PID_distace,
-				 cal_Gyro,
-				 Mode,
-				 flag_angulo,
-				 flag_measurements,
-				 flag_control,
-				 userMsg,
-				 parameters_Path_Robot.line_Distance,
-				 Mode_dir);
+			Done = goTo(handler_Motor_Array,
+					    &handler_MPUAccel_6050,
+					    &parameters_Pos_Robot,
+					    &parameters_Path_Robot,
+					    &parameter_PID_distace,
+					    cal_Gyro,
+					    Mode,
+					    &flag_angulo,
+					    &flag_measurements,
+					    &flag_control,
+					    data,
+					    parameters_Path_Robot.line_Distance,
+					    Mode_dir);
 
+			if (Done){parseCommands("stop");}
+
+		}
+
+		if (flag_Roll){
+
+			// Si llegamos a este comando lo que se quiere es girar indefinidamente en cierta direccion (CW o CCW)
+
+			// Cambiamos los parametros
+			roll(handler_Motor_Array,
+				&handler_MPUAccel_6050,
+				&parameters_Pos_Robot,
+				&parameters_Path_Robot,
+				cal_Gyro,
+				Mode,
+				&flag_angulo,
+				&flag_measurements,
+				&flag_control,
+				data,
+				Mode_dir);
+
+		}
+
+		if (flag_RollTo){
+
+			// Si llegamos a este comando lo que se quiere es girar un cierto ángulo el robot
+			Done = RESET; // Reseteamos la bandera
+			angle_start = parameters_Pos_Robot.grad_global;
+
+			while (!Done){
+
+				// comparamos el ángulo a rotar con el angulo actual, partiendo desde el angulo en el que se estaba
+				angleToGo_Relative = abs(parameters_Pos_Robot.grad_global - angle_start);
+				// tomamos el angulo global y se lo restamos con el angulo con el que se empezo a rotar
+
+				// Cambiamos los parametros
+				roll(handler_Motor_Array,
+				    &handler_MPUAccel_6050,
+				    &parameters_Pos_Robot,
+				    &parameters_Path_Robot,
+				    cal_Gyro,
+				    Mode,
+				    &flag_angulo,
+				    &flag_measurements,
+				    &flag_control,
+					data,
+				    Mode_dir);
+
+
+				// Analizamos si ya se llego al angulo deseado
+				if (!(angleToGo_Relative < parameters_Path_Robot.angle) ){Done = !Done;}
+			}
+
+			// Paramos el robot
+			if (Done){parseCommands("stop");}
+			angleToGo_Relative = 0; // Reseteamos
+			Done = RESET; // Reseteamos la bandera
 		}
 
 
@@ -342,7 +398,7 @@ void inSystem (void){
 
 
 	//////////////////////////// INICIALIZAMOS EL ROBOT//////////////////////
-	int_Config_Motor(handler_Motor_Array, &parameter_PID_distace);
+	int_Config_Motor(handler_Motor_Array, &parameters_Pos_Robot, &parameters_Path_Robot, &parameter_PID_distace);
 
 
 	//////////////////////////////////////////////////// Velocidad de motores //////////////////////////////////////////////
@@ -362,7 +418,7 @@ void inSystem (void){
 	handlerPWM_1.ptrTIMx            = TIM5;
 	handlerPWM_1.config.channel     = PWM_CHANNEL_1;
 	handlerPWM_1.config.duttyCicle  = fixed_dutty;
-	counter = fixed_dutty;
+//	counter = fixed_dutty;
 	handlerPWM_1.config.periodo     = 33; // se maneja 25 hz por testeo
 	handlerPWM_1.config.prescaler   = PWM_SPEED_100MHz_1us;
 	handlerPWM_1.config.polarity    = PWM_ENABLE_POLARITY;
@@ -430,7 +486,8 @@ void inSystem (void){
 	handlerIn1PinC12.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	handlerIn1PinC12.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
 	GPIO_Config(&handlerIn1PinC12);
-	GPIO_WritePin_Afopt(&handlerIn1PinC12, RESET); // default
+	GPIO_WritePin_Afopt(&handlerIn1PinC12, RESET); // default SET
+	handler_Motor_Array[0]->configMotor.dir = SET;
 
 	handlerIn2PinD2.pGPIOx                             = GPIOD;
 	handlerIn2PinD2.GPIO_PinConfig.GPIO_PinAltFunMode  = AF0;
@@ -440,8 +497,8 @@ void inSystem (void){
 	handlerIn2PinD2.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	handlerIn2PinD2.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
 	GPIO_Config(&handlerIn2PinD2);
-	GPIO_WritePin_Afopt(&handlerIn2PinD2, RESET); // default
-
+	GPIO_WritePin_Afopt(&handlerIn2PinD2, RESET); // default SET
+	handler_Motor_Array[1]->configMotor.dir = SET;
 
 	//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
 
@@ -475,7 +532,8 @@ void inSystem (void){
 	//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
 
 	///////////////////////////////////////////Comunicación serial para comandos //////////////////////////////////////////////
-
+		/////////A2 TX // A3 RX PARA USART 2 /////////
+		////////A9 TX // A10 RX PARA USART 1 ////////
 
 	//Comunicacion serial
 
@@ -568,18 +626,20 @@ void parseCommands(char *stringVector){
 	sscanf(stringVector, "%s %u %u %u %s", cmd ,&firstParameter, &secondParameter, &thirdParameter, userMsg);
 
 
-
-
 	if (strcmp(cmd, "help") == 0){
 
 		writeMsg(&handlerUSART, "HELP MENU CMD : \n");
 		writeMsg(&handlerUSART, "1)  go #dir 1--> Ahead , 0-->back Ward\n");
 		writeMsg(&handlerUSART, "2)  goto #dir #Distance \n");
+		writeMsg(&handlerUSART, "3)  roll #dir_roll 1--> CW , 0-->CCW \n");
+		writeMsg(&handlerUSART, "4)  rollto #dir_roll #angle  \n");
+		writeMsg(&handlerUSART, "5)  change #dir #operation 1--->Line , 0--->Roll \n");
+		writeMsg(&handlerUSART, "6)  reinit  \n");
 		writeMsg(&handlerUSART, " \n");
 
 	}else if (strcmp(cmd, "go") == 0){
 		// Si estamos aqui se quiere solo que el robot vaya hacia adelante y el linea recta
-		Mode_dir.Mode = sLine;
+		Mode_dir.Mode = Mode = sLine;
 		Mode_dir.direction_s_r = firstParameter;
 
 		On_motor_Straigh_Roll(handler_Motor_Array,  Mode_dir); // Encendemos los motores para irnos hacia adelante y con una velocidad fija
@@ -589,8 +649,10 @@ void parseCommands(char *stringVector){
 
 		flag_Go_Straigh = SET;
 
+		writeMsg(&handlerUSART, "\n____COMANDO go EJECUTADO____\n\r");
+
 	}else if (strcmp(cmd, "goto") == 0){
-		Mode_dir.Mode = sLine;
+		Mode_dir.Mode = Mode = sLine ;
 		Mode_dir.direction_s_r = firstParameter;
 
 		// Si estamos aqui es porque se quiere ir recorriendo una distancia especifica
@@ -601,9 +663,56 @@ void parseCommands(char *stringVector){
 
 		flag_GoTo_Straigh = SET;
 
+		writeMsg(&handlerUSART, "\n____COMANDO goto EJECUTADO____\n\r");
+
 	}else if (strcmp(cmd, "roll") == 0){
 		// si estamos aqui, este comando lo que hara es girar el robot indefinidamente
+		Mode_dir.Mode = Mode = sRoll;
+		Mode_dir.direction_s_r = firstParameter;
 
+		// Si estamos aqui es porque se quiere ir recorriendo una distancia especifica
+		On_motor_Straigh_Roll(handler_Motor_Array, Mode_dir); // Encendemos los motores para irnos hacia adelante y con una velocidad fija
+		startTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Comenzamos el muestreo de datos con los que aplicaremos un control adecuado
+
+		flag_Roll = SET;
+
+		writeMsg(&handlerUSART, "\n____COMANDO roll EJECUTADO____\n\r");
+
+	}else if (strcmp(cmd, "rollto") == 0){
+		// si estamos aqui, este comando lo que hara es girar el robot indefinidamente
+		Mode_dir.Mode = Mode = sRoll;
+		Mode_dir.direction_s_r = firstParameter;
+
+		// Si estamos aqui es porque se quiere ir recorriendo una distancia especifica
+		On_motor_Straigh_Roll(handler_Motor_Array, Mode_dir); // Encendemos los motores para irnos hacia adelante y con una velocidad fija
+		startTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Comenzamos el muestreo de datos con los que aplicaremos un control adecuado
+
+		// Almacenamos el angulo al que se quiere ir
+		parameters_Path_Robot.angle = secondParameter;
+
+		flag_RollTo = SET;
+
+		writeMsg(&handlerUSART, "\n____COMANDO rollto EJECUTADO____\n\r");
+
+
+	}else if (strcmp(cmd, "reinit") == 0){
+
+		// en este comando reiniciamos las variables del sistema para volver a empezar desde un nuevo punto de referencia
+		int_Config_Motor(handler_Motor_Array, &parameters_Pos_Robot, &parameters_Path_Robot, &parameter_PID_distace);
+
+		writeMsg(&handlerUSART, "\n____COMANDO reinit EJECUTADO____\n\r");
+
+	}else if (strcmp(cmd, "change") == 0){
+		// Si estamos en este comando lo que se desea es que haya un cambio de direccion y de operacion
+		if (Mode == sLine ){
+			Mode_dir.direction_s_r = firstParameter;
+			change_dir_straigh_Roll(handler_Motor_Array, Mode_dir);
+		}else if (Mode == sRoll ){
+			Mode_dir.direction_s_r = firstParameter;
+			change_dir_straigh_Roll(handler_Motor_Array, Mode_dir);
+		}
+
+		writeMsg(&handlerUSART, "\n____COMANDO reinit EJECUTADO____\n\r");
 	}
 
 
@@ -624,21 +733,15 @@ void parseCommands(char *stringVector){
 
 	else {
 		writeMsg(&handlerUSART, "Comando Incorrecto :c \n");
-
-
 	}
 
 
 }
 
 
-
-
 // Interrupcion usart 1
 void usart2Rx_Callback(void){
-
 	rxData = getRxData();
-
 }
 
 
@@ -651,7 +754,6 @@ void BasicTimer3_Callback(void){
 
 void BasicTimer2_Callback(void){
 
-
 	// Levantamos bandera que calcula el angulo actual
 	flag_angulo = SET;
 
@@ -663,16 +765,18 @@ void BasicTimer2_Callback(void){
 			flag_measurements = SET;
 	}else{ counting_action++; }
 
-	// EN EL MAIN ESTAS DOS BANDERAS SE ANALIZARAN Y SE EJECUTARAN
+	// EN LA FUNCION 'GO' ESTAN LAS DOS BANDERAS SE ANALIZARAN Y SE EJECUTARAN
 }
 
 
 //Interrupciones de Exti
 void callback_extInt1(void){
+	// Aumentamos las cuentas
 	handler_Motor_Array[0]->parametersMotor.counts++;
 }
 
 void callback_extInt3(void){
+	// Aumentamos las cuentas
 	handler_Motor_Array[1]->parametersMotor.counts++;
 }
 
@@ -685,10 +789,10 @@ void callback_extInt3(void){
 float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis){
 
 	uint16_t  numMedidas = 200;
-	float    medidas    = 0;
-	float    suma       = 0;
-	uint8_t  contador   = 0;
-	float    promedio   = 0;
+	float     medidas    = 0;
+	float     suma       = 0;
+	uint8_t   contador   = 0;
+	float     promedio   = 0;
 
 	switch (axis) {
 		case 0:{
@@ -758,17 +862,37 @@ void get_measuremets_parameters(Motor_Handler_t *ptrMotorHandler[2], Parameters_
 			promAng = sum_ang / counting_action;
 			ptrParameter_position->rad_relativo = (promAng * M_PI) / 180; //[rad]
 
-			ptrParameter_position->grad_global += sum_ang; // angulo acumulado global
-			ptrParameter_position->rad_global = (ptrParameter_position->grad_global * M_PI) / 180; //[rad]
+			ptrParameter_position->grad_global += atan2(sin((sum_ang * M_PI) / 180),
+					  	  	  	  	  	  	  	  	    cos((sum_ang * M_PI) / 180)) * (180 / M_PI); //[°] angulo acumulado global en grados
 
-			// Con la siguiente accion lo que hacemos es conseguir un angulo con mucha mas precision decimal debido a la funcion atan2
-			ptrParameter_position->rad_relativo = atan2(sin(ptrParameter_position->rad_relativo),cos(ptrParameter_position->rad_relativo));
+			ptrParameter_position->rad_global = atan2(sin((ptrParameter_position->grad_global * M_PI) / 180),
+													  cos((ptrParameter_position->grad_global * M_PI) / 180)); //[rad]
+
+			// Con la siguiente accion conseguimos que el angulo que deseamos solo este dentro del rango [-pi,pi]
+			ptrParameter_position->rad_relativo = atan2(sin(ptrParameter_position->rad_relativo),
+														cos(ptrParameter_position->rad_relativo));
 
 			//Calculamos la velocidad
-			ptrMotorHandler[0]->parametersMotor.dis = (paso_mm_1 * ptrMotorHandler[0]->parametersMotor.counts);      //[mm]
-			ptrMotorHandler[1]->parametersMotor.dis = (paso_mm_2 * ptrMotorHandler[1]->parametersMotor.counts);      //[mm]
-			ptrMotorHandler[0]->parametersMotor.vel = ptrMotorHandler[0]->parametersMotor.dis / time_accion;      //[m/s]
-			ptrMotorHandler[1]->parametersMotor.vel = ptrMotorHandler[1]->parametersMotor.dis / time_accion;      //[m/s]
+			if (Mode_dir.direction_s_r == SET){
+
+				// SI estamos aqui se tiene una direccion deseada hacia adelante
+				// almacenamos las variables de velocidad y dirección en función de hacia donde se este llendo
+
+				ptrMotorHandler[0]->parametersMotor.dis = (paso_mm_1 * ptrMotorHandler[0]->parametersMotor.counts);// Calculamos la distancia recorrida contando cuantos pasos a dado la rueda izquierda //[mm]
+				ptrMotorHandler[1]->parametersMotor.dis = (paso_mm_2 * ptrMotorHandler[1]->parametersMotor.counts);// Calculamos la distancia recorrida contando cuantos pasos a dado la rueda derecha   //[mm]
+				ptrMotorHandler[0]->parametersMotor.vel = ptrMotorHandler[0]->parametersMotor.dis / time_accion; // Calculamos la velocidad de la rueda izquierda     //[m/s]
+				ptrMotorHandler[1]->parametersMotor.vel = ptrMotorHandler[1]->parametersMotor.dis / time_accion; // Calculamos la velocidad de la rueda derecha    //[m/s]
+
+			}else{
+				// SI estamos aqui se tiene una direccion deseada hacia atras
+				// almacenamos las variables de velocidad y dirección en función de hacia donde se este llendo
+
+				ptrMotorHandler[0]->parametersMotor.dis = -(paso_mm_1 * ptrMotorHandler[0]->parametersMotor.counts);// Calculamos la distancia recorrida contando cuantos pasos a dado la rueda izquierda //[mm]
+				ptrMotorHandler[1]->parametersMotor.dis = -(paso_mm_2 * ptrMotorHandler[1]->parametersMotor.counts);// Calculamos la distancia recorrida contando cuantos pasos a dado la rueda derecha   //[mm]
+				ptrMotorHandler[0]->parametersMotor.vel = -ptrMotorHandler[0]->parametersMotor.dis / time_accion; // Calculamos la velocidad de la rueda izquierda     //[m/s]
+				ptrMotorHandler[1]->parametersMotor.vel = -ptrMotorHandler[1]->parametersMotor.dis / time_accion; // Calculamos la velocidad de la rueda derecha    //[m/s]
+
+			}
 
 			//Reiniciamos el numero de conteos
 			ptrMotorHandler[0]->parametersMotor.counts = 0;
@@ -788,28 +912,66 @@ void get_measuremets_parameters(Motor_Handler_t *ptrMotorHandler[2], Parameters_
 	{
 			//Guardamos el tiempo entre acciones especificas
 			time_accion = time_accumulated;
+			//Calculamos el angulo promedio y la establecemos como el angulo relativo
+			promAng = sum_ang / counting_action;
+			ptrParameter_position->rad_relativo = (promAng * M_PI) / 180; //[rad]
+
+			ptrParameter_position->grad_global += atan2(sin((sum_ang * M_PI) / 180),
+					  	  	  	  	  	  	  	  	    cos((sum_ang * M_PI) / 180)) * (180 / M_PI); //[°] angulo acumulado global en grados
+
+			ptrParameter_position->rad_global = atan2(sin((ptrParameter_position->grad_global * M_PI) / 180),
+													  cos((ptrParameter_position->grad_global * M_PI) / 180)); //[rad]
+
+			// Con la siguiente accion conseguimos que el angulo que deseamos solo este dentro del rango [-pi,pi]
+			ptrParameter_position->rad_relativo = atan2(sin(ptrParameter_position->rad_relativo),
+														cos(ptrParameter_position->rad_relativo));
+
 			//Calculo de la distancia recorrida por cada rueda
-			ptrMotorHandler[0]->parametersMotor.dis = (paso_mm_1 * ptrMotorHandler[0]->parametersMotor.counts);// Calculamos la distancia recorrida contando cuantos pasos a dado la rueda izquierda //[mm]
-			ptrMotorHandler[1]->parametersMotor.dis = (paso_mm_2 * ptrMotorHandler[1]->parametersMotor.counts);// Calculamos la distancia recorrida contando cuantos pasos a dado la rueda derecha   //[mm]
-			ptrMotorHandler[0]->parametersMotor.vel = ptrMotorHandler[0]->parametersMotor.dis / time_accion; // Calculamos la velocidad de la rueda izquierda     //[m/s]
-			ptrMotorHandler[1]->parametersMotor.vel = ptrMotorHandler[1]->parametersMotor.dis / time_accion; // Calculamos la velocidad de la rueda derecha    //[m/s]
+
+			if (Mode_dir.direction_s_r == SET){
+
+				// SI estamos aqui se tiene un una direccion de giro CW
+				// almacenamos las variables de velocidad y dirección en función de hacia donde se este girando
+
+				ptrMotorHandler[0]->parametersMotor.dis = (paso_mm_1 * ptrMotorHandler[0]->parametersMotor.counts);// Calculamos la distancia recorrida contando cuantos pasos a dado la rueda izquierda //[mm]
+				ptrMotorHandler[1]->parametersMotor.dis = -(paso_mm_2 * ptrMotorHandler[1]->parametersMotor.counts);// Calculamos la distancia recorrida contando cuantos pasos a dado la rueda derecha   //[mm]
+				ptrMotorHandler[0]->parametersMotor.vel = ptrMotorHandler[0]->parametersMotor.dis / time_accion; // Calculamos la velocidad de la rueda izquierda     //[m/s]
+				ptrMotorHandler[1]->parametersMotor.vel = -ptrMotorHandler[1]->parametersMotor.dis / time_accion; // Calculamos la velocidad de la rueda derecha    //[m/s]
+
+			}else{
+				// SI estamos aqui se tiene un una direccion de giro CCW
+				// almacenamos las variables de velocidad y dirección en función de hacia donde se este girando
+
+				ptrMotorHandler[0]->parametersMotor.dis = -(paso_mm_1 * ptrMotorHandler[0]->parametersMotor.counts);// Calculamos la distancia recorrida contando cuantos pasos a dado la rueda izquierda //[mm]
+				ptrMotorHandler[1]->parametersMotor.dis = (paso_mm_2 * ptrMotorHandler[1]->parametersMotor.counts);// Calculamos la distancia recorrida contando cuantos pasos a dado la rueda derecha   //[mm]
+				ptrMotorHandler[0]->parametersMotor.vel = -ptrMotorHandler[0]->parametersMotor.dis / time_accion; // Calculamos la velocidad de la rueda izquierda     //[m/s]
+				ptrMotorHandler[1]->parametersMotor.vel = ptrMotorHandler[1]->parametersMotor.dis / time_accion; // Calculamos la velocidad de la rueda derecha    //[m/s]
+
+			}
+
 			//Reiniciamos el numero de conteos
 			ptrMotorHandler[0]->parametersMotor.counts = 0;
 			ptrMotorHandler[1]->parametersMotor.counts = 0; // RESETEAMOS LAS CUENTAS
 
-			//Cálculo ángulo debido al desplazamiento del ICR
-			ang_for_Displament += (((ptrMotorHandler[1]->parametersMotor.dis - ptrMotorHandler[0]->parametersMotor.dis) * 100)/ distanceBetweenWheels)*(180/M_PI); //[°]
+//			//Cálculo ángulo debido al desplazamiento del ICR
+//			ang_for_Displament += (((ptrMotorHandler[1]->parametersMotor.dis - ptrMotorHandler[0]->parametersMotor.dis) * 100)
+//					               / distanceBetweenWheels)*(180/M_PI); //[°]
+//
+			//Reiniciamos variable
+			sum_ang = 0;
 			//Reiniciamos tiempo
 			time_accumulated = 0;
+
 			//Reiniciamos el contador de acción
 			counting_action  = 0;
 
 		//Combinar ambos ángulos
-		ang_complementary = ptrParameter_position->grad_relativo + ang_for_Displament;
+//		ang_complementary = ptrParameter_position->grad_relativo + ang_for_Displament;
 	}
 	else{  __NOP(); }
 
 }
+
 
 void On_motor_Straigh_Roll(Motor_Handler_t *ptrMotorhandler[2], state_dir_t operation_mode_dir){
 
@@ -881,10 +1043,10 @@ void set_direction_straigh_roll (Motor_Handler_t *ptrMotorhandler[2], state_dir_
 
 			// Primero revisamos en que direccion se encuentra el robot para ver si si se aplica
 			// el cambio o no
-			if ((ptrMotorhandler[0]->configMotor.dir != !operation_mode_dir.direction_s_r)){
+			if ((ptrMotorhandler[0]->configMotor.dir == operation_mode_dir.direction_s_r)){
 				// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
 				ptrMotorhandler[0]->configMotor.dir  =  !operation_mode_dir.direction_s_r;
-				GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, !ptrMotorhandler[0]->configMotor.dir  ); // La direccion estaba en RESET, la cambiamos a SET
+				GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, !ptrMotorhandler[0]->configMotor.dir); // La direccion estaba en RESET, la cambiamos a SET
 				PWMx_Toggle(ptrMotorhandler[0]->phandlerPWM);
 
 			}
@@ -953,7 +1115,7 @@ void change_dir_straigh_Roll(Motor_Handler_t *ptrMotorhandler[2], state_dir_t op
 			GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOEN,RESET);
 			GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN,RESET);
 
-			if ((ptrMotorhandler[0]->configMotor.dir != !operation_mode_dir.direction_s_r)){
+			if ((ptrMotorhandler[0]->configMotor.dir == operation_mode_dir.direction_s_r)){
 				// cambiamos la direccion cambiando los pines in pero tambien aplicando un toogle al PWM en cada caso
 				ptrMotorhandler[0]->configMotor.dir = !operation_mode_dir.direction_s_r;
 				GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOIN, !ptrMotorhandler[0]->configMotor.dir ); // La direccion estaba en RESET, la cambiamos a SET
@@ -994,14 +1156,16 @@ void stop (Motor_Handler_t *ptrMotorhandler[2]){
 }
 
 
-void int_Config_Motor(Motor_Handler_t *ptrMotorhandler[2], PID_Parameters_t *ptrPIDHandler){
+void int_Config_Motor(Motor_Handler_t *ptrMotorhandler[2],
+		              Parameters_Position_t *ptrPosHandler,
+					  Parameters_Path_t *ptrPathHandler ,
+					  PID_Parameters_t *ptrPIDHandler){
 
 	//---------------Motor Izquierdo----------------
 	ptrMotorhandler[0] = &handlerMotor1_t;
 
 	//Parametro de la señal del dutty
 	ptrMotorhandler[0]->configMotor.dutty =  fixed_dutty;
-	ptrMotorhandler[0]->configMotor.dir = SET; // Por defecto dejamos el bit de direccion en SET
 	//handler de los perifericos
 	ptrMotorhandler[0]->phandlerGPIOEN = &handlerEn1PinC10;
 	ptrMotorhandler[0]->phandlerGPIOIN = &handlerIn1PinC12;
@@ -1021,7 +1185,6 @@ void int_Config_Motor(Motor_Handler_t *ptrMotorhandler[2], PID_Parameters_t *ptr
 	ptrMotorhandler[1] = &handlerMotor2_t;
 
 	ptrMotorhandler[1]->configMotor.dutty =  fixed_dutty;
-	ptrMotorhandler[1]->configMotor.dir = SET; // Por defecto dejamos el bit de direccion en SET
 	//handler de los perifericos
 	ptrMotorhandler[1]->phandlerGPIOEN = &handlerEn2PinC11;
 	ptrMotorhandler[1]->phandlerGPIOIN = &handlerIn2PinD2;
@@ -1044,16 +1207,45 @@ void int_Config_Motor(Motor_Handler_t *ptrMotorhandler[2], PID_Parameters_t *ptr
 	ptrPIDHandler->kp = 1.0;
 	ptrPIDHandler->ki = 0.1;
 	ptrPIDHandler->kd = 0.8;
+
+	//-------------- Parametros de posicion---------------
+	ptrPosHandler->grad_global   = 0;
+	ptrPosHandler->rad_global    = 0;
+	ptrPosHandler->grad_relativo = 0;
+	ptrPosHandler->rad_relativo  = 0;
+	ptrPosHandler->xr_position   = 0;
+	ptrPosHandler->yr_position   = 0;
+	ptrPosHandler->xg_position   = ptrPosHandler->xg_position_inicial = 0;
+	ptrPosHandler->yg_position   = ptrPosHandler->yg_position_inicial = 0;
+
+
+	//--------------Parametros de Path-----------------
+	ptrPathHandler->angle = 0;
+	ptrPathHandler->goal_Position_x = ptrPathHandler->goal_Position_y = 0;
+	ptrPathHandler->line_Distance = 0;
+	ptrPathHandler->start_position_x = ptrPathHandler->start_position_y = 0;
+
 }
 
 
-int goTo(Motor_Handler_t *ptrMotorhandler[2],MPUAccel_Config *ptrMPUhandler,Parameters_Position_t *ptrPosHandler ,
-		Parameters_Path_t *ptrPathHandler, PID_Parameters_t *ptrPIDHandler, double calib , state_t mode,uint8_t fAnglulo, uint8_t fMeasurements,
-		uint8_t fcontrol, char buff[64], uint32_t distance_mm , state_dir_t operation_mode_dir){
+int goTo(Motor_Handler_t *ptrMotorhandler[2],
+		 MPUAccel_Config *ptrMPUhandler,
+		 Parameters_Position_t *ptrPosHandler ,
+		 Parameters_Path_t *ptrPathHandler,
+		 PID_Parameters_t *ptrPIDHandler,
+		 double calib ,
+		 state_t mode,
+		 uint8_t *fAnglulo,
+		 uint8_t *fMeasurements,
+		 uint8_t *fcontrol,
+		 char buff[64],
+		 uint32_t distance_mm ,
+		 state_dir_t operation_mode_dir){
 
 	// esta funcion se encarga de enviar al robot en una linea recta hacia una distancia especifica
 	// Para ello lo que se hara es simplemente encender el robot y al mismo tiempo calcular su distancia recorrida
 	double distance_to_go = 0;
+	uint8_t done = RESET;
 
 	// seteamos la posicion inicial como la posicion actual global del robot
 	ptrPathHandler->start_position_x = ptrPosHandler->xg_position;
@@ -1070,7 +1262,7 @@ int goTo(Motor_Handler_t *ptrMotorhandler[2],MPUAccel_Config *ptrMPUhandler,Para
 
 	On_motor_Straigh_Roll(ptrMotorhandler, operation_mode_dir); // Encendemos el robot en la direccion deseada
 
-	while(distance_to_go < distance_mm){
+	while(!done){
 		// calculamos la distancia con la libreria PosRobt.h
 
 		distance_to_go = distance_traveled( ptrPathHandler, ptrPosHandler->xg_position, ptrPosHandler->yg_position);
@@ -1088,15 +1280,26 @@ int goTo(Motor_Handler_t *ptrMotorhandler[2],MPUAccel_Config *ptrMPUhandler,Para
 		   fcontrol,
 		   buff,
 		   operation_mode_dir); // Con esta funcion hacemos que el robot simplemente se mueva
+
+		if (!(distance_to_go < distance_mm)){
+			// Paramos el proceso
+			done = !done;
+		}
+
+		// Observamos si hay algun comando en espera
+		fillComand();
+
 	}
 
 
-	return 1;
+	return done;
 }
 
 
-void PID_control(Motor_Handler_t *ptrMotorhandler[2] ,Parameters_Path_t *ptrPathHandler,Parameters_Position_t *ptrPosHandler
-		        ,PID_Parameters_t *ptrPIDHandler){
+void PID_control(Motor_Handler_t *ptrMotorhandler[2] ,
+		        Parameters_Path_t *ptrPathHandler,
+				Parameters_Position_t *ptrPosHandler,
+				PID_Parameters_t *ptrPIDHandler){
 
 	//Conversion de tiempo
 	float sampling_time = ((float) (handlerTIM2_PARAMETROS_MOVIMIENTO.TIMx_Config.TIMx_period * timeAction_TIMER_Sampling) / 1000); //[s]
@@ -1141,7 +1344,10 @@ void PID_control(Motor_Handler_t *ptrMotorhandler[2] ,Parameters_Path_t *ptrPath
 
 }
 
-void PID_calc(PID_Parameters_t *ptrPIDHandler, float time_of_sampling, float setpoint, float current_measure){
+void PID_calc(PID_Parameters_t *ptrPIDHandler,
+		      float time_of_sampling,
+			  float setpoint,
+			  float current_measure){
 
 	//Calculo del error
 	ptrPIDHandler->e0 = setpoint-current_measure;
@@ -1163,9 +1369,9 @@ void go(Motor_Handler_t *ptrMotorhandler[2],
 		PID_Parameters_t *ptrPIDHandler,
 		double calib ,
 		state_t mode,
-		uint8_t fAnglulo,
-		uint8_t fMeasurements,
-		uint8_t fcontrol,
+		uint8_t *fAnglulo,
+		uint8_t *fMeasurements,
+		uint8_t *fcontrol,
 		char buff[64],
 		state_dir_t operation_mode_dir){
 
@@ -1173,32 +1379,32 @@ void go(Motor_Handler_t *ptrMotorhandler[2],
 
 
 	//En este primera medicion se mide el el angulo actual del robot con respecto a una referencia.
-	if (fAnglulo){ // este se ejecutara cada periodo
+	if (*fAnglulo){ // este se ejecutara cada periodo
 
 		// Medimos el angulo actual
 		getAngle(ptrMPUhandler, 0, calib, ptrPosHandler);
 		// bajamos la bandera
-		fAnglulo = RESET;
+		*fAnglulo = RESET;
 	}
 	// En la siguiente medicion medimos todos los parametros necesarios para el control posterior
-	if (fMeasurements){ // Este se ejecutara cada (periodo * 13 cuentas)
+	if (*fMeasurements){ // Este se ejecutara cada (periodo * 13 cuentas)
 
 		// Medimos el angulo actual
 		get_measuremets_parameters(ptrMotorhandler, ptrPosHandler, mode);
 		// bajamos la bandera
-		fMeasurements = RESET;
+		*fMeasurements = RESET;
 		//Levandamos la bandera de control
-		fcontrol = SET;
+		*fcontrol = SET;
 	}
 
 	// Control
-	if (fcontrol){
+	if (*fcontrol){
 
 		//Calculo odometria
 		double distance_prom = (ptrMotorhandler[1]->parametersMotor.dis + ptrMotorhandler[0]->parametersMotor.dis)/2;//[mm]
 
-		ptrPosHandler->xr_position += distance_prom * (cos(ptrPosHandler->rad_global));        //[mm]
-		ptrPosHandler->yr_position += distance_prom * (sin(ptrPosHandler->rad_global));       //[mm]
+		ptrPosHandler->xr_position = distance_prom * (cos(ptrPosHandler->rad_global));        //[mm]
+		ptrPosHandler->yr_position = distance_prom * (sin(ptrPosHandler->rad_global));       //[mm]
 
 		//Paso de c.relativa a c.globales
 		ptrPosHandler->xg_position +=  ptrPosHandler->xr_position;
@@ -1211,7 +1417,71 @@ void go(Motor_Handler_t *ptrMotorhandler[2],
 
 		PID_control(ptrMotorhandler, ptrPathHandler, ptrPosHandler, ptrPIDHandler);
 
-		fcontrol = RESET;
+		*fcontrol = RESET;
 	}
+}
+
+
+void roll(Motor_Handler_t *ptrMotorhandler[2],
+		MPUAccel_Config *ptrMPUhandler,
+		Parameters_Position_t *ptrPosHandler ,
+		Parameters_Path_t *ptrPathHandler,
+		double calib ,
+		state_t mode,
+		uint8_t *fAnglulo,
+		uint8_t *fMeasurements,
+		uint8_t *fcontrol,
+		char buff[64],
+		state_dir_t operation_mode_dir){
+
+	////////////////////////////////////////BLOQUE DE MEDICION Y CONTROL//////////////////////////////////////////////////////
+
+
+	//En este primera medicion se mide el el angulo actual del robot con respecto a una referencia.
+	if (*fAnglulo){ // este se ejecutara cada periodo
+
+		// Medimos el angulo actual
+		getAngle(ptrMPUhandler, 0, calib, ptrPosHandler);
+		// bajamos la bandera
+		*fAnglulo = RESET;
+	}
+	// En la siguiente medicion medimos todos los parametros necesarios para el control posterior
+	if (*fMeasurements){ // Este se ejecutara cada (periodo * 13 cuentas)
+
+		// Medimos el angulo actual
+		get_measuremets_parameters(ptrMotorhandler, ptrPosHandler, mode);
+		// bajamos la bandera
+		*fMeasurements = RESET;
+	}
+
+}
+
+
+
+void fillComand(void){
+
+	if (rxData != '\0'){
+		writeChar(&handlerUSART, rxData);
+		bufferReception[counterReception] = rxData;
+		counterReception++;
+
+		if (rxData == '@'){
+			doneTransaction = SET;
+
+			bufferReception[counterReception-1] = '\0';
+
+			counterReception = 0;
+			parseCommands(bufferReception);
+
+		}else if (rxData == 'z'){
+
+			memset(bufferReception, 0, sizeof(bufferReception));
+			counterReception = 0;
+			writeMsg(&handlerUSART, "\n___Buffer Vaciado___\n \r");
+			rxData = '\0';
+		}
+		rxData = '\0';
+	}
+
 }
 
