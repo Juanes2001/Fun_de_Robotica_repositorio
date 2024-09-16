@@ -64,7 +64,7 @@ typedef enum {
 #define STACK_SIZE 200
 
 // Velocidad del MCU
-//uint32_t SystemCoreClock = 100000000;
+uint32_t SystemCoreClock = 100000000;
 
 // Definicion de la variable xReturned donde se almacenara el estado de todas las tareas creadas
 BaseType_t xReturned;
@@ -75,6 +75,7 @@ void vTask_Commands( void * pvParameters );
 void vTask_Stop( void * pvParameters );
 void vTask_Go( void * pvParameters );
 void vTask_Control( void * pvParameters );
+void vTask_GoTo( void * pvParameters );
 
 //Cabecera de la funcion Timer de FreeRTOS
 void led_state_callback (TimerHandle_t xTimer);
@@ -85,7 +86,8 @@ TaskHandle_t xHandleTask_Print    = NULL; // Handler de la tarea dE PRINT
 TaskHandle_t xHandleTask_Commands = NULL; // Handler de la tarea de Comandos
 TaskHandle_t xHandleTask_Stop     = NULL; // Handler de la tarea de Stop
 TaskHandle_t xHandleTask_Go       = NULL; // Handler de la tarea de Go
-TaskHandle_t xHandleTask_Control      = NULL; // Handler de la tarea de PID
+TaskHandle_t xHandleTask_Control  = NULL; // Handler de la tarea de PID
+TaskHandle_t xHandleTask_GoTo     = NULL; // Handler de la tarea de Ir a
 
 //Colas
 QueueHandle_t xQueue_Print;
@@ -93,9 +95,6 @@ QueueHandle_t xQueue_InputData;
 
 //Timer FreeRTOS
 TimerHandle_t handler_led_timer;
-
-//Semaforos
-SemaphoreHandle_t xSemaphore_Handle = NULL;
 
 
 void process_command (command_t *cmd);
@@ -106,11 +105,11 @@ float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis);
 
 //Algunos mensajes String necesarios para la comunicacion
 const char *msg_invalid = "\n ////Invalid option /////\n";
-const char *msg_option_1= "\n------ Selected Option - sGo ------- \n";
-const char *msg_option_2= "\n------ Selected Option - 1 ------- \n";
-const char *msg_option_3= "\n------ Selected Option - 2 ------- \n";
-const char *msg_option_n= "\n------ Option out of range ------- \n";
-const char *msg_no_smphr= "\n-------Semaphore no activated------\n";
+const char *msg_option_1= "\n------ Selected Option - sGo ------ \n";
+const char *msg_option_2= "\n----- Selected Option - sGoTo ----- \n";
+const char *msg_option_3= "\n------ Selected Option - sRoll ---- \n";
+const char *msg_option_4= "\n----Selected Option - sRollTo ----- \n";
+const char *msg_no_smphr= "\n-------Semaphore no activated------ \n";
 
 
 //Definición Handlers
@@ -195,6 +194,7 @@ typedef struct{
 //DEFINICION DE FUNCIONES
 
 void inSystem (void);
+void resetParameters(void);
 float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis);
 void getAngle(MPUAccel_Config *ptrMPUAccel,float angle_init, double calibr,Parameters_Position_t *ptrParameter_position);
 void On_motor_Straigh_Roll(Motor_Handler_t *ptrMotorhandler[2], state_dir_t operation_mode_dir);
@@ -293,6 +293,9 @@ uint8_t flag_control      = 0;
 uint8_t flag_Roll         = 0;
 uint8_t flag_RollTo         = 0;
 uint8_t Done = 0;
+uint8_t wrong_command = 0;
+uint8_t end = 0;
+
 
 // TIEMPOS DE SAMPLEO Y CONTEO PARA DEFINICION DE PARAMETROS
 uint8_t timeAction_TIMER_Sampling = 13;            // Cantidad de cuentas para
@@ -319,6 +322,7 @@ float velSetPoint = 0;
 int counter;
 float vel_Setpoint_1;
 float vel_Setpoint_2;
+double distance_to_go = 0;
 
 // VARIABLES VARIAS DEL ROBOT
 #define fixed_dutty 28 // Fixed dutty cycle, velocidad constante
@@ -391,6 +395,12 @@ int main(void)
 	 /////////////////////////////////TAREA DE PID//////////////////////////////////////
 
 	xReturned = xTaskCreate(vTask_Control,"Task-Control",STACK_SIZE,NULL,3,&xHandleTask_Control );
+
+	 configASSERT( xReturned == pdPASS );// Nos aseguramos de que se creo la tarea de una forma correcta
+
+	 /////////////////////////////////TAREA DE IR A//////////////////////////////////////
+
+	xReturned = xTaskCreate(vTask_GoTo,"Task-GoTo",STACK_SIZE,NULL,3,&xHandleTask_GoTo );
 
 	 configASSERT( xReturned == pdPASS );// Nos aseguramos de que se creo la tarea de una forma correcta
 
@@ -699,6 +709,7 @@ void vTask_Menu( void * pvParameters ){
 	const char* msg_menu = "\n===============================================\n"
 						   "|                     MENU                    |\n"
 						   "sGo #dir ---------> 1--> Adelante , 0--> Atras \n"
+						   "sGoTo #dir #distance [mm]                      \n"
 						   "Enter your choice here:";
 
 	while (1){
@@ -710,54 +721,72 @@ void vTask_Menu( void * pvParameters ){
 		xTaskNotifyWait (0,0,&cmd_addr, portMAX_DELAY);
 		cmd = (command_t *) cmd_addr;
 
-		// El comando recibido solo tener el largo de 1 caracter
-		if(cmd->functionType != -1){
+		if (end){
 
-			switch (cmd->functionType) {
-				case 1:{
+			 next_state = sMainMenu; // Cambiamos el estado actual al de menu
+			 end = RESET; // Bajamos la bandera
 
-					//Envia a imprimir en la consola lo que se debe mostrar en el menu
-					xQueueSend(xQueue_Print,&msg_option_1,portMAX_DELAY);
-					// Aca se deberia notificar para cambiar la variable next_state y notification
-					next_state = sGo;
-					xTaskNotify(xHandleTask_Go, 0 ,eNoAction); // NOS VAMOS AL ESTADO sGo
-
-
-					break;
-				}case 2:{
-
-					//Envia a imprimir en la consola lo que se debe mostrar en el menu
-					xQueueSend(xQueue_Print,&msg_option_1,portMAX_DELAY);
-
-					// Aca se deberia notificar para cambiar la variable next_state y notification
-					next_state = sGo;
-					xTaskNotify(xHandleTask_Menu,0,eNoAction);
-
-
-					break;
-				}case 3:{
-					//Envia a imprimir en la consola lo que se debe mostrar en el menu
-					xQueueSend(xQueue_Print,&msg_option_2,portMAX_DELAY);
-
-					// Aca se deberia notificar para cambiar la variable next_state y notification
-					next_state = sMainMenu;
-					xTaskNotify(xHandleTask_Menu,0,eNoAction);
-
-
-
-					break;
-				}
-				default:{
-					xQueueSend(xQueue_Print, &msg_option_n , portMAX_DELAY);
-					continue;
-
-				}
-			}
-
+			 //Reseteamos la cola para recibir nuevos comandos
+			 xQueueReset(xQueue_InputData);
 		}else{
-			xQueueSend(xQueue_Print, &msg_invalid,portMAX_DELAY);
-			//Aca se deberia notificar cambiar la variable next_state y notificar
-			next_state = sMainMenu;
+
+			// El comando recibido solo tener el largo de 1 caracter
+			if(cmd->functionType != -1){
+
+				switch (cmd->functionType) {
+					case 1:{
+
+						//Envia a imprimir en la consola lo que se debe mostrar en el menu
+						xQueueSend(xQueue_Print,&msg_option_1,portMAX_DELAY);
+						xQueueReset(xQueue_InputData); // RESETEAMOS LA COLA INPUT PARA ESPERAR NUEVOS COMANDOS
+
+						// Aca se deberia notificar para cambiar la variable next_state y notification
+						next_state = sGo;
+						xTaskNotify(xHandleTask_Go, 0 ,eNoAction); // NOS VAMOS AL ESTADO sGo
+
+
+						break;
+					}case 2:{
+
+						//Envia a imprimir en la consola lo que se debe mostrar en el menu
+						xQueueSend(xQueue_Print,&msg_option_2,portMAX_DELAY);
+						xQueueReset(xQueue_InputData); // RESETEAMOS LA COLA INPUT PARA ESPERAR NUEVOS COMANDOS
+
+						// Aca se deberia notificar para cambiar la variable next_state y notification
+						next_state = sGoTo;
+						xTaskNotify(xHandleTask_GoTo, 0 ,eNoAction); // NOS VAMOS AL ESTADO sGo
+
+
+						break;
+					}case 3:{
+						//Envia a imprimir en la consola lo que se debe mostrar en el menu
+						xQueueSend(xQueue_Print,&msg_option_2,portMAX_DELAY);
+
+						// Aca se deberia notificar para cambiar la variable next_state y notification
+						next_state = sMainMenu;
+						xTaskNotify(xHandleTask_Menu,0,eNoAction);
+
+
+
+						break;
+					}
+					default:{
+						///////
+						continue;
+
+					}
+				}
+
+			}else{
+				xQueueSend(xQueue_Print, &msg_invalid,portMAX_DELAY);
+				//Aca se deberia notificar cambiar la variable next_state y notificar
+				wrong_command = RESET; // RESETEAMOS LA BANDERA
+				xQueueReset(xQueue_InputData); // Reseteamos la cola que recibe los comandos
+				memset(cmd->payload,0,sizeof(cmd->payload)); // Limpiamos el payload
+
+				xTaskNotify(xHandleTask_Menu,0,eNoAction); // Notificamos a la funcion menu para que pueda inmediatamente mandar de nuevo el menu
+				xTaskNotifyWait(0,0,NULL,portMAX_DELAY);
+			}
 		}
 
 
@@ -801,7 +830,6 @@ void vTask_Stop( void * pvParameters ){
 		 //Esperamos la notificacion desde la interrupcion de comandos
 		 xTaskNotifyWait(0,0,NULL,portMAX_DELAY); // Esoerar hasta que la notificacion salte
 
-
 		 // Este comando lo que busca es apagar el robot y detenerlo de su estado de movimiento
 		stop(handler_Motor_Array); // Apagamos los motores
 		stopTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Detenemos los muestreos
@@ -811,6 +839,11 @@ void vTask_Stop( void * pvParameters ){
 		flag_GoTo_Straigh = RESET;
 		flag_Roll         = RESET;
 		flag_RollTo       = RESET;
+
+		 if (end){
+			 xTaskNotify(xHandleTask_Menu,0, eNoAction);
+		 }
+
 
 	}
 }
@@ -837,12 +870,10 @@ void vTask_Go( void * pvParameters ){
 		Mode_dir.Mode = Line;
 		Mode_dir.direction_s_r = fparam;
 
+		resetParameters();
+
 		On_motor_Straigh_Roll(handler_Motor_Array,  Mode_dir); // Encendemos los motores para irnos hacia adelante y con una velocidad fija
 		startTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Comenzamos el muestreo de datos con los que aplicaremos un control adecuado
-
-		// Levantamos la bandera correspondiente a este comando
-
-		flag_Go_Straigh = SET;
 
 	}
 
@@ -857,24 +888,112 @@ void vTask_Control( void * pvParameters ){
 		//Esperamos la notificacion desde la interrupcion de comandos
 		 xTaskNotifyWait(0,0,NULL,portMAX_DELAY); // Esoerar hasta que la notificacion salte
 
-		go(handler_Motor_Array,
-		  &handler_MPUAccel_6050,
-		  &parameters_Pos_Robot,
-		  &parameters_Path_Robot,
-		  &parameter_PID_distace,
-		  cal_Gyro,
-		  &flag_angulo,
-		  &flag_measurements,
-		  &flag_control,
-		  userMsg,
-		  Mode_dir); // Esta funcion se ejecutara cada 16ms, tiempo entre interrupciones del Timer 2
+		 switch (next_state) {
+			case sGo:{
 
+				go(handler_Motor_Array,
+				  &handler_MPUAccel_6050,
+				  &parameters_Pos_Robot,
+				  &parameters_Path_Robot,
+				  &parameter_PID_distace,
+				  cal_Gyro,
+				  &flag_angulo,
+				  &flag_measurements,
+				  &flag_control,
+				  userMsg,
+				  Mode_dir); // Esta funcion se ejecutara cada 16ms, tiempo entre interrupciones del Timer 2
+
+				break;
+			}case sGoTo:{
+
+
+				distance_to_go = distance_traveled(&parameters_Path_Robot, parameters_Pos_Robot.xg_position, parameters_Pos_Robot.yg_position);
+
+				// Función de control del robot
+				go(handler_Motor_Array,
+				  &handler_MPUAccel_6050,
+				  &parameters_Pos_Robot,
+				  &parameters_Path_Robot,
+				  &parameter_PID_distace,
+				  cal_Gyro,
+				  &flag_angulo,
+				  &flag_measurements,
+				  &flag_control,
+				  userMsg,
+				  Mode_dir); // Esta funcion se ejecutara cada 16ms, tiempo entre interrupciones del Timer 2
+
+				if (!(abs(distance_to_go) < parameters_Path_Robot.line_Distance)){
+					// Paramos el proceso
+					end = SET;
+					xTaskNotify(xHandleTask_Stop,0, eNoAction); // Levantamos la tarea de stop para parar la ejecución
+				}
+
+
+				break;
+			}
+			default:{break;}
+		}
 	}
 
 }
 
 ////////////////////////////////////////////////////////////////////////GO STATE/////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+
+////////////////////////////////////////////////////////////////////////GOTO STATE/////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+void vTask_GoTo( void * pvParameters ){
+
+	// En esta tarea querremos ir solo hacia un punto deseado por el usuario
+
+	while(1){
+
+		//Esperamos la notificacion desde la interrupcion de comandos
+		 xTaskNotifyWait(0,0,NULL,portMAX_DELAY); // Esoerar hasta que la notificacion salte
+
+		// Si estamos aqui se quiere solo que el robot vaya hacia adelante y el linea recta
+		Mode_dir.Mode = Line;
+		Mode_dir.direction_s_r = fparam;
+
+		// Almacenamos la distancia en milimetros a recorrer
+		parameters_Path_Robot.line_Distance = sparam;
+
+		resetParameters();
+
+		On_motor_Straigh_Roll(handler_Motor_Array,  Mode_dir); // Encendemos los motores para irnos hacia adelante y con una velocidad fija
+
+		// seteamos la posicion inicial como la posicion actual global del robot
+		parameters_Path_Robot.start_position_x = parameters_Pos_Robot.xg_position;
+		parameters_Path_Robot.start_position_y = parameters_Pos_Robot.yg_position;
+
+		// seteamos la posicion final usando parametros polares
+
+		//Usando el angulo actual global con respecto al eje x se tiene que
+		parameters_Path_Robot.goal_Position_x = parameters_Path_Robot.line_Distance * cos(parameters_Pos_Robot.rad_global) + parameters_Path_Robot.start_position_x ; // usando la funcion coseno para hallar la coordenada x de llegada
+		parameters_Path_Robot.goal_Position_y = parameters_Path_Robot.line_Distance * sin(parameters_Pos_Robot.rad_global) + parameters_Path_Robot.start_position_y ; //usando la funcion coseno para hallar la coordenada y de llegada
+
+		// definimos los parametros del camino en funcion de la situacion actual
+		calculation_parameter_distance(&parameters_Path_Robot);
+
+		startTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Comenzamos el muestreo de datos con los que aplicaremos un control adecuado
+
+	}
+
+}
+
+
+
+////////////////////////////////////////////////////////////////////////GOTO STATE/////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 
 
 void vTask_Print( void * pvParameters ){
@@ -898,9 +1017,13 @@ void process_command (command_t *cmd){
 	if (next_state == sMainMenu){
 		//Notificamos a la tarea respectiva
 		xTaskNotify(xHandleTask_Menu,(uint32_t)cmd, eSetValueWithOverwrite);
+	}else if (!wrong_command){
+		end = SET;
+		//Notificamos a la tarea en el estado de parada.
+		xTaskNotify(xHandleTask_Stop,0, eNoAction);
 	}else{
-//		//Notificamos a la tarea en el estado de parada.
-//		xTaskNotify(xHandleTask_Stop,0, eNoAction);
+		//Notificamos a la tarea respectiva
+		xTaskNotify(xHandleTask_Menu,(uint32_t)cmd, eSetValueWithOverwrite);
 	}
 
 
@@ -918,29 +1041,44 @@ int extract_command (command_t *cmd){
 		return -1;
 	}
 
-	do{
-		// Recibimos un elemento y lo montamos en el item ademas no deseamos bloquarlo
-		status = xQueueReceive(xQueue_InputData, &item,0);
-		if(status == pdTRUE){
-
-			//vamos llenando el arreglo del comando
-			cmd->payload[counter_j++] = item;
-
-		}
-	}while(item != '#');
-
-	cmd->payload[counter_j] = '\0'; // Agregamos la terminacion nula para que tengamos un string
-
-	// Del comando entregado extraemos toda la informacion necesaria para poder usarla luego en los estados necesarios
-//	sscanf((char *) cmd->payload, "%s %u %u %u %s", data ,&firstParameter, &secondParameter, &thirdParameter, userMsg);
-
-	extract_info(cmd, data, firstParameter, secondParameter, thirdParameter, &fparam, &sparam, &tparam);
-
-	if (strcmp(data, "sGo") == 0){
-		cmd->functionType = 1;
+	if (wrong_command){
+				// si se llego aqui es porque se mando un comando erronio, por lo que hay resetear y mandar de nuevo
+				cmd->functionType = -1;
+				memset(cmd->payload,0,sizeof(cmd->payload)); // Limpiamos el payload
+				xQueueReset(xQueue_InputData);
 	}else{
-		cmd->functionType = -1; // Si se llega aca es porque se mando el comando incorrecto
+
+		do{
+			// Recibimos un elemento y lo montamos en el item ademas no deseamos bloquarlo
+			status = xQueueReceive(xQueue_InputData, &item,0);
+			if(status == pdTRUE){
+
+				//vamos llenando el arreglo del comando
+				cmd->payload[counter_j++] = item;
+
+			}
+		}while(item != '#');
+
+		cmd->payload[counter_j] = '\0'; // Agregamos la terminacion nula para que tengamos un string
+
+		// Del comando entregado extraemos toda la informacion necesaria para poder usarla luego en los estados necesarios
+	//	sscanf((char *) cmd->payload, "%s %u %u %u %s", data ,&firstParameter, &secondParameter, &thirdParameter, userMsg);
+
+		extract_info(cmd, data, firstParameter, secondParameter, thirdParameter, &fparam, &sparam, &tparam);
+
+		memset(cmd->payload,0,sizeof(cmd->payload)); // Limpiamos el payload
+		xQueueReset(xQueue_InputData);
+
+		if (strcmp(data, "sGo") == 0){
+			cmd->functionType = 1;
+		}
+		else if (strcmp(data, "sGoTo") == 0){
+			cmd->functionType = 2;
+		}
+
 	}
+
+
 
 	return 0;
 
@@ -965,6 +1103,10 @@ void usart1Rx_Callback(void){
 
 	rxData = getRxData();
 	writeChar(&handlerUSART, rxData);
+
+	if (rxData == '\r'){
+		wrong_command = SET;
+	}
 	BaseType_t xHigerPriorituTaskWoken;
 	(void) xHigerPriorituTaskWoken;
 	xHigerPriorituTaskWoken = pdFALSE;
@@ -994,7 +1136,7 @@ void usart1Rx_Callback(void){
 
 	}
 
-	if (rxData == '#'){
+	if (rxData == '#' || rxData == '\r'){
 		// Se manda la notificacion de la tarea que se quiere mover al estado de RUN
 		xTaskNotifyFromISR(xHandleTask_Commands,
 						   0,
@@ -1020,6 +1162,7 @@ void BasicTimer2_Callback(void){
 	if(counting_action >= timeAction_TIMER_Sampling){
 			flag_measurements = SET;
 	}else{ counting_action++; }
+
 	xTaskNotifyFromISR(xHandleTask_Control,
 					   0,
 					   eNoAction,
@@ -1656,9 +1799,9 @@ void go(Motor_Handler_t *ptrMotorhandler[2],
 		ptrPosHandler->yg_position +=  ptrPosHandler->yr_position;
 
 		//Convertimos el valor y imprimimos en la terminal
-		sprintf(buff,"&%#.4f\t%#.4f\n", ptrPosHandler->xg_position , ptrPosHandler->yg_position);
-
-		writeMsg(&handlerUSART, buff);
+//		sprintf(buff,"&%#.4f\t%#.4f\n", ptrPosHandler->xg_position , ptrPosHandler->yg_position);
+//
+//		writeMsg(&handlerUSART, buff);
 
 		PID_control(ptrMotorhandler, ptrPathHandler, ptrPosHandler, ptrPIDHandler);
 
@@ -1718,6 +1861,9 @@ int extract_info ( command_t *cmd ,
 	uint8_t len_f = 0;
 	uint8_t len_s = 0;
 	uint8_t len_t = 0;
+
+
+
 
 	while (1){
 
@@ -1854,6 +2000,13 @@ int extract_info ( command_t *cmd ,
 	////////////// SI SE LLEGA HASTA ACA ES PORQUE YA TODO ESTA CONVERTIDO///////////////
 
 	return 0;
+}
+
+
+void resetParameters(void){
+	fparam = 0;
+	sparam = 0;
+	tparam = 0;
 }
 
 

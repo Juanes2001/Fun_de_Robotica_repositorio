@@ -270,7 +270,7 @@ void RCC_enableMaxFrequencies(uint8_t frequency){
 		__NOP();
 	}
 
-	SystemCoreClockUpdate();
+//	SystemCoreClockUpdate();
 
 }
 

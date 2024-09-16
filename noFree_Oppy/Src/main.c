@@ -250,7 +250,7 @@ int main(void)
 	velSetPoint = (0.00169*fixed_dutty + 0.0619);
 
 	// calibramos el Giroscopio para que tengamos una medida de error controlable
-	cal_Gyro = calibracionGyros(&handler_MPUAccel_6050, CALIB_Z); // Calibramos el giroscopio que usaremos
+//	cal_Gyro = calibracionGyros(&handler_MPUAccel_6050, CALIB_Z); // Calibramos el giroscopio que usaremos
 
 	double angleToGo_Relative = 0;
 	double angle_start = 0;
@@ -616,7 +616,7 @@ void inSystem (void){
 	handler_MPUAccel_6050.ptrI2Chandler   = &handler_I2C1;
 	handler_MPUAccel_6050.fullScaleACCEL  = ACCEL_2G;
 	handler_MPUAccel_6050.fullScaleGYRO   = GYRO_250;
-	configMPUAccel(&handler_MPUAccel_6050);
+//	configMPUAccel(&handler_MPUAccel_6050);
 
 }
 
