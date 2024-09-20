@@ -79,7 +79,7 @@ typedef struct
 {
 	uint8_t		channel; 		// Canal PWM relacionado con el TIMER
 	uint32_t	prescaler;		// A qué velocidad se incrementa el Timer
-	uint16_t	periodo;		// Indica el número de veces que el Timer se incrementa, el periodo de la frecuencia viene dado por Time_Fosc * PSC * ARR
+	double	periodo;		// Indica el número de veces que el Timer se incrementa, el periodo de la frecuencia viene dado por Time_Fosc * PSC * ARR
 	float   	duttyCicle;		// Valor en porcentaje (%) del tiempo que la señal está en alto
 	uint8_t     polarity;       // Se activa el modo de polaridad o no
 	uint8_t     optocoupler;    // Se activa la opcion de optoacolpador donde se cambia toda la propiedad del dutty

@@ -83,7 +83,7 @@ double counter = 0;
 int main(void)
 {
 	//Activamos la FPU
-	SCB -> CPACR |= (0xF << 20);
+ 	SCB -> CPACR |= (0xF << 20);
 
 	inSystem ();
 
@@ -168,7 +168,7 @@ void inSystem (void){
 
 	handlerPWM_pulse_10ns.ptrTIMx            = TIM1;
 	handlerPWM_pulse_10ns.config.channel     = PWM_CHANNEL_1;
-	handlerPWM_pulse_10ns.config.duttyCicle  = 1;
+	handlerPWM_pulse_10ns.config.duttyCicle  = 1.2;
 	counter = handlerPWM_pulse_10ns.config.duttyCicle;
 	handlerPWM_pulse_10ns.config.periodo     = 10000; // se maneja 100kHz por testeo
 	handlerPWM_pulse_10ns.config.prescaler   = PWM_SPEED_100MHz_10ns;
