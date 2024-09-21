@@ -10,6 +10,8 @@
 #include <math.h>
 
 
+
+
 //-------------------------Funcion para la definicion de operaciones--------------------------
 void build_Operation(Parameters_Operation_t *prtList, Parameter_build_t *prtbuild, double finishline_x, double finishline_y)
 {
@@ -74,7 +76,7 @@ void change_coordinates_position(Parameters_Path_t *ptrParameterPath, double coo
 	ptrParameterPath->goal_Position_y = coor_y;
 	//Definimos la distancia
 	ptrParameterPath->line_Distance = sqrt(pow((ptrParameterPath->goal_Position_x - ptrParameterPath->start_position_x),2)+
-			pow(ptrParameterPath->goal_Position_y - ptrParameterPath->start_position_y,2));;                  //[mm]
+										   pow(ptrParameterPath->goal_Position_y - ptrParameterPath->start_position_y,2));                  //[mm]
 
 }
 

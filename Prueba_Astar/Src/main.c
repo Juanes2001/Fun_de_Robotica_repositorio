@@ -159,7 +159,7 @@ int main(void)
 					memset(stringMatrix, 0, sizeof(stringMatrix));
 					stringRow    = 0;
 					stringColumn = 0;
-					writeMsg(&handlerUSART, "\n------String Vaciado-----\n \r");
+					writeMsg(&handlerUSART, "\n------String Vaciado-----\n\r");
 					writeMsg(&handlerUSART, msg_InsertGrid);
 				}
 

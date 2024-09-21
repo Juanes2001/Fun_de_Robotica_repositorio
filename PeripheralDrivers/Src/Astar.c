@@ -948,3 +948,51 @@ void initSerialComunication (USART_Handler_t *ptrHandlerUsart, GPIO_Handler_t *p
 	// Ya seteados estos handler en teoria podriamos mandar por terminarl serial desde este .c
 
 }
+
+
+
+
+// Con esta funcion se setea el vector de operaciones con el que podemos recorrer el camino sin problemas
+
+void Create_operations(AStar_distancesHandler *parameters,
+		          int **shorterWayArray,
+				  Parameters_Operation_t *prtList,
+				  Parameter_build_t *prtbuild,
+				  Parameters_Path_t *ptrPath){
+
+	// Aqui lo que se tendra en cuenta es el listado de operaciones necesarias para recorrer el camino, un listado donde
+	// solo sea recorrerlo en el main y leer cada operacion y simplemene usar goto y rollto para aplicar tales operaciones
+
+	// Aqui se va a suponer que donde se resetea el robot es el (0,0) de coordenadas y que su vector directos esta a 0 grados con respecto
+	// al eje X, por lo que se puede colocar el robot como sea en la posicion inicial y este calculara sus operaciones dependiendo
+	// de su posicion inicial
+
+
+	double finishline_x = 0;
+	double finishline_y = 0;
+	double coor_x = 0;
+	double coor_y = 0;
+
+	ptrPath->start_position_x = 0;
+	ptrPath->start_position_y = 0; // posicion de estart, considerada como (0,0)
+
+
+	for (uint8_t i = 0 ; i < parameters->numberOfElements - 1 ; i++){
+
+		// Seteamos como punto inicial el punto de start y como punto final el siguiente punto a ir
+
+		coor_x = (shorterWayArray[i+1][0] - shorterWayArray[i][0]) * parameters->parallelDistance;
+		coor_y = (shorterWayArray[i+1][1] - shorterWayArray[i][1]) * parameters->parallelDistance;
+
+		finishline_x = ptrPath->goal_Position_x - ptrPath->start_position_x;
+		finishline_y = ptrPath->goal_Position_y - ptrPath->start_position_y;
+
+
+		build_Operation(prtList, prtbuild, finishline_x, finishline_y);
+
+		change_coordinates_position(ptrPath, shorterWayArray[i+1][0], shorterWayArray[i+1][0]);
+
+	}
+
+
+}

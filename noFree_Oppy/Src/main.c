@@ -115,7 +115,8 @@ costChangesAndPos_t handlerCostsAstar         = {0};
 // Estructura de estados
 typedef enum{
 	sLine = 0,
-	sRoll
+	sRoll,
+	sNone
 }state_t;
 
 typedef struct{
@@ -130,14 +131,15 @@ void parseCommands(char *stringVector);
 float calibracionGyros (MPUAccel_Config *ptrMPUAccel, uint8_t axis);
 void getAngle(MPUAccel_Config *ptrMPUAccel,float angle_init, double calibr,Parameters_Position_t *ptrParameter_position);
 void On_motor_Straigh_Roll(Motor_Handler_t *ptrMotorhandler[2], state_dir_t operation_mode_dir);
-void get_measuremets_parameters(Motor_Handler_t *ptrMotorHandler[2], Parameters_Position_t *ptrParameter_position, state_t operation_mode);
+void get_measuremets_parameters(Motor_Handler_t *ptrMotorHandler[2], Parameters_Position_t *ptrParameter_position, state_dir_t operation_mode_dir);
 void change_dir_straigh_Roll(Motor_Handler_t *ptrMotorhandler[2], state_dir_t operation_mode_dir);
 void set_direction_straigh_roll (Motor_Handler_t *ptrMotorhandler[2], state_dir_t operation_mode_dir);
 void stop (Motor_Handler_t *ptrMotorhandler[2]);
 void int_Config_Motor(Motor_Handler_t *ptrMotorhandler[2],
 					  Parameters_Position_t *ptrPosHandler,
 					  Parameters_Path_t *ptrPathHandler ,
-					  PID_Parameters_t *ptrPIDHandler);
+					  PID_Parameters_t *ptrPIDHandler,
+					  state_dir_t operation_mode_dir);
 void PID_calc(PID_Parameters_t *ptrPIDHandler, float time_of_sampling, float setpoint, float current_measure);
 void fillComand(void);
 void PID_control(Motor_Handler_t *ptrMotorhandler[2],
@@ -151,7 +153,6 @@ void go(Motor_Handler_t *ptrMotorhandler[2],
 		Parameters_Path_t *ptrPathHandler,
 		PID_Parameters_t *ptrPIDHandler,
 		double calib ,
-		state_t mode,
 		uint8_t *fAnglulo,
 		uint8_t *fMeasurements,
 		uint8_t *fcontrol,
@@ -164,7 +165,6 @@ int goTo(Motor_Handler_t *ptrMotorhandler[2],
 		 Parameters_Path_t *ptrPathHandler,
 		 PID_Parameters_t *ptrPIDHandler,
 		 double calib ,
-		 state_t mode,
 		 uint8_t *fAnglulo,
 		 uint8_t *fMeasurements,
 		 uint8_t *fcontrol,
@@ -172,12 +172,11 @@ int goTo(Motor_Handler_t *ptrMotorhandler[2],
 		 uint32_t distance_mm ,
 		 state_dir_t operation_mode_dir);
 
-void roll(Motor_Handler_t *ptrMotorhandler[2],
+void NOP(Motor_Handler_t *ptrMotorhandler[2],
 		MPUAccel_Config *ptrMPUhandler,
 		Parameters_Position_t *ptrPosHandler ,
 		Parameters_Path_t *ptrPathHandler,
 		double calib ,
-		state_t mode,
 		uint8_t *fAnglulo,
 		uint8_t *fMeasurements,
 		uint8_t *fcontrol,
@@ -229,6 +228,9 @@ uint8_t flag_Roll         = 0;
 uint8_t flag_RollTo       = 0;
 uint8_t Done              = 0;
 uint8_t flag_Astar        = 0;
+uint8_t Do_the_track      = 0;
+uint8_t flag_square       = 0;
+uint8_t flag_NOP          = 0;
 
 // TIEMPOS DE SAMPLEO Y CONTEO PARA DEFINICION DE PARAMETROS
 uint8_t timeAction_TIMER_Sampling = 13;            // Cantidad de cuentas para
@@ -242,6 +244,8 @@ PID_Parameters_t parameter_PID_distace = {0};        //estructura para los param
 /// Variables para Odometria
 Parameters_Path_t parameters_Path_Robot    = {0};           //Estructura que almacena los parametros del camino a recorrer
 Parameters_Position_t parameters_Pos_Robot = {0}; 	//Estructura que almacena la posicion del robot
+Parameter_build_t parameters_buit_Robot = {0};
+Parameters_Operation_t parameters_op_Robot = {0};
 
 double cal_Gyro = 0;   // variable que almacena la calibración del giroscopio
 float ang_d = 0;
@@ -272,7 +276,7 @@ int main(void)
 	velSetPoint = (0.00169*fixed_dutty + 0.0619);
 
 	// calibramos el Giroscopio para que tengamos una medida de error controlable
-//	cal_Gyro = calibracionGyros(&handler_MPUAccel_6050, CALIB_Z); // Calibramos el giroscopio que usaremos
+	cal_Gyro = calibracionGyros(&handler_MPUAccel_6050, CALIB_Z); // Calibramos el giroscopio que usaremos
 
 	double angleToGo_Relative = 0;
 	double angle_start = 0;
@@ -282,6 +286,22 @@ int main(void)
 
 		if (!flag_Astar){
 			fillComand(); // Se puede leer cualquier comando excepto cuando se esta lleyendo el grid de Astar
+		}
+
+		if (flag_NOP){
+
+			 NOP(handler_Motor_Array,
+				 &handler_MPUAccel_6050,
+				 &parameters_Pos_Robot,
+				 &parameters_Path_Robot,
+				 cal_Gyro,
+				 &flag_angulo,
+				 &flag_measurements,
+				 &flag_control,
+				 data,
+				 Mode_dir);
+
+			 flag_NOP = RESET;
 		}
 
 		// En esta parte ya usamos las medidas halladas para mover el robot en linea recta dependiendo de la operacion y el comando deseado
@@ -295,7 +315,6 @@ int main(void)
 			   &parameters_Path_Robot,
 			   &parameter_PID_distace,
 			   cal_Gyro,
-			   Mode,
 			   &flag_angulo,
 			   &flag_measurements,
 			   &flag_control,
@@ -312,7 +331,6 @@ int main(void)
 					    &parameters_Path_Robot,
 					    &parameter_PID_distace,
 					    cal_Gyro,
-					    Mode,
 					    &flag_angulo,
 					    &flag_measurements,
 					    &flag_control,
@@ -329,12 +347,11 @@ int main(void)
 			// Si llegamos a este comando lo que se quiere es girar indefinidamente en cierta direccion (CW o CCW)
 
 			// Cambiamos los parametros
-			roll(handler_Motor_Array,
+			NOP(handler_Motor_Array,
 				&handler_MPUAccel_6050,
 				&parameters_Pos_Robot,
 				&parameters_Path_Robot,
 				cal_Gyro,
-				Mode,
 				&flag_angulo,
 				&flag_measurements,
 				&flag_control,
@@ -356,13 +373,12 @@ int main(void)
 				// tomamos el angulo global y se lo restamos con el angulo con el que se empezo a rotar
 
 				// Cambiamos los parametros
-				roll(handler_Motor_Array,
+				NOP(handler_Motor_Array,
 				    &handler_MPUAccel_6050,
 				    &parameters_Pos_Robot,
 				    &parameters_Path_Robot,
 				    cal_Gyro,
-				    Mode,
-				    &flag_angulo,
+				 	&flag_angulo,
 				    &flag_measurements,
 				    &flag_control,
 					data,
@@ -427,14 +443,37 @@ int main(void)
 				writeMsg(&handlerUSART, "\n------String Vaciado-----\n \r");
 
 				flagAstar = RESET;
-
 				doneTransaction = RESET;
-			}
+				Do_the_track = SET;
 
+				parameters_op_Robot.op_Mode = 1; // SETEAMOS EN 1 PARA OPERACIONES DE ASTAR
+			}
 		}
 
 
-	}
+		if (Do_the_track){
+
+			// Si estamos aqui es porque queremos que nuestro robot haga unas operaciones contiguas
+			switch (parameters_op_Robot.op_Mode) {
+				case 0:{
+
+
+					break;
+				}case 1:{
+					// PAra este caso queremos un Astar,por lo que seteamos las operaciones necesarias despues de haber
+					// hallado los puntos a recorrer
+
+
+					break;
+				}
+				default:{break;}
+			}// Fin del switch case
+
+
+
+		}
+
+	}// End of the loop
 }
 
 
@@ -476,7 +515,7 @@ void inSystem (void){
 
 
 	//////////////////////////// INICIALIZAMOS EL ROBOT//////////////////////
-	int_Config_Motor(handler_Motor_Array, &parameters_Pos_Robot, &parameters_Path_Robot, &parameter_PID_distace);
+	int_Config_Motor(handler_Motor_Array, &parameters_Pos_Robot, &parameters_Path_Robot, &parameter_PID_distace, Mode_dir);
 
 
 	//////////////////////////////////////////////////// Velocidad de motores //////////////////////////////////////////////
@@ -654,6 +693,7 @@ void inSystem (void){
 	handlerTIM2_PARAMETROS_MOVIMIENTO.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_10us;
 	handlerTIM2_PARAMETROS_MOVIMIENTO.TIMx_Config.TIMx_period           = fixed_sample_period;
 	BasicTimer_Config(&handlerTIM2_PARAMETROS_MOVIMIENTO);
+	startTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Comenzamos el muestreo de datos con los que aplicaremos un control adecuado
 
 
 	//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
@@ -694,7 +734,7 @@ void inSystem (void){
 	handler_MPUAccel_6050.ptrI2Chandler   = &handler_I2C1;
 	handler_MPUAccel_6050.fullScaleACCEL  = ACCEL_2G;
 	handler_MPUAccel_6050.fullScaleGYRO   = GYRO_250;
-//	configMPUAccel(&handler_MPUAccel_6050);
+	configMPUAccel(&handler_MPUAccel_6050);
 
 }
 
@@ -713,7 +753,7 @@ void parseCommands(char *stringVector){
 		writeMsg(&handlerUSART, "4)  rollto #dir_roll #angle  \n");
 		writeMsg(&handlerUSART, "5)  change #dir #operation 1--->Line , 0--->Roll \n");
 		writeMsg(&handlerUSART, "6)  square #dir_roll #side_distance  \n");
-		writeMsg(&handlerUSART, "7)  Astar  \n");
+		writeMsg(&handlerUSART, "7)  Astar  #Parallel-distance #Diagonal-distance \n");
 		writeMsg(&handlerUSART, "8)  reinit  \n");
 		writeMsg(&handlerUSART, " \n");
 
@@ -723,7 +763,6 @@ void parseCommands(char *stringVector){
 		Mode_dir.direction_s_r = firstParameter;
 
 		On_motor_Straigh_Roll(handler_Motor_Array,  Mode_dir); // Encendemos los motores para irnos hacia adelante y con una velocidad fija
-		startTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Comenzamos el muestreo de datos con los que aplicaremos un control adecuado
 
 		// Levantamos la bandera correspondiente a este comando
 
@@ -737,7 +776,6 @@ void parseCommands(char *stringVector){
 
 		// Si estamos aqui es porque se quiere ir recorriendo una distancia especifica
 		On_motor_Straigh_Roll(handler_Motor_Array, Mode_dir); // Encendemos los motores para irnos hacia adelante y con una velocidad fija
-		startTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Comenzamos el muestreo de datos con los que aplicaremos un control adecuado
 
 		parameters_Path_Robot.line_Distance = secondParameter; // almacenamos la distancia en milimrtros a recorrer
 
@@ -752,7 +790,6 @@ void parseCommands(char *stringVector){
 
 		// Si estamos aqui es porque se quiere ir recorriendo una distancia especifica
 		On_motor_Straigh_Roll(handler_Motor_Array, Mode_dir); // Encendemos los motores para irnos hacia adelante y con una velocidad fija
-		startTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Comenzamos el muestreo de datos con los que aplicaremos un control adecuado
 
 		flag_Roll = SET;
 
@@ -765,7 +802,6 @@ void parseCommands(char *stringVector){
 
 		// Si estamos aqui es porque se quiere ir recorriendo una distancia especifica
 		On_motor_Straigh_Roll(handler_Motor_Array, Mode_dir); // Encendemos los motores para irnos hacia adelante y con una velocidad fija
-		startTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Comenzamos el muestreo de datos con los que aplicaremos un control adecuado
 
 		// Almacenamos el angulo al que se quiere ir
 		parameters_Path_Robot.angle = secondParameter;
@@ -778,7 +814,7 @@ void parseCommands(char *stringVector){
 	}else if (strcmp(cmd, "reinit") == 0){
 
 		// en este comando reiniciamos las variables del sistema para volver a empezar desde un nuevo punto de referencia
-		int_Config_Motor(handler_Motor_Array, &parameters_Pos_Robot, &parameters_Path_Robot, &parameter_PID_distace);
+		int_Config_Motor(handler_Motor_Array, &parameters_Pos_Robot, &parameters_Path_Robot, &parameter_PID_distace, Mode_dir);
 
 		writeMsg(&handlerUSART, "\n____COMANDO reinit EJECUTADO____\n\r");
 
@@ -795,13 +831,24 @@ void parseCommands(char *stringVector){
 		writeMsg(&handlerUSART, "\n____COMANDO reinit EJECUTADO____\n\r");
 	}else if (strcmp(cmd, "square") == 0){
 
-
+		flag_square = SET; // Levantamos la bandera para Square
 
 	}else if (strcmp(cmd, "Astar") == 0){
 
 
+		//////////////////////////////////////////////  ASTAR - Algoritm setup//////////////////////////////////////////////////////////
 
+		// Solo necesitamos definir las distancias paralela y diagonal de la malla
+		handlerAstarParameters.parallelDistance  = firstParameter;
+		handlerAstarParameters.diagonalDiastance = secondParameter;
+		writeMsg(&handlerUSART, msg_InsertGrid);
 
+		writeMsg(&handlerUSART, "\n_____________Insert * for  empty space______________\n");
+		writeMsg(&handlerUSART, "\n_____________Insert e for  the end space____________\n");
+		writeMsg(&handlerUSART, "\n_____________Insert s for  the start space__________\n");
+		writeMsg(&handlerUSART, "\n_____________Insert # for  obstacules_______________\n");
+		initSerialComunication(&handlerUSART, &handlerPinRx, &handlerPinTx);
+		flagAstar = SET;
 
 	}
 
@@ -811,18 +858,22 @@ void parseCommands(char *stringVector){
 	else if (strcmp(cmd, "stop") == 0){
 		 // Este comando lo que busca es apagar el robot y detenerlo de su estado de movimiento
 		stop(handler_Motor_Array); // Apagamos los motores
-		stopTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Detenemos los muestreos
 
 		// Bajamos las banderas de movimiento alguno
 		flag_Go_Straigh   = RESET;
 		flag_GoTo_Straigh = RESET;
 		flag_Roll         = RESET;
 		flag_RollTo       = RESET;
+		Mode_dir.Mode     = sNone;
+
+
+	}else if (strcmp(cmd, "stoptimer") == 0){
+		stopTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Paramos de medir
 	}
 
 
 	else {
-		writeMsg(&handlerUSART, "Comando Incorrecto :c \n");
+		writeMsg(&handlerUSART, "\r\n _____________Comando Incorrecto :c_____________ \n");
 	}
 
 
@@ -855,6 +906,10 @@ void BasicTimer2_Callback(void){
 			flag_measurements = SET;
 	}else{ counting_action++; }
 
+	if (Mode_dir.Mode == sNone){
+		flag_NOP = SET;
+	}
+
 	// EN LA FUNCION 'GO' ESTAN LAS DOS BANDERAS SE ANALIZARAN Y SE EJECUTARAN
 }
 
@@ -862,12 +917,16 @@ void BasicTimer2_Callback(void){
 //Interrupciones de Exti
 void callback_extInt1(void){
 	// Aumentamos las cuentas
-	handler_Motor_Array[0]->parametersMotor.counts++;
+	if (Mode_dir.Mode != sNone){
+		handler_Motor_Array[0]->parametersMotor.counts++;
+	}
 }
 
 void callback_extInt3(void){
 	// Aumentamos las cuentas
-	handler_Motor_Array[1]->parametersMotor.counts++;
+	if (Mode_dir.Mode != sNone){
+		handler_Motor_Array[1]->parametersMotor.counts++;
+	}
 }
 
 
@@ -941,10 +1000,10 @@ void getAngle(MPUAccel_Config *ptrMPUAccel,float angle_init, double calibr, Para
 		time_accumulated += handlerTIM2_PARAMETROS_MOVIMIENTO.TIMx_Config.TIMx_period;
 }
 
-void get_measuremets_parameters(Motor_Handler_t *ptrMotorHandler[2], Parameters_Position_t *ptrParameter_position, state_t operation_mode){
+void get_measuremets_parameters(Motor_Handler_t *ptrMotorHandler[2], Parameters_Position_t *ptrParameter_position, state_dir_t operation_mode_dir){
 
 	//Verificamos el modo
-	if(operation_mode == sLine){ // Levantamos la vandera que calcula todos los parametros necesarios para el control
+	if(operation_mode_dir.Mode == sLine){ // Levantamos la vandera que calcula todos los parametros necesarios para el control
 
 			//Guardamos el tiempo entre acciones especificas
 			time_accion = time_accumulated;
@@ -963,7 +1022,7 @@ void get_measuremets_parameters(Motor_Handler_t *ptrMotorHandler[2], Parameters_
 														cos(ptrParameter_position->rad_relativo));
 
 			//Calculamos la velocidad
-			if (Mode_dir.direction_s_r == SET){
+			if (operation_mode_dir.direction_s_r == SET){
 
 				// SI estamos aqui se tiene una direccion deseada hacia adelante
 				// almacenamos las variables de velocidad y dirección en función de hacia donde se este llendo
@@ -998,7 +1057,7 @@ void get_measuremets_parameters(Motor_Handler_t *ptrMotorHandler[2], Parameters_
 			counting_action = 0;
 
 	}
-	else if(Mode == sRoll)
+	else if(operation_mode_dir.Mode == sRoll)
 	{
 			//Guardamos el tiempo entre acciones especificas
 			time_accion = time_accumulated;
@@ -1018,7 +1077,7 @@ void get_measuremets_parameters(Motor_Handler_t *ptrMotorHandler[2], Parameters_
 
 			//Calculo de la distancia recorrida por cada rueda
 
-			if (Mode_dir.direction_s_r == SET){
+			if (operation_mode_dir.direction_s_r == SET){
 
 				// SI estamos aqui se tiene un una direccion de giro CW
 				// almacenamos las variables de velocidad y dirección en función de hacia donde se este girando
@@ -1058,7 +1117,43 @@ void get_measuremets_parameters(Motor_Handler_t *ptrMotorHandler[2], Parameters_
 		//Combinar ambos ángulos
 //		ang_complementary = ptrParameter_position->grad_relativo + ang_for_Displament;
 	}
-	else{  __NOP(); }
+
+	else{ // SI estamos aqui es porque no estamos en ningun modo
+
+		//Guardamos el tiempo entre acciones especificas
+		time_accion = time_accumulated;
+		//Calculamos el angulo promedio y la establecemos como el angulo relativo
+		promAng = sum_ang / counting_action;
+		ptrParameter_position->rad_relativo = (promAng * M_PI) / 180; //[rad]
+
+		ptrParameter_position->grad_global += atan2(sin((sum_ang * M_PI) / 180),
+													cos((sum_ang * M_PI) / 180)) * (180 / M_PI); //[°] angulo acumulado global en grados
+
+		ptrParameter_position->rad_global = atan2(sin((ptrParameter_position->grad_global * M_PI) / 180),
+												  cos((ptrParameter_position->grad_global * M_PI) / 180)); //[rad]
+
+		// Con la siguiente accion conseguimos que el angulo que deseamos solo este dentro del rango [-pi,pi]
+		ptrParameter_position->rad_relativo = atan2(sin(ptrParameter_position->rad_relativo),
+													cos(ptrParameter_position->rad_relativo));
+
+
+		//Reiniciamos el numero de conteos
+		ptrMotorHandler[0]->parametersMotor.counts = 0;
+		ptrMotorHandler[1]->parametersMotor.counts = 0; // RESETEAMOS LAS CUENTAS
+
+//			//Cálculo ángulo debido al desplazamiento del ICR
+//			ang_for_Displament += (((ptrMotorHandler[1]->parametersMotor.dis - ptrMotorHandler[0]->parametersMotor.dis) * 100)
+//					               / distanceBetweenWheels)*(180/M_PI); //[°]
+//
+		//Reiniciamos variable
+		sum_ang = 0;
+		//Reiniciamos tiempo
+		time_accumulated = 0;
+
+		//Reiniciamos el contador de acción
+		counting_action  = 0;
+
+	}
 
 }
 
@@ -1249,7 +1344,8 @@ void stop (Motor_Handler_t *ptrMotorhandler[2]){
 void int_Config_Motor(Motor_Handler_t *ptrMotorhandler[2],
 		              Parameters_Position_t *ptrPosHandler,
 					  Parameters_Path_t *ptrPathHandler ,
-					  PID_Parameters_t *ptrPIDHandler){
+					  PID_Parameters_t *ptrPIDHandler,
+					  state_dir_t operation_mode_dir){
 
 	//---------------Motor Izquierdo----------------
 	ptrMotorhandler[0] = &handlerMotor1_t;
@@ -1259,7 +1355,7 @@ void int_Config_Motor(Motor_Handler_t *ptrMotorhandler[2],
 	//handler de los perifericos
 	ptrMotorhandler[0]->phandlerGPIOEN = &handlerEn1PinC10;
 	ptrMotorhandler[0]->phandlerGPIOIN = &handlerIn1PinC12;
-	ptrMotorhandler[0]->phandlerPWM = &handlerPWM_1;
+	ptrMotorhandler[0]->phandlerPWM    = &handlerPWM_1;
 	//definicion de parametros
 	ptrMotorhandler[0]->parametersMotor.pid->e0 = 0;
 	ptrMotorhandler[0]->parametersMotor.pid->e_prev = 0;
@@ -1315,6 +1411,9 @@ void int_Config_Motor(Motor_Handler_t *ptrMotorhandler[2],
 	ptrPathHandler->line_Distance = 0;
 	ptrPathHandler->start_position_x = ptrPathHandler->start_position_y = 0;
 
+
+	// Seteamos la direccion el modo de operacion en None
+	operation_mode_dir.Mode = sNone;
 }
 
 
@@ -1324,7 +1423,6 @@ int goTo(Motor_Handler_t *ptrMotorhandler[2],
 		 Parameters_Path_t *ptrPathHandler,
 		 PID_Parameters_t *ptrPIDHandler,
 		 double calib ,
-		 state_t mode,
 		 uint8_t *fAnglulo,
 		 uint8_t *fMeasurements,
 		 uint8_t *fcontrol,
@@ -1364,7 +1462,6 @@ int goTo(Motor_Handler_t *ptrMotorhandler[2],
 		   ptrPathHandler,
 		   ptrPIDHandler,
 		   calib,
-		   mode,
 		   fAnglulo,
 		   fMeasurements,
 		   fcontrol,
@@ -1458,7 +1555,6 @@ void go(Motor_Handler_t *ptrMotorhandler[2],
 		Parameters_Path_t *ptrPathHandler,
 		PID_Parameters_t *ptrPIDHandler,
 		double calib ,
-		state_t mode,
 		uint8_t *fAnglulo,
 		uint8_t *fMeasurements,
 		uint8_t *fcontrol,
@@ -1480,7 +1576,7 @@ void go(Motor_Handler_t *ptrMotorhandler[2],
 	if (*fMeasurements){ // Este se ejecutara cada (periodo * 13 cuentas)
 
 		// Medimos el angulo actual
-		get_measuremets_parameters(ptrMotorhandler, ptrPosHandler, mode);
+		get_measuremets_parameters(ptrMotorhandler, ptrPosHandler,operation_mode_dir );
 		// bajamos la bandera
 		*fMeasurements = RESET;
 		//Levandamos la bandera de control
@@ -1512,12 +1608,11 @@ void go(Motor_Handler_t *ptrMotorhandler[2],
 }
 
 
-void roll(Motor_Handler_t *ptrMotorhandler[2],
+void NOP(Motor_Handler_t *ptrMotorhandler[2],
 		MPUAccel_Config *ptrMPUhandler,
 		Parameters_Position_t *ptrPosHandler ,
 		Parameters_Path_t *ptrPathHandler,
 		double calib ,
-		state_t mode,
 		uint8_t *fAnglulo,
 		uint8_t *fMeasurements,
 		uint8_t *fcontrol,
@@ -1539,7 +1634,7 @@ void roll(Motor_Handler_t *ptrMotorhandler[2],
 	if (*fMeasurements){ // Este se ejecutara cada (periodo * 13 cuentas)
 
 		// Medimos el angulo actual
-		get_measuremets_parameters(ptrMotorhandler, ptrPosHandler, mode);
+		get_measuremets_parameters(ptrMotorhandler, ptrPosHandler, operation_mode_dir);
 		// bajamos la bandera
 		*fMeasurements = RESET;
 	}

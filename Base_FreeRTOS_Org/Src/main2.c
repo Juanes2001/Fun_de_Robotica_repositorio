@@ -76,6 +76,7 @@ void vTask_Stop( void * pvParameters );
 void vTask_Go( void * pvParameters );
 void vTask_Control( void * pvParameters );
 void vTask_GoTo( void * pvParameters );
+void vTask_NOP( void * pvParameters );
 
 //Cabecera de la funcion Timer de FreeRTOS
 void led_state_callback (TimerHandle_t xTimer);
@@ -88,6 +89,7 @@ TaskHandle_t xHandleTask_Stop     = NULL; // Handler de la tarea de Stop
 TaskHandle_t xHandleTask_Go       = NULL; // Handler de la tarea de Go
 TaskHandle_t xHandleTask_Control  = NULL; // Handler de la tarea de PID
 TaskHandle_t xHandleTask_GoTo     = NULL; // Handler de la tarea de Ir a
+TaskHandle_t xHandleTask_NOP      = NULL; // Handler de la tarea de NO OPERATION
 
 //Colas
 QueueHandle_t xQueue_Print;
@@ -183,7 +185,8 @@ Motor_Handler_t handlerMotor2_t;
 // Estructura de estados
 typedef enum{
 	Line = 0,
-	Roll
+	Roll,
+	None
 }Op_Mode_t;
 
 typedef struct{
@@ -205,7 +208,8 @@ void stop (Motor_Handler_t *ptrMotorhandler[2]);
 void int_Config_Motor(Motor_Handler_t *ptrMotorhandler[2],
 					  Parameters_Position_t *ptrPosHandler,
 					  Parameters_Path_t *ptrPathHandler ,
-					  PID_Parameters_t *ptrPIDHandler);
+					  PID_Parameters_t *ptrPIDHandler,
+					  state_dir_t operation_mode_dir);
 void PID_calc(PID_Parameters_t *ptrPIDHandler, float time_of_sampling, float setpoint, float current_measure);
 void fillComand(void);
 void PID_control(Motor_Handler_t *ptrMotorhandler[2],
@@ -238,7 +242,7 @@ int goTo(Motor_Handler_t *ptrMotorhandler[2],
 		 uint32_t distance_mm ,
 		 state_dir_t operation_mode_dir);
 
-void roll(Motor_Handler_t *ptrMotorhandler[2],
+void NOP(Motor_Handler_t *ptrMotorhandler[2],
 		MPUAccel_Config *ptrMPUhandler,
 		Parameters_Position_t *ptrPosHandler ,
 		Parameters_Path_t *ptrPathHandler,
@@ -404,6 +408,12 @@ int main(void)
 
 	 configASSERT( xReturned == pdPASS );// Nos aseguramos de que se creo la tarea de una forma correcta
 
+	 /////////////////////////////////TAREA DE NO OPERACION//////////////////////////////////////
+
+	xReturned = xTaskCreate(vTask_NOP,"Task-NOP",STACK_SIZE,NULL,3,&xHandleTask_NOP );
+
+	 configASSERT( xReturned == pdPASS );// Nos aseguramos de que se creo la tarea de una forma correcta
+
 
 
 	 //Creacion de colas
@@ -472,7 +482,7 @@ void inSystem (void){
 
 
 	//////////////////////////// INICIALIZAMOS EL ROBOT//////////////////////
-	int_Config_Motor(handler_Motor_Array, &parameters_Pos_Robot, &parameters_Path_Robot, &parameter_PID_distace);
+	int_Config_Motor(handler_Motor_Array, &parameters_Pos_Robot, &parameters_Path_Robot, &parameter_PID_distace, Mode_dir);
 
 
 	//////////////////////////////////////////////////// Velocidad de motores //////////////////////////////////////////////
@@ -653,6 +663,7 @@ void inSystem (void){
 	handlerTIM2_PARAMETROS_MOVIMIENTO.TIMx_Config.TIMx_period           = fixed_sample_period;
 	BasicTimer_Config(&handlerTIM2_PARAMETROS_MOVIMIENTO);
 	TIM_SetPriority(&handlerTIM2_PARAMETROS_MOVIMIENTO, e_TIM_PRIORITY_6);
+	startTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Comenzamos el muestreo de datos con los que aplicaremos un control adecuado
 
 
 	//////////////////////////////////////////////////// /////////////////// //////////////////////////////////////////////
@@ -832,13 +843,13 @@ void vTask_Stop( void * pvParameters ){
 
 		 // Este comando lo que busca es apagar el robot y detenerlo de su estado de movimiento
 		stop(handler_Motor_Array); // Apagamos los motores
-		stopTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Detenemos los muestreos
 
 		// Bajamos las banderas de movimiento alguno
 		flag_Go_Straigh   = RESET;
 		flag_GoTo_Straigh = RESET;
 		flag_Roll         = RESET;
 		flag_RollTo       = RESET;
+		Mode_dir.Mode     = None;
 
 		 if (end){
 			 xTaskNotify(xHandleTask_Menu,0, eNoAction);
@@ -873,7 +884,6 @@ void vTask_Go( void * pvParameters ){
 		resetParameters();
 
 		On_motor_Straigh_Roll(handler_Motor_Array,  Mode_dir); // Encendemos los motores para irnos hacia adelante y con una velocidad fija
-		startTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Comenzamos el muestreo de datos con los que aplicaremos un control adecuado
 
 	}
 
@@ -981,8 +991,6 @@ void vTask_GoTo( void * pvParameters ){
 		// definimos los parametros del camino en funcion de la situacion actual
 		calculation_parameter_distance(&parameters_Path_Robot);
 
-		startTimer(&handlerTIM2_PARAMETROS_MOVIMIENTO); // Comenzamos el muestreo de datos con los que aplicaremos un control adecuado
-
 	}
 
 }
@@ -1007,6 +1015,28 @@ void vTask_Print( void * pvParameters ){
 	   //usart write command
 	   writeMsg(&handlerUSART, (char*) msg);
    }
+}
+
+
+void vTask_NOP( void * pvParameters ){
+
+	// esta tarea se ejecuta cada vez que haya una interrupcion del timer, es solo para calcular los datos necesarios cuando no hay operacion
+
+	 while(1){
+		 xTaskNotifyWait(0,0,NULL,portMAX_DELAY); // Esoerar hasta que la notificacion salte
+
+		 NOP(handler_Motor_Array,
+			&handler_MPUAccel_6050,
+			&parameters_Pos_Robot,
+			&parameters_Path_Robot,
+			cal_Gyro,
+			&flag_angulo,
+			&flag_measurements,
+			&flag_control,
+			data,
+			Mode_dir);
+	}
+
 }
 
 void process_command (command_t *cmd){
@@ -1084,17 +1114,20 @@ int extract_command (command_t *cmd){
 
 }
 
-// INTERRUPCIONES DE EXTI
+//Interrupciones de Exti
 void callback_extInt1(void){
 	// Aumentamos las cuentas
-	handler_Motor_Array[0]->parametersMotor.counts++;
+	if (Mode_dir.Mode != None){
+		handler_Motor_Array[0]->parametersMotor.counts++;
+	}
 }
 
 void callback_extInt3(void){
 	// Aumentamos las cuentas
-	handler_Motor_Array[1]->parametersMotor.counts++;
+	if (Mode_dir.Mode != None){
+		handler_Motor_Array[1]->parametersMotor.counts++;
+	}
 }
-
 
 
 
@@ -1163,10 +1196,17 @@ void BasicTimer2_Callback(void){
 			flag_measurements = SET;
 	}else{ counting_action++; }
 
-	xTaskNotifyFromISR(xHandleTask_Control,
-					   0,
-					   eNoAction,
-					   NULL);
+
+	if (Mode_dir.Mode != None){
+		// Solo cuando estemos en alguna operacion diferente a None, se despierta la tarea de control
+		xTaskNotifyFromISR(xHandleTask_Control,
+						   0,
+						   eNoAction,
+						   NULL);
+	}else{
+		// SI estamos aqui es porque estamos en estado de NO operation
+		xTaskNotify(xHandleTask_NOP,0, eNoAction);
+	}
 
 	// EN LA FUNCION 'GO' ESTAN LAS DOS BANDERAS SE ANALIZARAN Y SE EJECUTARAN
 }
@@ -1359,7 +1399,40 @@ void get_measuremets_parameters(Motor_Handler_t *ptrMotorHandler[2], Parameters_
 		//Combinar ambos ángulos
 //		ang_complementary = ptrParameter_position->grad_relativo + ang_for_Displament;
 	}
-	else{  __NOP(); }
+	else{  // SI estamos aqui es porque no estamos en ningun modo
+
+		//Guardamos el tiempo entre acciones especificas
+		time_accion = time_accumulated;
+		//Calculamos el angulo promedio y la establecemos como el angulo relativo
+		promAng = sum_ang / counting_action;
+		ptrParameter_position->rad_relativo = (promAng * M_PI) / 180; //[rad]
+
+		ptrParameter_position->grad_global += atan2(sin((sum_ang * M_PI) / 180),
+													cos((sum_ang * M_PI) / 180)) * (180 / M_PI); //[°] angulo acumulado global en grados
+
+		ptrParameter_position->rad_global = atan2(sin((ptrParameter_position->grad_global * M_PI) / 180),
+												  cos((ptrParameter_position->grad_global * M_PI) / 180)); //[rad]
+
+		// Con la siguiente accion conseguimos que el angulo que deseamos solo este dentro del rango [-pi,pi]
+		ptrParameter_position->rad_relativo = atan2(sin(ptrParameter_position->rad_relativo),
+													cos(ptrParameter_position->rad_relativo));
+
+
+		//Reiniciamos el numero de conteos
+		ptrMotorHandler[0]->parametersMotor.counts = 0;
+		ptrMotorHandler[1]->parametersMotor.counts = 0; // RESETEAMOS LAS CUENTAS
+
+//			//Cálculo ángulo debido al desplazamiento del ICR
+//			ang_for_Displament += (((ptrMotorHandler[1]->parametersMotor.dis - ptrMotorHandler[0]->parametersMotor.dis) * 100)
+//					               / distanceBetweenWheels)*(180/M_PI); //[°]
+//
+		//Reiniciamos variable
+		sum_ang = 0;
+		//Reiniciamos tiempo
+		time_accumulated = 0;
+
+		//Reiniciamos el contador de acción
+		counting_action  = 0;}
 
 }
 
@@ -1550,7 +1623,8 @@ void stop (Motor_Handler_t *ptrMotorhandler[2]){
 void int_Config_Motor(Motor_Handler_t *ptrMotorhandler[2],
 		              Parameters_Position_t *ptrPosHandler,
 					  Parameters_Path_t *ptrPathHandler ,
-					  PID_Parameters_t *ptrPIDHandler){
+					  PID_Parameters_t *ptrPIDHandler,
+					  state_dir_t operation_mode_dir){
 
 	//---------------Motor Izquierdo----------------
 	ptrMotorhandler[0] = &handlerMotor1_t;
@@ -1616,6 +1690,9 @@ void int_Config_Motor(Motor_Handler_t *ptrMotorhandler[2],
 	ptrPathHandler->line_Distance = 0;
 	ptrPathHandler->start_position_x = ptrPathHandler->start_position_y = 0;
 
+
+	// Seteamos la direccion el modo de operacion en None
+	operation_mode_dir.Mode = None;
 }
 
 
@@ -1810,7 +1887,7 @@ void go(Motor_Handler_t *ptrMotorhandler[2],
 }
 
 
-void roll(Motor_Handler_t *ptrMotorhandler[2],
+void NOP(Motor_Handler_t *ptrMotorhandler[2],
 		MPUAccel_Config *ptrMPUhandler,
 		Parameters_Position_t *ptrPosHandler ,
 		Parameters_Path_t *ptrPathHandler,

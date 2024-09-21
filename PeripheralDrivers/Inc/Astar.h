@@ -12,6 +12,7 @@
 #include "stm32f4xx.h"
 #include "USARTxDriver.h"
 #include "GPIOxDriver.h"
+#include "PosRobt.h"
 
 
 // Estructura donde se colocan las distancias paralela y diagonal entre baldosas
@@ -105,6 +106,13 @@ void freeShorterWay(AStar_distancesHandler *parameters, int **shorterWayArray);
 // Con las siguientes funciones inicializamos a los handler necesarios para poder usar la comunicacion serial desde aqui y no desde el main
 void initSerialComunication (USART_Handler_t *ptrHandlerUsart, GPIO_Handler_t *ptrHandlerRx, GPIO_Handler_t *ptrHandlerTx);
 
+
+///////////////////////////////////////////Funciones para realizar las operaciones///////////////////////////////////////
+void Create_operations(AStar_distancesHandler *parameters,
+		          int **shorterWayArray,
+				  Parameters_Operation_t *prtList,
+				  Parameter_build_t *prtbuild,
+				  Parameters_Path_t *ptrPath);
 
 
 

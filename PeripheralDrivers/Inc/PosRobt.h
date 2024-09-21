@@ -31,6 +31,7 @@ typedef struct
 	double x_destination;       //coordenadas destino           [mm]
 	double y_destination;
 	double grad_Rotative;       //Grados de rotación     [°]
+	uint8_t op_Mode;             // Tipo de operacion 0--> Square 1-->Astar
 }Parameters_Operation_t;
 
 
