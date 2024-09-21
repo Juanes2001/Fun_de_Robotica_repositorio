@@ -137,12 +137,14 @@ int main(void)
 
 			if (rxData != '\0'){
 
-				if (rxData != '\r'){
-					stringMatrix[stringRow][stringColumn] = rxData;
-					stringColumn++;
-				}else{
-					stringRow++;
-					stringColumn = 0;
+				if (rxData != '\n'){
+					if (rxData != '\r'){
+						stringMatrix[stringRow][stringColumn] = rxData;
+						stringColumn++;
+					}else{
+						stringRow++;
+						stringColumn = 0;
+					}
 				}
 
 				if (rxData == '@'){
@@ -281,6 +283,11 @@ void parseCommands(char *stringVector){
 		handlerAstarParameters.parallelDistance  = firstParameter;
 		handlerAstarParameters.diagonalDiastance = secondParameter;
 		writeMsg(&handlerUSART, msg_InsertGrid);
+
+		writeMsg(&handlerUSART, "\n_____________Insert * for  empty space______________\n");
+		writeMsg(&handlerUSART, "\n_____________Insert e for  the end space____________\n");
+		writeMsg(&handlerUSART, "\n_____________Insert s for  the start space__________\n");
+		writeMsg(&handlerUSART, "\n_____________Insert # for  obstacule________________\n");
 		initSerialComunication(&handlerUSART, &handlerPinRx, &handlerPinTx);
 		flagAstar = SET;
 

@@ -27,8 +27,12 @@ int shorterWay[100][2]     = {0};
 
 
 
-int findShorterWay(char terminalGrid[52][52],char Gridcopy[52][52], float matrixCosts[52][52][6] ,
-		AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, int shorterWay[100][2]){
+int findShorterWay(char terminalGrid[52][52],
+				   char Gridcopy[52][52],
+				   float matrixCosts[52][52][6],
+				   AStar_distancesHandler *parameters,
+				   costChangesAndPos_t *ptrChanges,
+				   int shorterWay[100][2]){
 
 	writeMsg(&handlerAstarUsart, "\n______________Comencemos el viaje_____________\n");
 
@@ -414,7 +418,7 @@ int findShorterWay(char terminalGrid[52][52],char Gridcopy[52][52], float matrix
 	j = ptrChanges->endPos[1];
 
     // Recorremos la matriz e iremos almacenando dentro de este comenzando desde la posicion final y terminando en la posicion inicial
-    for (uint8_t  k = 0 ; k < numberOfPositions + 1 ; k++){
+    for (int  k = numberOfPositions; k >= 0 ; k--){
     	//Cambiamos la matriz redeableGrid, las posiciones que corresponden a la ruta mas corta por un char 'I',
     	if (Gridcopy[i][j] == 'e'){
     		// Si estamos aqui es porque no queremos cambiar el char de finalización
@@ -452,14 +456,14 @@ int findShorterWay(char terminalGrid[52][52],char Gridcopy[52][52], float matrix
     // sabra hacia donde moverse y cuanto moverse
 
     // Si llegamos hasta aca, con exito hemos logrado todo lo cometido, ¡Felicidades!
-    writeMsg(&handlerAstarUsart, "\n_______________Gracias por viajar con nuestra linea Astarlines____________________\n");
+    writeMsg(&handlerAstarUsart, "\n______________________Gracias por viajar con nuestra linea Astarlines____________________\n");
 
     return 1;
 
 
 }
 
-// esta funcion actuazliza en la matriz de costs el parent correspondiente
+// Esta función actuazliza en la matriz de costs y el parent correspondiente
 void updateParent(costChangesAndPos_t *ptrChanges, int posIJ[2], float matrixCosts[52][52][6]){
 
 	setParents(ptrChanges, posIJ);

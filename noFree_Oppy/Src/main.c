@@ -36,6 +36,7 @@
 #include "MotorsDriver.h"
 #include "PosRobt.h"
 #include "DMA.h"
+#include "Astar.h"
 
 
 //Definición Handlers
@@ -104,6 +105,11 @@ MPUAccel_Config handler_MPUAccel_6050 ={0};
 Motor_Handler_t *handler_Motor_Array[2]; // Handler para cada motor, 0--> izquierdo; 1--> derecho
 Motor_Handler_t handlerMotor1_t;
 Motor_Handler_t handlerMotor2_t;
+
+// Astar
+AStar_distancesHandler handlerAstarParameters = {0};
+costChangesAndPos_t handlerCostsAstar         = {0};
+
 
 ////////ESTRUCTURAS
 // Estructura de estados
@@ -196,6 +202,21 @@ unsigned int thirdParameter  = 0;
 char data[64];
 char userMsg[64];
 
+// ASTART PARAMETERS
+// Definición de la matriz de string que almacenará
+char stringMatrix[52][52];
+
+uint8_t stringColumn = 0;
+uint8_t stringRow = 0;
+
+// Banderas Astar
+uint8_t flagAstar   = RESET;
+uint8_t starWorking = RESET;
+
+//Mensajes
+const char* msg_NotWorking = "\n--------Astar isn't working properly----------\n";
+const char* msg_InsertGrid = "\n------------Insert the char grid--------------\n";
+
 //////Banderas y estados-----------
 state_dir_t Mode_dir      = {0};
 state_t Mode              = sLine;
@@ -205,8 +226,9 @@ uint8_t flag_Go_Straigh   = 0;
 uint8_t flag_GoTo_Straigh = 0;
 uint8_t flag_control      = 0;
 uint8_t flag_Roll         = 0;
-uint8_t flag_RollTo         = 0;
-uint8_t Done = 0;
+uint8_t flag_RollTo       = 0;
+uint8_t Done              = 0;
+uint8_t flag_Astar        = 0;
 
 // TIEMPOS DE SAMPLEO Y CONTEO PARA DEFINICION DE PARAMETROS
 uint8_t timeAction_TIMER_Sampling = 13;            // Cantidad de cuentas para
@@ -258,7 +280,9 @@ int main(void)
     /* Loop forever */
 	while(1){
 
-		fillComand();
+		if (!flag_Astar){
+			fillComand(); // Se puede leer cualquier comando excepto cuando se esta lleyendo el grid de Astar
+		}
 
 		// En esta parte ya usamos las medidas halladas para mover el robot en linea recta dependiendo de la operacion y el comando deseado
 		if (flag_Go_Straigh){
@@ -353,6 +377,60 @@ int main(void)
 			if (Done){parseCommands("stop");}
 			angleToGo_Relative = 0; // Reseteamos
 			Done = RESET; // Reseteamos la bandera
+		}
+
+		if (flag_Astar){
+
+			if (rxData != '\0'){
+
+				if (rxData != '\r'){
+					stringMatrix[stringRow][stringColumn] = rxData;
+					stringColumn++;
+				}else{
+					stringRow++;
+					stringColumn = 0;
+				}
+
+				if (rxData == '@'){
+					doneTransaction = SET;
+
+					stringMatrix[stringRow][stringColumn - 1] = '\0';
+
+					stringColumn = 0;
+
+				}else if (rxData == 'z'){
+
+					memset(stringMatrix, 0, sizeof(stringMatrix));
+					stringRow    = 0;
+					stringColumn = 0;
+					writeMsg(&handlerUSART, "\n------String Vaciado-----\n \r");
+					writeMsg(&handlerUSART, msg_InsertGrid);
+				}
+
+				rxData = '\0';
+
+			}
+
+			// Hallamos la ruta mas corta del Grid y con esto ya formamos nuestra matriz de operaciones
+			if (doneTransaction){
+
+				starWorking = findShorterWay(stringMatrix, readableGrid, costs, &handlerAstarParameters, &handlerCostsAstar, shorterWay);
+
+				if (starWorking){
+					// si se llego hasta aca es porque Astar si funciona correctamente
+				}else{
+					writeMsg(&handlerUSART, msg_NotWorking);
+				}
+				memset(stringMatrix, 0, sizeof(stringMatrix));
+				stringRow    = 0;
+				stringColumn = 0;
+				writeMsg(&handlerUSART, "\n------String Vaciado-----\n \r");
+
+				flagAstar = RESET;
+
+				doneTransaction = RESET;
+			}
+
 		}
 
 
@@ -634,7 +712,9 @@ void parseCommands(char *stringVector){
 		writeMsg(&handlerUSART, "3)  roll #dir_roll 1--> CW , 0-->CCW \n");
 		writeMsg(&handlerUSART, "4)  rollto #dir_roll #angle  \n");
 		writeMsg(&handlerUSART, "5)  change #dir #operation 1--->Line , 0--->Roll \n");
-		writeMsg(&handlerUSART, "6)  reinit  \n");
+		writeMsg(&handlerUSART, "6)  square #dir_roll #side_distance  \n");
+		writeMsg(&handlerUSART, "7)  Astar  \n");
+		writeMsg(&handlerUSART, "8)  reinit  \n");
 		writeMsg(&handlerUSART, " \n");
 
 	}else if (strcmp(cmd, "go") == 0){
@@ -713,6 +793,16 @@ void parseCommands(char *stringVector){
 		}
 
 		writeMsg(&handlerUSART, "\n____COMANDO reinit EJECUTADO____\n\r");
+	}else if (strcmp(cmd, "square") == 0){
+
+
+
+	}else if (strcmp(cmd, "Astar") == 0){
+
+
+
+
+
 	}
 
 
