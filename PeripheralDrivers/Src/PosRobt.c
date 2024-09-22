@@ -20,19 +20,21 @@ void build_Operation(Parameters_Operation_t *prtList, Parameter_build_t *prtbuil
 	//Calculo angulo entre vectores directores
 	double grad_turn_res = calculed_ang_turn(prtbuild->delta_before, delta);
 	//condicional de cambio de angulo
-	if(grad_turn_res == 0)
+	if( -5 < grad_turn_res  && grad_turn_res < 5 )
 	{
 		//agregar operacion de linea recta
 		 add_Operation(prtList, prtbuild->number_operation, LINE, finishline_x, finishline_y, 0);
+		 //Agregar operacion de rotacion
+		 prtbuild->number_operation++;
 	}
 	else
 	{
-		//Agregar operacion de rotacion
-		prtbuild->number_operation++;
-		add_Operation(prtList, prtbuild->number_operation, TURN, 0, 0, grad_turn_res);
+		add_Operation(prtList, prtbuild->number_operation, TURN, 0, 0, grad_turn_res); // Agregamos la operacion de girar
 		//agregar operacion de linea recta
 		prtbuild->number_operation++;
-		add_Operation(prtList, prtbuild->number_operation, LINE, finishline_x, finishline_y, 0);
+		add_Operation(prtList, prtbuild->number_operation, LINE, finishline_x, finishline_y, 0); // Agregamos la operacion de ir a
+		//agregar operacion de linea recta
+		prtbuild->number_operation++;
 	}
 	//Se redefine los valores iniciales
 	prtbuild->delta_before[0] = delta[0];
@@ -144,11 +146,11 @@ double calculed_ang_turn(double vector_a[2], double vector_b[2])
     double dot = vector_a[0]*vector_b[1]-vector_b[0]*vector_a[1];
     double magvector_a = sqrt(pow(vector_a[0],2)+pow(vector_a[1],2));
     double magvector_b = sqrt(pow(vector_b[0],2)+pow(vector_b[1],2));
-    double ang_between_vector = acos((vector_a[0]*vector_b[0]+vector_a[1]*vector_b[1])/(magvector_b*magvector_a));
+    double ang_between_vector = acos((vector_a[0]*vector_b[0]+vector_a[1]*vector_b[1]) / (magvector_b * magvector_a));
     //conversion a grados
     ang_between_vector = (ang_between_vector*180) / M_PI;
     //agregamos la direccion de giro
-    if(dot<0){ ang_between_vector = -ang_between_vector;}
+    if(dot<0){ang_between_vector = -ang_between_vector;}
     //Retornar valor
     return ang_between_vector;
 }

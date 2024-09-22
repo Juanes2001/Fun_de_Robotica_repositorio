@@ -108,9 +108,9 @@ void initSerialComunication (USART_Handler_t *ptrHandlerUsart, GPIO_Handler_t *p
 
 
 ///////////////////////////////////////////Funciones para realizar las operaciones///////////////////////////////////////
-void Create_operations(AStar_distancesHandler *parameters,
-		          int **shorterWayArray,
-				  Parameters_Operation_t *prtList,
+void create_operations(AStar_distancesHandler *parameters,
+		          int shorterWayArray[100][2],
+				  Parameters_Operation_t prtList[30],
 				  Parameter_build_t *prtbuild,
 				  Parameters_Path_t *ptrPath);
 

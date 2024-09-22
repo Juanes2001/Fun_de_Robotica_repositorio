@@ -783,9 +783,7 @@ void vTask_Menu( void * pvParameters ){
 					}
 					default:{
 						///////
-						continue;
-
-					}
+						continue;}
 				}
 
 			}else{
@@ -1092,7 +1090,7 @@ int extract_command (command_t *cmd){
 		cmd->payload[counter_j] = '\0'; // Agregamos la terminacion nula para que tengamos un string
 
 		// Del comando entregado extraemos toda la informacion necesaria para poder usarla luego en los estados necesarios
-	//	sscanf((char *) cmd->payload, "%s %u %u %u %s", data ,&firstParameter, &secondParameter, &thirdParameter, userMsg);
+//		sscanf((char *) cmd->payload, "%s %u %u %u %s", data ,&firstParameter, &secondParameter, &thirdParameter, userMsg);
 
 		extract_info(cmd, data, firstParameter, secondParameter, thirdParameter, &fparam, &sparam, &tparam);
 
@@ -1107,11 +1105,7 @@ int extract_command (command_t *cmd){
 		}
 
 	}
-
-
-
 	return 0;
-
 }
 
 //Interrupciones de Exti

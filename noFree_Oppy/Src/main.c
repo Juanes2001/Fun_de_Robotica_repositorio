@@ -139,7 +139,7 @@ void int_Config_Motor(Motor_Handler_t *ptrMotorhandler[2],
 					  Parameters_Position_t *ptrPosHandler,
 					  Parameters_Path_t *ptrPathHandler ,
 					  PID_Parameters_t *ptrPIDHandler,
-					  state_dir_t operation_mode_dir);
+					  state_dir_t *operation_mode_dir);
 void PID_calc(PID_Parameters_t *ptrPIDHandler, float time_of_sampling, float setpoint, float current_measure);
 void fillComand(void);
 void PID_control(Motor_Handler_t *ptrMotorhandler[2],
@@ -191,6 +191,7 @@ void NOP(Motor_Handler_t *ptrMotorhandler[2],
 
 // Variables para los comandos
 char bufferReception[64] = {0};
+char bufferReceptionMultiOperations[64] = {0};
 uint8_t counterReception = 0;
 uint8_t doneTransaction = RESET;
 uint8_t rxData = '\0';
@@ -218,7 +219,7 @@ const char* msg_InsertGrid = "\n------------Insert the char grid--------------\n
 
 //////Banderas y estados-----------
 state_dir_t Mode_dir      = {0};
-state_t Mode              = sLine;
+state_t Mode              = sNone;
 uint8_t flag_angulo       = 0;
 uint8_t flag_measurements = 0;
 uint8_t flag_Go_Straigh   = 0;
@@ -257,6 +258,7 @@ double ang_for_Displament = 0;
 double ang_complementary = 0;
 float velSetPoint = 0;
 int counter;
+uint8_t counter_operation;
 float vel_Setpoint_1;
 float vel_Setpoint_2;
 
@@ -264,8 +266,8 @@ float vel_Setpoint_2;
 #define fixed_dutty 28 // Fixed dutty cycle, velocidad constante
 #define fixed_sample_period 16 // Periodo en milisegundos de muestreo de datos de encoder
 
-int main(void)
-{
+
+int main(void){
 
 	//Activamos el FPU o la unidad de punto flotante
  	SCB -> CPACR |= (0xF << 20);
@@ -463,15 +465,72 @@ int main(void)
 					// PAra este caso queremos un Astar,por lo que seteamos las operaciones necesarias despues de haber
 					// hallado los puntos a recorrer
 
+					create_operations(&handlerAstarParameters,
+									  shorterWay,
+									  parameters_Path_Robot.Operation_List,
+									  &parameters_buit_Robot,
+									  &parameters_Path_Robot);
+
+					counter_operation = 0;
+					parameters_op_Robot.op_Mode = 2;
+
+					parseCommands("reinit"); //reiniciamos todos los parametros
+
+					break;
+
+				}case 2:{
+
+					// Este caso representa la ejecución de las operaciones almacenadas en la lista de operaciones
+
+					if (parameters_Path_Robot.Operation_List[counter_operation].operacion == LINE){
+
+						// Creamos el comando para que haga la tarea respectiva a ir en linea recta
+
+						parameters_Path_Robot.line_Distance =
+								sqrt(pow((parameters_Path_Robot.Operation_List[counter_operation].x_destination - parameters_Pos_Robot.xg_position),2)+
+								     pow((parameters_Path_Robot.Operation_List[counter_operation].y_destination - parameters_Pos_Robot.yg_position),2));
+
+
+						sprintf(bufferReception, "goto %u %.2f" , 1 , parameters_Path_Robot.line_Distance); // Mandamos una direccion hacia adelante
+						// y ademas la distancia a recorrer
+
+						parseCommands(bufferReception); // Mandamos el comando
+
+						counter_operation++;
+
+						// fin de la operacion de linea recta
+
+					}else if (parameters_Path_Robot.Operation_List[counter_operation].operacion == TURN){
+						// Creamos el comando para que haga la tarea para que gire un cierto ángulo
+
+						// metemos el angulo a rotar, ya sea positivo o negativo
+
+						if (parameters_Path_Robot.Operation_List[counter_operation].grad_Rotative < 0 ){
+							sprintf(bufferReception,
+									"rollto %u %.2f" ,
+									0 , // CCW
+									-parameters_Path_Robot.Operation_List[counter_operation].grad_Rotative);
+						}else{
+							sprintf(bufferReception,
+									"rollto %u %.2f" ,
+									1 , // CW
+									parameters_Path_Robot.Operation_List[counter_operation].grad_Rotative);
+						}
+						counter_operation++;
+
+					}else{// Al llegar aca es porque se acabaron las operaciones, la ultima operacion sera una operacion nula, lo que indica
+						// cerrar el comando de Astar
+
+						Do_the_track = RESET; // Bajamos la bandera de Do_the_track para dejar de hacer operaciones
+
+						// Ya en este punto la bandera de Astar esta bajada por loq ue no tenemos que bajarla nuevamente, y ya
+					}
 
 					break;
 				}
 				default:{break;}
-			}// Fin del switch case
-
-
-
-		}
+				}// Fin del switch case
+			}
 
 	}// End of the loop
 }
@@ -491,7 +550,7 @@ void inSystem (void){
 
 	//BLINKY LED
 
-	handlerPinA5.pGPIOx = GPIOA;
+	handlerPinA5.pGPIOx = GPIOC;
 	handlerPinA5.GPIO_PinConfig.GPIO_PinAltFunMode = AF0;
 	handlerPinA5.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
 	handlerPinA5.GPIO_PinConfig.GPIO_PinOPType = GPIO_OTYPE_PUSHPULL;
@@ -515,7 +574,11 @@ void inSystem (void){
 
 
 	//////////////////////////// INICIALIZAMOS EL ROBOT//////////////////////
-	int_Config_Motor(handler_Motor_Array, &parameters_Pos_Robot, &parameters_Path_Robot, &parameter_PID_distace, Mode_dir);
+	int_Config_Motor(handler_Motor_Array,
+					 &parameters_Pos_Robot,
+					 &parameters_Path_Robot,
+					 &parameter_PID_distace,
+					 &Mode_dir);
 
 
 	//////////////////////////////////////////////////// Velocidad de motores //////////////////////////////////////////////
@@ -658,7 +721,7 @@ void inSystem (void){
 	handlerPinTx.GPIO_PinConfig.GPIO_PinAltFunMode  = AF7;
 	handlerPinTx.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
 	handlerPinTx.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
-	handlerPinTx.GPIO_PinConfig.GPIO_PinNumber      = PIN_9;
+	handlerPinTx.GPIO_PinConfig.GPIO_PinNumber      = PIN_2;
 	handlerPinTx.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	handlerPinTx.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
 	GPIO_Config(&handlerPinTx);
@@ -667,13 +730,13 @@ void inSystem (void){
 	handlerPinRx.GPIO_PinConfig.GPIO_PinAltFunMode  = AF7;
 	handlerPinRx.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
 	handlerPinRx.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
-	handlerPinRx.GPIO_PinConfig.GPIO_PinNumber      = PIN_10;
+	handlerPinRx.GPIO_PinConfig.GPIO_PinNumber      = PIN_3;
 	handlerPinRx.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	handlerPinRx.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
 	GPIO_Config(&handlerPinRx);
 
-	handlerUSART.ptrUSARTx                      = USART1;
-	handlerUSART.USART_Config.USART_MCUvelocity = USART_100MHz_VELOCITY;
+	handlerUSART.ptrUSARTx                      = USART2;
+	handlerUSART.USART_Config.USART_MCUvelocity = USART_50MHz_VELOCITY;
 	handlerUSART.USART_Config.USART_baudrate    = USART_BAUDRATE_19200;
 	handlerUSART.USART_Config.USART_enableInRx  = USART_INTERRUPT_RX_ENABLE;
 	handlerUSART.USART_Config.USART_enableInTx  = USART_INTERRUPT_TX_DISABLE;
@@ -814,7 +877,7 @@ void parseCommands(char *stringVector){
 	}else if (strcmp(cmd, "reinit") == 0){
 
 		// en este comando reiniciamos las variables del sistema para volver a empezar desde un nuevo punto de referencia
-		int_Config_Motor(handler_Motor_Array, &parameters_Pos_Robot, &parameters_Path_Robot, &parameter_PID_distace, Mode_dir);
+		int_Config_Motor(handler_Motor_Array, &parameters_Pos_Robot, &parameters_Path_Robot, &parameter_PID_distace, &Mode_dir);
 
 		writeMsg(&handlerUSART, "\n____COMANDO reinit EJECUTADO____\n\r");
 
@@ -881,7 +944,7 @@ void parseCommands(char *stringVector){
 
 
 // Interrupcion usart 1
-void usart1Rx_Callback(void){
+void usart2Rx_Callback(void){
 	rxData = getRxData();
 }
 
@@ -1345,7 +1408,7 @@ void int_Config_Motor(Motor_Handler_t *ptrMotorhandler[2],
 		              Parameters_Position_t *ptrPosHandler,
 					  Parameters_Path_t *ptrPathHandler ,
 					  PID_Parameters_t *ptrPIDHandler,
-					  state_dir_t operation_mode_dir){
+					  state_dir_t *operation_mode_dir){
 
 	//---------------Motor Izquierdo----------------
 	ptrMotorhandler[0] = &handlerMotor1_t;
@@ -1411,9 +1474,11 @@ void int_Config_Motor(Motor_Handler_t *ptrMotorhandler[2],
 	ptrPathHandler->line_Distance = 0;
 	ptrPathHandler->start_position_x = ptrPathHandler->start_position_y = 0;
 
+	// Colocamos el punto delta
+
 
 	// Seteamos la direccion el modo de operacion en None
-	operation_mode_dir.Mode = sNone;
+	operation_mode_dir->Mode = sNone;
 }
 
 
@@ -1646,7 +1711,7 @@ void NOP(Motor_Handler_t *ptrMotorhandler[2],
 void fillComand(void){
 
 	if (rxData != '\0'){
-		writeChar(&handlerUSART, rxData);
+//		writeChar(&handlerUSART, rxData);
 		bufferReception[counterReception] = rxData;
 		counterReception++;
 
