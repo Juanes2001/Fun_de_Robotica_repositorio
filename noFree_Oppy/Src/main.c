@@ -183,6 +183,13 @@ void NOP(Motor_Handler_t *ptrMotorhandler[2],
 		char buff[64],
 		state_dir_t operation_mode_dir);
 
+void create_square_operations(double side,
+							  uint8_t CW_CCW,
+							  Parameters_Operation_t prtList[30],
+							  Parameter_build_t *ptrbuild,
+							  Parameters_Path_t *ptrPath,
+							  Parameters_Position_t *ptrPos);
+
 //-----Macros------
 #define distanceBetweenWheels 10600             //Distacia entre ruedas     106,00 [mm]
 #define D1 5170                                 //Diametro rueda izquierda  51,70  [mm]
@@ -210,7 +217,6 @@ uint8_t stringColumn = 0;
 uint8_t stringRow = 0;
 
 // Banderas Astar
-uint8_t flagAstar   = RESET;
 uint8_t starWorking = RESET;
 
 //Mensajes
@@ -261,6 +267,8 @@ int counter;
 uint8_t counter_operation;
 float vel_Setpoint_1;
 float vel_Setpoint_2;
+uint8_t square_dir = 0;
+double square_side = 0;
 
 // VARIABLES VARIAS DEL ROBOT
 #define fixed_dutty 28 // Fixed dutty cycle, velocidad constante
@@ -327,18 +335,60 @@ int main(void){
 		if (flag_GoTo_Straigh){
 
 			// SI llegamos a este comando, lo que se quiere es ir en linea recta a cierta distancia usando un control PID
-			Done = goTo(handler_Motor_Array,
-					    &handler_MPUAccel_6050,
-					    &parameters_Pos_Robot,
-					    &parameters_Path_Robot,
-					    &parameter_PID_distace,
-					    cal_Gyro,
-					    &flag_angulo,
-					    &flag_measurements,
-					    &flag_control,
-					    data,
-					    parameters_Path_Robot.line_Distance,
-					    Mode_dir);
+
+
+			// esta funcion se encarga de enviar al robot en una linea recta hacia una distancia especifica
+			// Para ello lo que se hara es simplemente encender el robot y al mismo tiempo calcular su distancia recorrida
+			double distance_to_go = 0;
+			uint8_t done = RESET;
+
+			// seteamos la posicion inicial como la posicion actual global del robot
+			parameters_Path_Robot.start_position_x = parameters_Pos_Robot.xg_position;
+			parameters_Path_Robot.start_position_y = parameters_Pos_Robot.yg_position;
+
+			// seteamos la posicion final usando parametros polares
+
+			//Usando el angulo actual global con respecto al eje x se tiene que
+			parameters_Path_Robot.goal_Position_x = parameters_Path_Robot.line_Distance
+						* cos(parameters_Pos_Robot.rad_global) + parameters_Path_Robot.start_position_x ; // usando la funcion coseno para hallar la coordenada x de llegada
+			parameters_Path_Robot.goal_Position_y = parameters_Path_Robot.line_Distance
+						* sin(parameters_Pos_Robot.rad_global) + parameters_Path_Robot.start_position_y ; //usando la funcion coseno para hallar la coordenada y de llegada
+
+			// definimos los parametros del camino en funcion de la situacion actual
+			calculation_parameter_distance(&parameters_Path_Robot);
+
+			On_motor_Straigh_Roll(handler_Motor_Array, Mode_dir); // Encendemos el robot en la direccion deseada
+
+			while(!done){
+				// calculamos la distancia con la libreria PosRobt.h
+
+				distance_to_go = distance_traveled( &parameters_Path_Robot, parameters_Pos_Robot.xg_position, parameters_Pos_Robot.yg_position);
+
+				// Función de control del robot
+				go(handler_Motor_Array,
+				   &handler_MPUAccel_6050,
+				   &parameters_Pos_Robot,
+				   &parameters_Path_Robot,
+				   &parameter_PID_distace,
+				   cal_Gyro,
+				   &flag_angulo,
+				   &flag_measurements,
+				   &flag_control,
+				   data,
+				   Mode_dir); // Con esta funcion hacemos que el robot simplemente se mueva
+
+				if (!(distance_to_go < parameters_Path_Robot.line_Distance)){
+					// Paramos el proceso
+					done = !done;
+				}
+
+				// Observamos si hay algun comando en espera
+				fillComand();
+
+			}
+
+
+
 
 			if (Done){parseCommands("stop");}
 
@@ -401,31 +451,35 @@ int main(void){
 
 			if (rxData != '\0'){
 
-				if (rxData != '\r'){
-					stringMatrix[stringRow][stringColumn] = rxData;
-					stringColumn++;
+				if (rxData != '@'){
+					if (rxData != '\n'){ // Como estamos en Windows, el enter da un par the caracteres \r\n
+						if (rxData != '\r'){
+							stringMatrix[stringRow][stringColumn] = rxData;
+							stringColumn++;
+							rxData = '\0';
+						}else{
+							stringRow++;
+							stringColumn = 0;
+							rxData = '\0';
+						}
+					}else{
+						rxData = '\0';
+					}
 				}else{
-					stringRow++;
-					stringColumn = 0;
-				}
-
-				if (rxData == '@'){
 					doneTransaction = SET;
 
-					stringMatrix[stringRow][stringColumn - 1] = '\0';
-
 					stringColumn = 0;
-
-				}else if (rxData == 'z'){
+					rxData = '\0';
+				}
+				if (rxData == 'z'){
 
 					memset(stringMatrix, 0, sizeof(stringMatrix));
 					stringRow    = 0;
 					stringColumn = 0;
 					writeMsg(&handlerUSART, "\n------String Vaciado-----\n \r");
 					writeMsg(&handlerUSART, msg_InsertGrid);
+					rxData = '\0';
 				}
-
-				rxData = '\0';
 
 			}
 
@@ -444,12 +498,31 @@ int main(void){
 				stringColumn = 0;
 				writeMsg(&handlerUSART, "\n------String Vaciado-----\n \r");
 
-				flagAstar = RESET;
+				flag_Astar = RESET;
 				doneTransaction = RESET;
 				Do_the_track = SET;
 
 				parameters_op_Robot.op_Mode = 1; // SETEAMOS EN 1 PARA OPERACIONES DE ASTAR
 			}
+		}
+
+
+		if (flag_square){
+			// En este comando vamos a usar lo entrado en la terminal para contruir un cuadrado de LxL y que el robot
+			// recorra el cuadrado
+
+			// seteamos en la funcion create_square_operation las operaciones necesarias para recorrer el cuadrado
+			create_square_operations(square_side,
+									 square_dir,
+									 &parameters_op_Robot,
+									 &parameters_buit_Robot,
+									 &parameters_Path_Robot,
+									 &parameters_Pos_Robot);
+
+			flag_square = RESET;
+			Do_the_track = SET; // Realizamos las operaciones
+			parameters_op_Robot.op_Mode = 0; // SETEAMOS EN 1 PARA OPERACIONES DE SQUARE
+
 		}
 
 
@@ -459,17 +532,22 @@ int main(void){
 			switch (parameters_op_Robot.op_Mode) {
 				case 0:{
 
+					counter_operation = 0;
+					parameters_op_Robot.op_Mode = 2;
+
+					parseCommands("reinit"); //reiniciamos todos los parametros
 
 					break;
 				}case 1:{
 					// PAra este caso queremos un Astar,por lo que seteamos las operaciones necesarias despues de haber
 					// hallado los puntos a recorrer
 
-					create_operations(&handlerAstarParameters,
-									  shorterWay,
-									  parameters_Path_Robot.Operation_List,
-									  &parameters_buit_Robot,
-									  &parameters_Path_Robot);
+					create_Astar_operations(&handlerAstarParameters,
+											shorterWay,
+											parameters_Path_Robot.Operation_List,
+											&parameters_buit_Robot,
+											&parameters_Path_Robot,
+											&parameters_Pos_Robot);
 
 					counter_operation = 0;
 					parameters_op_Robot.op_Mode = 2;
@@ -480,6 +558,9 @@ int main(void){
 
 				}case 2:{
 
+					// Esperamos 3 segundos
+					delay_ms(3000);
+
 					// Este caso representa la ejecución de las operaciones almacenadas en la lista de operaciones
 
 					if (parameters_Path_Robot.Operation_List[counter_operation].operacion == LINE){
@@ -487,8 +568,8 @@ int main(void){
 						// Creamos el comando para que haga la tarea respectiva a ir en linea recta
 
 						parameters_Path_Robot.line_Distance =
-								sqrt(pow((parameters_Path_Robot.Operation_List[counter_operation].x_destination - parameters_Pos_Robot.xg_position),2)+
-								     pow((parameters_Path_Robot.Operation_List[counter_operation].y_destination - parameters_Pos_Robot.yg_position),2));
+								sqrt(pow((parameters_Path_Robot.Operation_List[counter_operation].x_destination*10 - parameters_Pos_Robot.xg_position),2)+
+								     pow((parameters_Path_Robot.Operation_List[counter_operation].y_destination*10 - parameters_Pos_Robot.yg_position),2));
 
 
 						sprintf(bufferReception, "goto %u %.2f" , 1 , parameters_Path_Robot.line_Distance); // Mandamos una direccion hacia adelante
@@ -550,7 +631,7 @@ void inSystem (void){
 
 	//BLINKY LED
 
-	handlerPinA5.pGPIOx = GPIOC;
+	handlerPinA5.pGPIOx = GPIOA;
 	handlerPinA5.GPIO_PinConfig.GPIO_PinAltFunMode = AF0;
 	handlerPinA5.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
 	handlerPinA5.GPIO_PinConfig.GPIO_PinOPType = GPIO_OTYPE_PUSHPULL;
@@ -815,7 +896,7 @@ void parseCommands(char *stringVector){
 		writeMsg(&handlerUSART, "3)  roll #dir_roll 1--> CW , 0-->CCW \n");
 		writeMsg(&handlerUSART, "4)  rollto #dir_roll #angle  \n");
 		writeMsg(&handlerUSART, "5)  change #dir #operation 1--->Line , 0--->Roll \n");
-		writeMsg(&handlerUSART, "6)  square #dir_roll #side_distance  \n");
+		writeMsg(&handlerUSART, "6)  square #dir_roll #side_distance (cm)  \n");
 		writeMsg(&handlerUSART, "7)  Astar  #Parallel-distance #Diagonal-distance \n");
 		writeMsg(&handlerUSART, "8)  reinit  \n");
 		writeMsg(&handlerUSART, " \n");
@@ -877,7 +958,11 @@ void parseCommands(char *stringVector){
 	}else if (strcmp(cmd, "reinit") == 0){
 
 		// en este comando reiniciamos las variables del sistema para volver a empezar desde un nuevo punto de referencia
-		int_Config_Motor(handler_Motor_Array, &parameters_Pos_Robot, &parameters_Path_Robot, &parameter_PID_distace, &Mode_dir);
+		int_Config_Motor(handler_Motor_Array,
+						&parameters_Pos_Robot,
+						&parameters_Path_Robot,
+						&parameter_PID_distace,
+						&Mode_dir);
 
 		writeMsg(&handlerUSART, "\n____COMANDO reinit EJECUTADO____\n\r");
 
@@ -892,9 +977,6 @@ void parseCommands(char *stringVector){
 		}
 
 		writeMsg(&handlerUSART, "\n____COMANDO reinit EJECUTADO____\n\r");
-	}else if (strcmp(cmd, "square") == 0){
-
-		flag_square = SET; // Levantamos la bandera para Square
 
 	}else if (strcmp(cmd, "Astar") == 0){
 
@@ -911,14 +993,16 @@ void parseCommands(char *stringVector){
 		writeMsg(&handlerUSART, "\n_____________Insert s for  the start space__________\n");
 		writeMsg(&handlerUSART, "\n_____________Insert # for  obstacules_______________\n");
 		initSerialComunication(&handlerUSART, &handlerPinRx, &handlerPinTx);
-		flagAstar = SET;
+		flag_Astar = SET;
 
-	}
+	}else if (strcmp(cmd, "square") == 0){
 
+			square_dir  = firstParameter; // Direccion del cuadrado
+			square_side = secondParameter; // lado del cuadrado en cm
 
+			flag_square = SET; // Levantamos la bandera para Square
 
-
-	else if (strcmp(cmd, "stop") == 0){
+	}else if (strcmp(cmd, "stop") == 0){
 		 // Este comando lo que busca es apagar el robot y detenerlo de su estado de movimiento
 		stop(handler_Motor_Array); // Apagamos los motores
 
@@ -942,12 +1026,10 @@ void parseCommands(char *stringVector){
 
 }
 
-
 // Interrupcion usart 1
 void usart2Rx_Callback(void){
 	rxData = getRxData();
 }
-
 
 //Interrupción Timer 3
 void BasicTimer3_Callback(void){
@@ -1306,8 +1388,6 @@ void set_direction_straigh_roll (Motor_Handler_t *ptrMotorhandler[2], state_dir_
 				PWMx_Toggle(ptrMotorhandler[1]->phandlerPWM);
 			}
 			// Puede que no analice ningun if y simplemente no haga nada
-
-
 	}
 }
 
@@ -1383,7 +1463,6 @@ void change_dir_straigh_Roll(Motor_Handler_t *ptrMotorhandler[2], state_dir_t op
 			// volvemos a encender los motores
 			GPIO_WritePin_Afopt(ptrMotorhandler[0]->phandlerGPIOEN,SET);
 			GPIO_WritePin_Afopt(ptrMotorhandler[1]->phandlerGPIOEN,SET);
-
 	}
 }
 
@@ -1474,7 +1553,6 @@ void int_Config_Motor(Motor_Handler_t *ptrMotorhandler[2],
 	ptrPathHandler->line_Distance = 0;
 	ptrPathHandler->start_position_x = ptrPathHandler->start_position_y = 0;
 
-	// Colocamos el punto delta
 
 
 	// Seteamos la direccion el modo de operacion en None
@@ -1708,6 +1786,112 @@ void NOP(Motor_Handler_t *ptrMotorhandler[2],
 
 
 
+void create_square_operations(double side,
+							  uint8_t CW_CCW,
+							  Parameters_Operation_t prtList[30],
+							  Parameter_build_t *ptrbuild,
+							  Parameters_Path_t *ptrPath,
+							  Parameters_Position_t *ptrPos){
+
+	// Aqui lo que se tendra en cuenta es el listado de operaciones necesarias para recorrer el camino, un listado donde
+	// solo sea recorrerlo en el main y leer cada operacion y simplemene usar goto y rollto para aplicar tales operaciones
+
+	// Aqui se va a suponer que donde se resetea el robot es el (0,0) de coordenadas y que su vector directos esta a 0 grados con respecto
+	// al eje X, por lo que se puede colocar el robot como sea en la posicion inicial y este calculara sus operaciones dependiendo
+	// de su posicion inicial
+
+
+	double finishline_x = 0;
+	double finishline_y = 0;
+
+	ptrPath->start_position_x = ptrbuild->initline_x = 0;
+	ptrPath->start_position_y = ptrbuild->initline_y = 0; //posicion de start, considerada como (0,0)
+
+
+	// Preguntamos si se quiere recorrer el cuadrado en CW o CCW, no importa donde este situado, comenzara en linea recta como primera operación
+
+	if (CW_CCW == 1) // Se quiere ir en CW
+	{
+
+		// calculo del vector unitario del robot
+
+		unitary_vector(ptrPos->rad_global, ptrbuild->delta_before);
+
+		double coordenadas_cuadrado[4][2] = {{side,0},
+											 {side,-side},
+											 {0,-side},
+											 {0,0}}; // Coordenadas (x,y) destino para hacer el cuadrado
+
+
+		for (uint8_t i = 0 ; i < 4 - 1 ; i++){
+
+			// Seteamos como punto inicial el punto de start y como punto final el siguiente punto a ir
+
+
+			finishline_x += coordenadas_cuadrado[i][0]; // Coordenada x a ir
+			finishline_y += coordenadas_cuadrado[i][1]; // Coordenada y a ir
+
+			ptrPath->goal_Position_x = finishline_x;
+			ptrPath->goal_Position_y = finishline_y;
+
+			build_Operation(prtList, ptrbuild, finishline_x, finishline_y); // Agregamos la operación respectiva ya sea si se tiene que rotar o si
+
+			change_coordinates_position(ptrPath, finishline_x, finishline_y); // Cambiamos de coordenada teorica para seguir construyendo el camino
+
+		}
+
+
+		// Agregamos la operacion nula
+		add_Operation(prtList, ptrbuild->number_operation, NULL_OPERATION, 0, 0, 0);
+
+
+	}else // Se quiere recorrer el cuadrado en CCW
+
+
+	{
+
+		// calculo del vector unitario del robot
+
+		unitary_vector(ptrPos->rad_global, ptrbuild->delta_before);
+
+		double coordenadas_cuadrado[4][2] = {{side,0},
+											 {side,side},
+											 {0,side},
+											 {0,0}}; // Coordenadas (x,y) destino para hacer el cuadrado
+
+
+		for (uint8_t i = 0 ; i < 4 - 1 ; i++){
+
+			// Seteamos como punto inicial el punto de start y como punto final el siguiente punto a ir
+
+
+			finishline_x += coordenadas_cuadrado[i][0]; // Coordenada x a ir
+			finishline_y += coordenadas_cuadrado[i][1]; // Coordenada y a ir
+
+			ptrPath->goal_Position_x = finishline_x;
+			ptrPath->goal_Position_y = finishline_y;
+
+			build_Operation(prtList, ptrbuild, finishline_x, finishline_y); // Agregamos la operación respectiva ya sea si se tiene que rotar o si
+
+			change_coordinates_position(ptrPath, finishline_x, finishline_y); // Cambiamos de coordenada teorica para seguir construyendo el camino
+
+		}
+
+
+		// Agregamos la operacion nula
+		add_Operation(prtList, ptrbuild->number_operation, NULL_OPERATION, 0, 0, 0);
+
+
+	}
+
+
+
+
+}
+
+
+
+
 void fillComand(void){
 
 	if (rxData != '\0'){
@@ -1716,7 +1900,6 @@ void fillComand(void){
 		counterReception++;
 
 		if (rxData == '@'){
-			doneTransaction = SET;
 
 			bufferReception[counterReception-1] = '\0';
 
@@ -1734,4 +1917,5 @@ void fillComand(void){
 	}
 
 }
+
 

@@ -86,6 +86,7 @@ double distance_to_straight_line(Parameters_Path_t  *ptrParameterPath, double cu
 double distance_traveled(Parameters_Path_t  *ptrParameterPath, double current_pos_x, double current_pos_y);
 //Definicion de cabeceras de funciones auxiliares
 double calculed_ang_turn(double vector_a[2], double vector_b[2]);
+void unitary_vector (double angle,double vector_b[2]);
 
 
 #endif /* POSROBT_H_ */

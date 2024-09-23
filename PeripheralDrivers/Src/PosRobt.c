@@ -17,6 +17,7 @@ void build_Operation(Parameters_Operation_t *prtList, Parameter_build_t *prtbuil
 {
 	//Definicion el vector director
 	double delta[2] = {finishline_x - prtbuild->initline_x, finishline_y - prtbuild->initline_y};
+
 	//Calculo angulo entre vectores directores
 	double grad_turn_res = calculed_ang_turn(prtbuild->delta_before, delta);
 	//condicional de cambio de angulo
@@ -153,4 +154,14 @@ double calculed_ang_turn(double vector_a[2], double vector_b[2])
     if(dot<0){ang_between_vector = -ang_between_vector;}
     //Retornar valor
     return ang_between_vector;
+}
+
+
+
+void unitary_vector (double angle,double vector_b[2]){
+
+	// Esta función lo que haremos es definir un vector unitario con respecto al angulo actual que tenga el robot
+	vector_b[0] = cos(angle);
+	vector_b[1] = sin(angle);
+
 }

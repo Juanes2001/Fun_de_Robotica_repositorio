@@ -954,11 +954,12 @@ void initSerialComunication (USART_Handler_t *ptrHandlerUsart, GPIO_Handler_t *p
 
 // Con esta funcion se setea el vector de operaciones con el que podemos recorrer el camino sin problemas
 
-void create_operations(AStar_distancesHandler *parameters,
+void create_Astar_operations(AStar_distancesHandler *parameters,
 					   int shorterWayArray[100][2],
 					   Parameters_Operation_t prtList[30],
-					   Parameter_build_t *prtbuild,
-					   Parameters_Path_t *ptrPath){
+					   Parameter_build_t *ptrbuild,
+					   Parameters_Path_t *ptrPath,
+					   Parameters_Position_t *ptrPos){
 
 	// Aqui lo que se tendra en cuenta es el listado de operaciones necesarias para recorrer el camino, un listado donde
 	// solo sea recorrerlo en el main y leer cada operacion y simplemene usar goto y rollto para aplicar tales operaciones
@@ -973,21 +974,32 @@ void create_operations(AStar_distancesHandler *parameters,
 	double dist_to_x = 0;
 	double dist_to_y = 0;
 
-	ptrPath->start_position_x = prtbuild->initline_x = 0;
-	ptrPath->start_position_y = prtbuild->initline_y = 0; //posicion de start, considerada como (0,0)
+	ptrPath->start_position_x = ptrbuild->initline_x = 0;
+	ptrPath->start_position_y = ptrbuild->initline_y = 0; //posicion de start, considerada como (0,0)
+
+
+	// calculo del vector unitario del robot
+
+
+	unitary_vector(ptrPos->rad_global, ptrbuild->delta_before);
+
+
 
 
 	for (uint8_t i = 0 ; i < parameters->numberOfElements - 1 ; i++){
 
 		// Seteamos como punto inicial el punto de start y como punto final el siguiente punto a ir
 
-		dist_to_x = (shorterWayArray[i+1][0] - shorterWayArray[i][0]) * parameters->parallelDistance;
-		dist_to_y = (shorterWayArray[i+1][1] - shorterWayArray[i][1]) * parameters->parallelDistance;
+		dist_to_y = -(shorterWayArray[i+1][0] - shorterWayArray[i][0]) * parameters->parallelDistance;
+		dist_to_x = (shorterWayArray[i+1][1] - shorterWayArray[i][1]) * parameters->parallelDistance;
 
 		finishline_x += dist_to_x; // Coordenada x a ir
 		finishline_y += dist_to_y; // Coordenada y a ir
 
-		build_Operation(prtList, prtbuild, finishline_x, finishline_y); // Agregamos la operación respectiva ya sea si se tiene que rotar o si
+		ptrPath->goal_Position_x = finishline_x;
+		ptrPath->goal_Position_y = finishline_y;
+
+		build_Operation(prtList, ptrbuild, finishline_x, finishline_y); // Agregamos la operación respectiva ya sea si se tiene que rotar o si
 
 		change_coordinates_position(ptrPath, finishline_x, finishline_y); // Cambiamos de coordenada teorica para seguir construyendo el camino
 
@@ -995,7 +1007,7 @@ void create_operations(AStar_distancesHandler *parameters,
 
 
 	// Agregamos la operacion nula
-	add_Operation(prtList, prtbuild->number_operation, NULL_OPERATION, 0, 0, 0);
+	add_Operation(prtList, ptrbuild->number_operation, NULL_OPERATION, 0, 0, 0);
 
 
 }
