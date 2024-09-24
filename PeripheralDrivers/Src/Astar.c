@@ -21,18 +21,18 @@ GPIO_Handler_t handlerAstarPinTx = {0};
 
 char buffer[64] = {0};
 
-float costs[52][52][6]   = {0};
-char readableGrid[52][52] = {0};
-int shorterWay[100][2]     = {0};
+float costs[7][7][6]   = {0};
+char readableGrid[7][7] = {0};
+int shorterWay[20][2]     = {0};
 
 
 
-int findShorterWay(char terminalGrid[52][52],
-				   char Gridcopy[52][52],
-				   float matrixCosts[52][52][6],
+int findShorterWay(char terminalGrid[7][7],
+				   char Gridcopy[7][7],
+				   float matrixCosts[7][7][6],
 				   AStar_distancesHandler *parameters,
 				   costChangesAndPos_t *ptrChanges,
-				   int shorterWay[100][2]){
+				   int shorterWay[20][2]){
 
 	writeMsg(&handlerAstarUsart, "\n______________Comencemos el viaje_____________\n");
 
@@ -47,7 +47,7 @@ int findShorterWay(char terminalGrid[52][52],
 	uint8_t counterStudy = 0;
 	//matriz donde se almacenaran en orden ascendente los F cost de las posiciones en estado de Open, esta si tendra un valor maximo y dos columnas, donde
 	// Se almacenara el F cost en la primera y el Hcost en la segunda,
-	float decisionMatrix[500][4] = {0};
+	float decisionMatrix[30][4] = {0};
 
 
 
@@ -464,7 +464,7 @@ int findShorterWay(char terminalGrid[52][52],
 }
 
 // Esta función actuazliza en la matriz de costs y el parent correspondiente
-void updateParent(costChangesAndPos_t *ptrChanges, int posIJ[2], float matrixCosts[52][52][6]){
+void updateParent(costChangesAndPos_t *ptrChanges, int posIJ[2], float matrixCosts[7][7][6]){
 
 	setParents(ptrChanges, posIJ);
 
@@ -474,14 +474,14 @@ void updateParent(costChangesAndPos_t *ptrChanges, int posIJ[2], float matrixCos
 }
 
 // esta funcion actualiz el Gcost correspondiente
-void updateGcost(AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, int posIJ[2], float matrixCosts[52][52][6] ){
+void updateGcost(AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, int posIJ[2], float matrixCosts[7][7][6] ){
 	//Por ultimo se setea en la pisicion de la heuristica correspondiente a la matriz ultima de la super matriz
 	// de costos
 	matrixCosts[ptrChanges->posAnalisis[0] + posIJ[0] -1][ptrChanges->posAnalisis[1] + posIJ[1] -1][0] = setGcost(parameters, ptrChanges, posIJ);
 }
 
 // Esta función actualiza el Fcost correspondiente
-void updateFcost(AStar_distancesHandler *parameters ,costChangesAndPos_t *ptrChanges, int posIJ[2], float matrixCosts[52][52][6] ){
+void updateFcost(AStar_distancesHandler *parameters ,costChangesAndPos_t *ptrChanges, int posIJ[2], float matrixCosts[7][7][6] ){
 	//Por ultimo se setea en la pisicion de la heuristica correspondiente a la matriz ultima de la super matriz
 	// de costos
 	matrixCosts[ptrChanges->posAnalisis[0] + posIJ[0] -1][ptrChanges->posAnalisis[1] + posIJ[1] -1][1] = setFcost(parameters, ptrChanges, posIJ, matrixCosts);
@@ -489,7 +489,7 @@ void updateFcost(AStar_distancesHandler *parameters ,costChangesAndPos_t *ptrCha
 }
 
 // con esta funcion seteamos la matriz Heuristica con la cual usaremos la info para buscar la ruta mas corta
-int setHeuristic(AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, float matrixCosts[52][52][6] , char Gridcopy[52][52]){
+int setHeuristic(AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, float matrixCosts[7][7][6] , char Gridcopy[7][7]){
 
 	// definimos variables locales
 	int distRows     = 0;
@@ -608,7 +608,7 @@ float setGcost (AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChan
 }
 
 // Con esta funcion seteamos el F cost en la matriz 2 de la posicion correspondiente
-float setFcost (AStar_distancesHandler *parameters , costChangesAndPos_t *ptrChanges, int posIJ[2], float matrixCosts[52][52][6]){
+float setFcost (AStar_distancesHandler *parameters , costChangesAndPos_t *ptrChanges, int posIJ[2], float matrixCosts[7][7][6]){
 
 	// Esta funcion es simple ya que solo tenemos que calcular de la matriz 3x3 de analisis y sumar el H cost y el G cost para tener el F cost
 	ptrChanges->Gcost = setGcost(parameters, ptrChanges, posIJ);
@@ -637,7 +637,7 @@ void setParents (costChangesAndPos_t *ptrChanges, int posIJ[2]){
 }
 
 // En esta funcion nos centraremos en buscar la posicion i,j donde se almacena el punto de inicio del robot
-int findStart(char Gridcopy[52][52], AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges){
+int findStart(char Gridcopy[7][7], AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges){
 
 	// Buscamos dentro de la matriz Grid que corresponde con la copia que le hacemos a la matriz de strings de entrada
 	// en la terminal
@@ -661,7 +661,7 @@ int findStart(char Gridcopy[52][52], AStar_distancesHandler *parameters, costCha
 
 
 }
-int findEnd(char Gridcopy[52][52], AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges){
+int findEnd(char Gridcopy[7][7], AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges){
 
 
 	// Buscamos dentro de la matriz Grid que corresponde con la copia que le hacemos a la matriz de strings de entrada
@@ -699,7 +699,7 @@ int findEnd(char Gridcopy[52][52], AStar_distancesHandler *parameters, costChang
 
 //Con esta funcion se reparte la memoria para la matriz de entrada desde la terminal serial
 
-void buildMatrixCopy(AStar_distancesHandler *parameters, char terminalGrid[52][52], char Gridcopy[52][52]){
+void buildMatrixCopy(AStar_distancesHandler *parameters, char terminalGrid[7][7], char Gridcopy[7][7]){
 
 
 	// Seteamos los valores dentro de la matriz infoGrid de la entrada respectiva
@@ -737,7 +737,7 @@ void buildMatrixCopy(AStar_distancesHandler *parameters, char terminalGrid[52][5
 
 // Se define la funcion de tomar cantidad de filas recorriendo la cantidad de String que tenga el puntero de arreglos matrix hasta que se
 // encuentre con el puntero nulo.
-uint8_t getRows(char terminalGrid[52][52]){
+uint8_t getRows(char terminalGrid[7][7]){
 
 	uint8_t counterRows = 0;
 	char letter = '\0';
@@ -752,7 +752,7 @@ uint8_t getRows(char terminalGrid[52][52]){
 }
 
 //Se define la funcion de tomar cantidad de columnas recorriendo el string hasta encontrar el elemento nulo char
-uint8_t getColums(char terminalGrid[52][52]){
+uint8_t getColums(char terminalGrid[7][7]){
 
 	uint8_t counterColumns = 0;
 	while(terminalGrid[0][counterColumns] != '\0'){

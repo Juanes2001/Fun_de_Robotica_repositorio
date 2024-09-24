@@ -47,11 +47,11 @@ typedef struct{
 
 //Matriz de arrays donde se almacenan respectivamente los valores de G cost, el F cost, y el H cost, posicion i del parent y posicion j del parent,
 // Y al final la posicion counter que corresponde con la posicion de la fila de la posicion guardada
-extern float costs[52][52][6];
+extern float costs[7][7][6];
 // Matriz donde se copiará la matriz que se inserta desde la terminal.
-extern char readableGrid[52][52];
+extern char readableGrid[7][7];
 // Matriz donde se almacenara las posicones de la ruta mas corta
-extern int shorterWay[100][2];
+extern int shorterWay[20][2];
 
 extern USART_Handler_t handlerAstarUsart;
 extern GPIO_Handler_t handlerAstarPinRx;
@@ -64,39 +64,39 @@ extern GPIO_Handler_t handlerAstarPinTx;
 
 // en el algoritmo es necesario si se da el caso cambiar el orden de prioridad al calcular el G cost actual y el F cost,
 // Por lo que el pariente puede cambiar dependiendo si esto se cumple o no.
-void updateParent(costChangesAndPos_t *ptrChanges, int posIJ[2],float matrixCosts[52][52][6] );
+void updateParent(costChangesAndPos_t *ptrChanges, int posIJ[2],float matrixCosts[7][7][6] );
 //Esta funcion renueva el costo G del punto desde el punto de analisis,
-void updateGcost(AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, int posIJ[2],float matrixCosts[52][52][6] );
+void updateGcost(AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, int posIJ[2],float matrixCosts[7][7][6] );
 // Esta funcion renueva el costo F del punto desde el punto de analisis.
-void updateFcost(AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, int posIJ[2], float matrixCosts[52][52][6] );
+void updateFcost(AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, int posIJ[2], float matrixCosts[7][7][6] );
 // Esta función Busca el punto inicial de la cuadricula entregada.
-int findStart(char Gridcopy[52][52], AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges);
+int findStart(char Gridcopy[7][7], AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges);
 // Esta funcion busca el punto final o punto de llegada.
-int findEnd(char Gridcopy[52][52], AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges);
+int findEnd(char Gridcopy[7][7], AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges);
 // Esta funcion define la heuristica de cada cuadro de la cuadricula exceptuando los obstaculos
-int setHeuristic(AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, float matrixCosts[52][52][6], char Gridcopy[52][52]);
+int setHeuristic(AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, float matrixCosts[7][7][6], char Gridcopy[7][7]);
 // Con esta funcion calculamos el Gcost a partir del punto de analisis , el G cost es la distancia mas corta que hay pasando siempre por el
 //punto de analisis y llendo hasta el punto de inicio
 float setGcost (AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, int posIJ[2]);
 // Con esta funcion seteamos el F cost de los puntos aledanios al punto de analisis , incluyendo el punto de analisis
-float setFcost (AStar_distancesHandler *parameters ,costChangesAndPos_t *ptrChanges, int posIJ[2],float matrixCosts[52][52][6]);
+float setFcost (AStar_distancesHandler *parameters ,costChangesAndPos_t *ptrChanges, int posIJ[2],float matrixCosts[7][7][6]);
 // Con etsa funcion seteamos el parent de los aledanios , es decir, la posicion a la que apuntan los aledanios a estudiar a partir del punto de analisis
 void setParents (costChangesAndPos_t *ptrChanges, int posIJ[2]);
 //Con esta funcion repartimos la cantidad de memoria que necesita el arreglo de char shorterWay
-void buildArrayShorterWay(AStar_distancesHandler *parameters, int shorterWay[100][2]);
+void buildArrayShorterWay(AStar_distancesHandler *parameters, int shorterWay[20][2]);
 // Esta función define la matriz que se usara para definir el camino mas corto, traida desde comunicacion serial.
-void buildMatrixCopy(AStar_distancesHandler *parameters, char terminalGrid[52][52], char Gridcopy[52][52]);
+void buildMatrixCopy(AStar_distancesHandler *parameters, char terminalGrid[7][7], char Gridcopy[7][7]);
 // Con esta funcion allocamos la supermatriz donde se almacenaran los datos numericos de la heuristica el G cost y el F cost, posicion i y j del parent
-void buildMatrixCosts(AStar_distancesHandler *parameters, float matrixCosts[52][52][6]);
+void buildMatrixCosts(AStar_distancesHandler *parameters, float matrixCosts[7][7][6]);
 //Esta funcion me cuenta la cantidad de filas que tiene mi arreglo entrado M
-uint8_t getRows(char terminalGrid[52][52]);
+uint8_t getRows(char terminalGrid[7][7]);
 // Esta funciom retorna la cantidad de columnas que hay en el arreglo entrado N
-uint8_t getColums(char terminalGrid[52][52]);
+uint8_t getColums(char terminalGrid[7][7]);
 // Esta funcion halla la posicion del valor mas pequeño más pequeño dentro de un conjunto de valores
-void findLesserValue(costChangesAndPos_t*ptrChanges, float decisionMtrx[500][4], uint8_t contador);
+void findLesserValue(costChangesAndPos_t*ptrChanges, float decisionMtrx[30][4], uint8_t contador);
 //Esta funcion inicializa los parametros de la estructura AStar_distances
-int findShorterWay(char terminalGrid[52][52], char Gridcopy[52][52], float matrixCosts[52][52][6],
-		AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, int shorterWay[100][2]);
+int findShorterWay(char terminalGrid[7][7], char Gridcopy[7][7], float matrixCosts[7][7][6],
+		AStar_distancesHandler *parameters, costChangesAndPos_t *ptrChanges, int shorterWay[20][2]);
 // Con esta funcion liberamos la memoria utilizada por la super matriz de costos
 void freeCosts(AStar_distancesHandler *parameters, float***matrixCosts);
 // Con esta funcion liberamos la memoria utilizada por la matriz que almacena la copia de los strings ingresados
@@ -109,7 +109,7 @@ void initSerialComunication (USART_Handler_t *ptrHandlerUsart, GPIO_Handler_t *p
 
 ///////////////////////////////////////////Funciones para realizar las operaciones///////////////////////////////////////
 void create_Astar_operations(AStar_distancesHandler *parameters,
-		          	  	  	 int shorterWayArray[100][2],
+		          	  	  	 int shorterWayArray[20][2],
 							 Parameters_Operation_t prtList[30],
 							 Parameter_build_t *ptrbuild,
 							 Parameters_Path_t *ptrPath,
