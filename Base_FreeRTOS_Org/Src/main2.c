@@ -111,7 +111,8 @@ const char *msg_option_1= "\n------ Selected Option - sGo ------ \n";
 const char *msg_option_2= "\n----- Selected Option - sGoTo ----- \n";
 const char *msg_option_3= "\n------ Selected Option - sRoll ---- \n";
 const char *msg_option_4= "\n----Selected Option - sRollTo ----- \n";
-const char *msg_no_smphr= "\n-------Semaphore no activated------ \n";
+const char *msg_option_5= "\n----Selected Option - Square  ----- \n";
+const char *msg_option_6= "\n----Selected Option - sAstar  ----- \n";
 
 
 //Definición Handlers
@@ -718,10 +719,14 @@ void vTask_Menu( void * pvParameters ){
 	command_t *cmd;
 
 	const char* msg_menu = "\n===============================================\n"
-						   "|                     MENU                    |\n"
-						   "sGo #dir ---------> 1--> Adelante , 0--> Atras \n"
-						   "sGoTo #dir #distance [mm]                      \n"
-						   "Enter your choice here:";
+						   "|                      MENU                     |\n"
+						   "sGo #dir | 1--> Adelante , 0--> Atras            \n"
+						   "sGoTo #dir #distance [mm]                        \n"
+						   "sRoll #dir CW_CCW  |1--> CW , 0-->CCW            \n"
+						   "sRollto #dir CW_CCW #Angle [°]                   \n"
+						   "Square #dir CW_CCW  #distance_side [cm]          \n"
+			               "sAstar #Parallel_dis [cm]  #Diagonal_dis [cm]    \n"
+						   "Enter your choice here: ";
 
 	while (1){
 

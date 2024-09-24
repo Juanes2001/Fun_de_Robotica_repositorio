@@ -1008,6 +1008,7 @@ void create_Astar_operations(AStar_distancesHandler *parameters,
 
 	// Agregamos la operacion nula
 	add_Operation(prtList, ptrbuild->number_operation, NULL_OPERATION, 0, 0, 0);
+	ptrbuild->number_operation = 0;
 
 
 }

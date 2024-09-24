@@ -116,7 +116,8 @@ costChangesAndPos_t handlerCostsAstar         = {0};
 typedef enum{
 	sLine = 0,
 	sRoll,
-	sNone
+	sNone,
+	sWait
 }state_t;
 
 typedef struct{
@@ -263,7 +264,7 @@ float paso_mm_2 = ((M_PI*D2)/(100*Ce)); // Numero de milimetros por paso de la r
 double ang_for_Displament = 0;
 double ang_complementary = 0;
 float velSetPoint = 0;
-int counter;
+uint32_t counter = 0;
 uint8_t counter_operation;
 float vel_Setpoint_1;
 float vel_Setpoint_2;
@@ -290,6 +291,7 @@ int main(void){
 
 	double angleToGo_Relative = 0;
 	double angle_start = 0;
+
 
     /* Loop forever */
 	while(1){
@@ -340,7 +342,7 @@ int main(void){
 			// esta funcion se encarga de enviar al robot en una linea recta hacia una distancia especifica
 			// Para ello lo que se hara es simplemente encender el robot y al mismo tiempo calcular su distancia recorrida
 			double distance_to_go = 0;
-			uint8_t done = RESET;
+			Done = RESET;
 
 			// seteamos la posicion inicial como la posicion actual global del robot
 			parameters_Path_Robot.start_position_x = parameters_Pos_Robot.xg_position;
@@ -359,7 +361,7 @@ int main(void){
 
 			On_motor_Straigh_Roll(handler_Motor_Array, Mode_dir); // Encendemos el robot en la direccion deseada
 
-			while(!done){
+			while(!Done){
 				// calculamos la distancia con la libreria PosRobt.h
 
 				distance_to_go = distance_traveled( &parameters_Path_Robot, parameters_Pos_Robot.xg_position, parameters_Pos_Robot.yg_position);
@@ -377,9 +379,9 @@ int main(void){
 				   data,
 				   Mode_dir); // Con esta funcion hacemos que el robot simplemente se mueva
 
-				if (!(distance_to_go < parameters_Path_Robot.line_Distance)){
+				if (!(abs(distance_to_go) < parameters_Path_Robot.line_Distance)){
 					// Paramos el proceso
-					done = !done;
+					Done = !Done;
 				}
 
 				// Observamos si hay algun comando en espera
@@ -439,6 +441,10 @@ int main(void){
 
 				// Analizamos si ya se llego al angulo deseado
 				if (!(angleToGo_Relative < parameters_Path_Robot.angle) ){Done = !Done;}
+
+				// Observamos si hay algun comando en espera
+				fillComand();
+
 			}
 
 			// Paramos el robot
@@ -451,7 +457,15 @@ int main(void){
 
 			if (rxData != '\0'){
 
-				if (rxData != '@'){
+
+				if (rxData == 'z'){
+					memset(stringMatrix, 0, sizeof(stringMatrix));
+					stringRow    = 0;
+					stringColumn = 0;
+					writeMsg(&handlerUSART, "\n------String Vaciado-----\n \r");
+					writeMsg(&handlerUSART, msg_InsertGrid);
+					rxData = '\0';
+				}else if (rxData != '@'){
 					if (rxData != '\n'){ // Como estamos en Windows, el enter da un par the caracteres \r\n
 						if (rxData != '\r'){
 							stringMatrix[stringRow][stringColumn] = rxData;
@@ -471,15 +485,6 @@ int main(void){
 					stringColumn = 0;
 					rxData = '\0';
 				}
-				if (rxData == 'z'){
-
-					memset(stringMatrix, 0, sizeof(stringMatrix));
-					stringRow    = 0;
-					stringColumn = 0;
-					writeMsg(&handlerUSART, "\n------String Vaciado-----\n \r");
-					writeMsg(&handlerUSART, msg_InsertGrid);
-					rxData = '\0';
-				}
 
 			}
 
@@ -490,19 +495,20 @@ int main(void){
 
 				if (starWorking){
 					// si se llego hasta aca es porque Astar si funciona correctamente
+
+					memset(stringMatrix, 0, sizeof(stringMatrix));
+					stringRow    = 0;
+					stringColumn = 0;
+					writeMsg(&handlerUSART, "\n------String Vaciado-----\n \r");
+
+					flag_Astar = RESET;
+					doneTransaction = RESET;
+					Do_the_track = SET;
+					Mode_dir.Mode = sWait;
+					parameters_op_Robot.op_Mode = 1; // SETEAMOS EN 1 PARA OPERACIONES DE ASTAR
 				}else{
 					writeMsg(&handlerUSART, msg_NotWorking);
 				}
-				memset(stringMatrix, 0, sizeof(stringMatrix));
-				stringRow    = 0;
-				stringColumn = 0;
-				writeMsg(&handlerUSART, "\n------String Vaciado-----\n \r");
-
-				flag_Astar = RESET;
-				doneTransaction = RESET;
-				Do_the_track = SET;
-
-				parameters_op_Robot.op_Mode = 1; // SETEAMOS EN 1 PARA OPERACIONES DE ASTAR
 			}
 		}
 
@@ -512,9 +518,9 @@ int main(void){
 			// recorra el cuadrado
 
 			// seteamos en la funcion create_square_operation las operaciones necesarias para recorrer el cuadrado
-			create_square_operations(square_side,
-									 square_dir,
-									 &parameters_op_Robot,
+ 			create_square_operations(square_side,
+ 					 	 	 	 	 square_dir,
+									 parameters_Path_Robot.Operation_List,
 									 &parameters_buit_Robot,
 									 &parameters_Path_Robot,
 									 &parameters_Pos_Robot);
@@ -530,7 +536,8 @@ int main(void){
 
 			// Si estamos aqui es porque queremos que nuestro robot haga unas operaciones contiguas
 			switch (parameters_op_Robot.op_Mode) {
-				case 0:{
+				case 0:{ // Para etse caso queremos recorrer un cuadrado, por lo que seteamos las operaciones necesarias despues de
+					// hallado los puntos a recorrer
 
 					counter_operation = 0;
 					parameters_op_Robot.op_Mode = 2;
@@ -572,10 +579,10 @@ int main(void){
 								     pow((parameters_Path_Robot.Operation_List[counter_operation].y_destination*10 - parameters_Pos_Robot.yg_position),2));
 
 
-						sprintf(bufferReception, "goto %u %.2f" , 1 , parameters_Path_Robot.line_Distance); // Mandamos una direccion hacia adelante
+						sprintf(bufferReceptionMultiOperations, "goto %u %.2f" , 1 , parameters_Path_Robot.line_Distance); // Mandamos una direccion hacia adelante
 						// y ademas la distancia a recorrer
 
-						parseCommands(bufferReception); // Mandamos el comando
+						parseCommands(bufferReceptionMultiOperations); // Mandamos el comando
 
 						counter_operation++;
 
@@ -587,21 +594,25 @@ int main(void){
 						// metemos el angulo a rotar, ya sea positivo o negativo
 
 						if (parameters_Path_Robot.Operation_List[counter_operation].grad_Rotative < 0 ){
-							sprintf(bufferReception,
+							sprintf(bufferReceptionMultiOperations,
 									"rollto %u %.2f" ,
-									0 , // CCW
-									-parameters_Path_Robot.Operation_List[counter_operation].grad_Rotative);
+									1 , // CCW
+									-parameters_Path_Robot.Operation_List[counter_operation].grad_Rotative -8);
 						}else{
-							sprintf(bufferReception,
+							sprintf(bufferReceptionMultiOperations,
 									"rollto %u %.2f" ,
-									1 , // CW
-									parameters_Path_Robot.Operation_List[counter_operation].grad_Rotative);
+									0 , // CW
+									parameters_Path_Robot.Operation_List[counter_operation].grad_Rotative - 8);
 						}
+
+						parseCommands(bufferReceptionMultiOperations); // Mandamos el comando
+
 						counter_operation++;
 
 					}else{// Al llegar aca es porque se acabaron las operaciones, la ultima operacion sera una operacion nula, lo que indica
 						// cerrar el comando de Astar
-
+						memset(parameters_Path_Robot.Operation_List,0, sizeof(parameters_Path_Robot.Operation_List));
+						counter_operation = 0;
 						Do_the_track = RESET; // Bajamos la bandera de Do_the_track para dejar de hacer operaciones
 
 						// Ya en este punto la bandera de Astar esta bajada por loq ue no tenemos que bajarla nuevamente, y ya
@@ -976,7 +987,7 @@ void parseCommands(char *stringVector){
 			change_dir_straigh_Roll(handler_Motor_Array, Mode_dir);
 		}
 
-		writeMsg(&handlerUSART, "\n____COMANDO reinit EJECUTADO____\n\r");
+		writeMsg(&handlerUSART, "\n____COMANDO change EJECUTADO____\n\r");
 
 	}else if (strcmp(cmd, "Astar") == 0){
 
@@ -1002,6 +1013,8 @@ void parseCommands(char *stringVector){
 
 			flag_square = SET; // Levantamos la bandera para Square
 
+			writeMsg(&handlerUSART, "\n____COMANDO square EJECUTADO____\n\r");
+
 	}else if (strcmp(cmd, "stop") == 0){
 		 // Este comando lo que busca es apagar el robot y detenerlo de su estado de movimiento
 		stop(handler_Motor_Array); // Apagamos los motores
@@ -1011,6 +1024,7 @@ void parseCommands(char *stringVector){
 		flag_GoTo_Straigh = RESET;
 		flag_Roll         = RESET;
 		flag_RollTo       = RESET;
+		Done = RESET;
 		Mode_dir.Mode     = sNone;
 
 
@@ -1051,7 +1065,7 @@ void BasicTimer2_Callback(void){
 			flag_measurements = SET;
 	}else{ counting_action++; }
 
-	if (Mode_dir.Mode == sNone){
+	if (Mode_dir.Mode == sNone && !flag_Astar){
 		flag_NOP = SET;
 	}
 
@@ -1770,6 +1784,18 @@ void NOP(Motor_Handler_t *ptrMotorhandler[2],
 
 		// Medimos el angulo actual
 		getAngle(ptrMPUhandler, 0, calib, ptrPosHandler);
+
+//		if (counter == 50){
+//		//Convertimos el valor y imprimimos en la terminal
+//		sprintf(data,"&%#.4f\t%#.4f\n", ptrPosHandler->rad_global , ptrPosHandler->grad_global);
+//
+//		writeMsg(&handlerUSART, data);
+//
+//		counter = 0;
+//
+//		}else{counter++;}
+
+
 		// bajamos la bandera
 		*fAnglulo = RESET;
 	}
@@ -1823,13 +1849,13 @@ void create_square_operations(double side,
 											 {0,0}}; // Coordenadas (x,y) destino para hacer el cuadrado
 
 
-		for (uint8_t i = 0 ; i < 4 - 1 ; i++){
+		for (uint8_t i = 0 ; i < 4; i++){
 
 			// Seteamos como punto inicial el punto de start y como punto final el siguiente punto a ir
 
 
-			finishline_x += coordenadas_cuadrado[i][0]; // Coordenada x a ir
-			finishline_y += coordenadas_cuadrado[i][1]; // Coordenada y a ir
+			finishline_x = coordenadas_cuadrado[i][0]; // Coordenada x a ir
+			finishline_y = coordenadas_cuadrado[i][1]; // Coordenada y a ir
 
 			ptrPath->goal_Position_x = finishline_x;
 			ptrPath->goal_Position_y = finishline_y;
@@ -1843,7 +1869,7 @@ void create_square_operations(double side,
 
 		// Agregamos la operacion nula
 		add_Operation(prtList, ptrbuild->number_operation, NULL_OPERATION, 0, 0, 0);
-
+		ptrbuild->number_operation = 0;
 
 	}else // Se quiere recorrer el cuadrado en CCW
 
@@ -1860,13 +1886,13 @@ void create_square_operations(double side,
 											 {0,0}}; // Coordenadas (x,y) destino para hacer el cuadrado
 
 
-		for (uint8_t i = 0 ; i < 4 - 1 ; i++){
+		for (uint8_t i = 0 ; i < 4 ; i++){
 
 			// Seteamos como punto inicial el punto de start y como punto final el siguiente punto a ir
 
 
-			finishline_x += coordenadas_cuadrado[i][0]; // Coordenada x a ir
-			finishline_y += coordenadas_cuadrado[i][1]; // Coordenada y a ir
+			finishline_x = coordenadas_cuadrado[i][0]; // Coordenada x a ir
+			finishline_y = coordenadas_cuadrado[i][1]; // Coordenada y a ir
 
 			ptrPath->goal_Position_x = finishline_x;
 			ptrPath->goal_Position_y = finishline_y;
@@ -1880,7 +1906,7 @@ void create_square_operations(double side,
 
 		// Agregamos la operacion nula
 		add_Operation(prtList, ptrbuild->number_operation, NULL_OPERATION, 0, 0, 0);
-
+		ptrbuild->number_operation = 0;
 
 	}
 

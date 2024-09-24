@@ -7,43 +7,43 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
   1 .text         0000f938  080001a0  080001a0  000101a0  2**4
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .rodata       000008a8  0800fad8  0800fad8  0001fad8  2**3
+  2 .rodata       000009a0  0800fad8  0800fad8  0001fad8  2**3
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  3 .ARM.extab    00000000  08010380  08010380  000301f4  2**0
+  3 .ARM.extab    00000000  08010478  08010478  000301f4  2**0
                   CONTENTS
-  4 .ARM          00000000  08010380  08010380  000301f4  2**0
+  4 .ARM          00000000  08010478  08010478  000301f4  2**0
                   CONTENTS
-  5 .preinit_array 00000000  08010380  08010380  000301f4  2**0
+  5 .preinit_array 00000000  08010478  08010478  000301f4  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  6 .init_array   00000004  08010380  08010380  00020380  2**2
+  6 .init_array   00000004  08010478  08010478  00020478  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  7 .fini_array   00000004  08010384  08010384  00020384  2**2
+  7 .fini_array   00000004  0801047c  0801047c  0002047c  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  8 .data         000001f4  20000000  08010388  00030000  2**2
+  8 .data         000001f4  20000000  08010480  00030000  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  9 .bss          000136c8  200001f8  0801057c  000301f8  2**3
+  9 .bss          000136c8  200001f8  08010674  000301f8  2**3
                   ALLOC
- 10 ._user_heap_stack 00000600  200138c0  0801057c  000338c0  2**0
+ 10 ._user_heap_stack 00000600  200138c0  08010674  000338c0  2**0
                   ALLOC
  11 .ARM.attributes 00000030  00000000  00000000  000301f4  2**0
                   CONTENTS, READONLY
- 12 .debug_info   0000d6eb  00000000  00000000  00030224  2**0
+ 12 .debug_info   0000d732  00000000  00000000  00030224  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 00002554  00000000  00000000  0003d90f  2**0
+ 13 .debug_abbrev 00002554  00000000  00000000  0003d956  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_aranges 00000c18  00000000  00000000  0003fe68  2**3
+ 14 .debug_aranges 00000c20  00000000  00000000  0003feb0  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_ranges 00000b00  00000000  00000000  00040a80  2**3
+ 15 .debug_ranges 00000b08  00000000  00000000  00040ad0  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  0001273d  00000000  00000000  00041580  2**0
+ 16 .debug_macro  0001273d  00000000  00000000  000415d8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0000e61b  00000000  00000000  00053cbd  2**0
+ 17 .debug_line   0000e63f  00000000  00000000  00053d15  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    00062567  00000000  00000000  000622d8  2**0
+ 18 .debug_str    00062583  00000000  00000000  00062354  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000050  00000000  00000000  000c483f  2**0
+ 19 .comment      00000050  00000000  00000000  000c48d7  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00004678  00000000  00000000  000c4890  2**2
+ 20 .debug_frame  000046a0  00000000  00000000  000c4928  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1430,34 +1430,34 @@ int main(void)
  8000f5c:	200003f8 	.word	0x200003f8
  8000f60:	20000ac0 	.word	0x20000ac0
  8000f64:	20000218 	.word	0x20000218
- 8000f68:	0800fbbc 	.word	0x0800fbbc
+ 8000f68:	0800fbe4 	.word	0x0800fbe4
  8000f6c:	08001491 	.word	0x08001491
  8000f70:	20000214 	.word	0x20000214
  8000f74:	2000021c 	.word	0x2000021c
- 8000f78:	0800fbc8 	.word	0x0800fbc8
+ 8000f78:	0800fbf0 	.word	0x0800fbf0
  8000f7c:	0800198d 	.word	0x0800198d
  8000f80:	20000220 	.word	0x20000220
- 8000f84:	0800fbd4 	.word	0x0800fbd4
+ 8000f84:	0800fbfc 	.word	0x0800fbfc
  8000f88:	08001629 	.word	0x08001629
  8000f8c:	20000224 	.word	0x20000224
- 8000f90:	0800fbe4 	.word	0x0800fbe4
+ 8000f90:	0800fc0c 	.word	0x0800fc0c
  8000f94:	08001669 	.word	0x08001669
  8000f98:	20000228 	.word	0x20000228
- 8000f9c:	0800fbf0 	.word	0x0800fbf0
+ 8000f9c:	0800fc18 	.word	0x0800fc18
  8000fa0:	080016e5 	.word	0x080016e5
  8000fa4:	2000022c 	.word	0x2000022c
- 8000fa8:	0800fbf8 	.word	0x0800fbf8
+ 8000fa8:	0800fc20 	.word	0x0800fc20
  8000fac:	0800172d 	.word	0x0800172d
  8000fb0:	20000230 	.word	0x20000230
- 8000fb4:	0800fc08 	.word	0x0800fc08
+ 8000fb4:	0800fc30 	.word	0x0800fc30
  8000fb8:	08001889 	.word	0x08001889
  8000fbc:	20000234 	.word	0x20000234
- 8000fc0:	0800fc14 	.word	0x0800fc14
+ 8000fc0:	0800fc3c 	.word	0x0800fc3c
  8000fc4:	080019bd 	.word	0x080019bd
  8000fc8:	2000023c 	.word	0x2000023c
  8000fcc:	20000238 	.word	0x20000238
  8000fd0:	08003545 	.word	0x08003545
- 8000fd4:	0800fc20 	.word	0x0800fc20
+ 8000fd4:	0800fc48 	.word	0x0800fc48
  8000fd8:	20000240 	.word	0x20000240
 
 08000fdc <inSystem>:
@@ -2238,7 +2238,7 @@ void vTask_Menu( void * pvParameters ){
 	const char* msg_menu = "\n===============================================\n"
  8001498:	4b57      	ldr	r3, [pc, #348]	; (80015f8 <vTask_Menu+0x168>)
  800149a:	60fb      	str	r3, [r7, #12]
-						   "Enter your choice here:";
+						   "Enter your choice here: ";
 
 	while (1){
 
@@ -2443,7 +2443,7 @@ void vTask_Menu( void * pvParameters ){
 		xQueueSend(xQueue_Print, &msg_menu, portMAX_DELAY);
  80015f4:	e752      	b.n	800149c <vTask_Menu+0xc>
  80015f6:	bf00      	nop
- 80015f8:	0800fc2c 	.word	0x0800fc2c
+ 80015f8:	0800fc54 	.word	0x0800fc54
  80015fc:	20000238 	.word	0x20000238
  8001600:	20000527 	.word	0x20000527
  8001604:	2000051e 	.word	0x2000051e
@@ -3264,8 +3264,8 @@ int extract_command (command_t *cmd){
  8001bb4:	20000478 	.word	0x20000478
  8001bb8:	2000046c 	.word	0x2000046c
  8001bbc:	2000049c 	.word	0x2000049c
- 8001bc0:	0800fd08 	.word	0x0800fd08
- 8001bc4:	0800fd0c 	.word	0x0800fd0c
+ 8001bc0:	0800fe00 	.word	0x0800fe00
+ 8001bc4:	0800fe04 	.word	0x0800fe04
 
 08001bc8 <callback_extInt1>:
 
@@ -6900,7 +6900,7 @@ LoopForever:
   ldr r1, =_edata
  8003710:	200001f4 	.word	0x200001f4
   ldr r2, =_sidata
- 8003714:	08010388 	.word	0x08010388
+ 8003714:	08010480 	.word	0x08010480
   ldr r2, =_sbss
  8003718:	200001f8 	.word	0x200001f8
   ldr r4, =_ebss
@@ -10014,7 +10014,7 @@ void vTaskStartScheduler( void )
  8004704:	bd80      	pop	{r7, pc}
  8004706:	bf00      	nop
  8004708:	20000c24 	.word	0x20000c24
- 800470c:	0800fd14 	.word	0x0800fd14
+ 800470c:	0800fe0c 	.word	0x0800fe0c
  8004710:	08004d19 	.word	0x08004d19
  8004714:	20000c20 	.word	0x20000c20
  8004718:	20000c0c 	.word	0x20000c0c
@@ -12635,7 +12635,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  800558e:	bd80      	pop	{r7, pc}
  8005590:	20000c5c 	.word	0x20000c5c
  8005594:	20000c60 	.word	0x20000c60
- 8005598:	0800fd1c 	.word	0x0800fd1c
+ 8005598:	0800fe14 	.word	0x0800fe14
  800559c:	0800578d 	.word	0x0800578d
 
 080055a0 <xTimerCreate>:
@@ -13829,7 +13829,7 @@ static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait,
  8005c08:	20000c40 	.word	0x20000c40
  8005c0c:	20000c54 	.word	0x20000c54
  8005c10:	20000c58 	.word	0x20000c58
- 8005c14:	0800fd24 	.word	0x0800fd24
+ 8005c14:	0800fe1c 	.word	0x0800fe1c
 
 08005c18 <pxPortInitialiseStack>:
  * See header file for description.
@@ -26589,10 +26589,10 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800ac2e:	4798      	blx	r3
  800ac30:	3601      	adds	r6, #1
  800ac32:	e7f2      	b.n	800ac1a <__libc_init_array+0x1e>
- 800ac34:	08010380 	.word	0x08010380
- 800ac38:	08010380 	.word	0x08010380
- 800ac3c:	08010380 	.word	0x08010380
- 800ac40:	08010384 	.word	0x08010384
+ 800ac34:	08010478 	.word	0x08010478
+ 800ac38:	08010478 	.word	0x08010478
+ 800ac3c:	08010478 	.word	0x08010478
+ 800ac40:	0801047c 	.word	0x0801047c
 
 0800ac44 <malloc>:
  800ac44:	4b02      	ldr	r3, [pc, #8]	; (800ac50 <malloc+0xc>)
@@ -27255,11 +27255,11 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800b258:	e7ee      	b.n	800b238 <_printf_float+0x2b8>
  800b25a:	bf00      	nop
  800b25c:	7fefffff 	.word	0x7fefffff
- 800b260:	0800fd30 	.word	0x0800fd30
- 800b264:	0800fd34 	.word	0x0800fd34
- 800b268:	0800fd3c 	.word	0x0800fd3c
- 800b26c:	0800fd38 	.word	0x0800fd38
- 800b270:	0800fd40 	.word	0x0800fd40
+ 800b260:	0800fe28 	.word	0x0800fe28
+ 800b264:	0800fe2c 	.word	0x0800fe2c
+ 800b268:	0800fe34 	.word	0x0800fe34
+ 800b26c:	0800fe30 	.word	0x0800fe30
+ 800b270:	0800fe38 	.word	0x0800fe38
  800b274:	9a0a      	ldr	r2, [sp, #40]	; 0x28
  800b276:	6da3      	ldr	r3, [r4, #88]	; 0x58
  800b278:	429a      	cmp	r2, r3
@@ -27750,8 +27750,8 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800b704:	f104 0619 	add.w	r6, r4, #25
  800b708:	e7f5      	b.n	800b6f6 <_printf_i+0x22e>
  800b70a:	bf00      	nop
- 800b70c:	0800fd42 	.word	0x0800fd42
- 800b710:	0800fd53 	.word	0x0800fd53
+ 800b70c:	0800fe3a 	.word	0x0800fe3a
+ 800b710:	0800fe4b 	.word	0x0800fe4b
 
 0800b714 <_sbrk_r>:
  800b714:	b538      	push	{r3, r4, r5, lr}
@@ -28159,15 +28159,15 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800bb14:	3fc68a28 	.word	0x3fc68a28
  800bb18:	509f79fb 	.word	0x509f79fb
  800bb1c:	3fd34413 	.word	0x3fd34413
- 800bb20:	0800fd71 	.word	0x0800fd71
- 800bb24:	0800fd88 	.word	0x0800fd88
+ 800bb20:	0800fe69 	.word	0x0800fe69
+ 800bb24:	0800fe80 	.word	0x0800fe80
  800bb28:	7ff00000 	.word	0x7ff00000
- 800bb2c:	0800fd6d 	.word	0x0800fd6d
- 800bb30:	0800fd64 	.word	0x0800fd64
- 800bb34:	0800fd41 	.word	0x0800fd41
+ 800bb2c:	0800fe65 	.word	0x0800fe65
+ 800bb30:	0800fe5c 	.word	0x0800fe5c
+ 800bb34:	0800fe39 	.word	0x0800fe39
  800bb38:	3ff80000 	.word	0x3ff80000
- 800bb3c:	0800fe78 	.word	0x0800fe78
- 800bb40:	0800fde3 	.word	0x0800fde3
+ 800bb3c:	0800ff70 	.word	0x0800ff70
+ 800bb40:	0800fedb 	.word	0x0800fedb
  800bb44:	2501      	movs	r5, #1
  800bb46:	2300      	movs	r3, #0
  800bb48:	9306      	str	r3, [sp, #24]
@@ -28494,8 +28494,8 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800be62:	4680      	mov	r8, r0
  800be64:	4689      	mov	r9, r1
  800be66:	e7bd      	b.n	800bde4 <_dtoa_r+0x594>
- 800be68:	0800fe78 	.word	0x0800fe78
- 800be6c:	0800fe50 	.word	0x0800fe50
+ 800be68:	0800ff70 	.word	0x0800ff70
+ 800be6c:	0800ff48 	.word	0x0800ff48
  800be70:	3ff00000 	.word	0x3ff00000
  800be74:	40240000 	.word	0x40240000
  800be78:	401c0000 	.word	0x401c0000
@@ -29075,9 +29075,9 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800c418:	2b02      	cmp	r3, #2
  800c41a:	f73f aea8 	bgt.w	800c16e <_dtoa_r+0x91e>
  800c41e:	e7a9      	b.n	800c374 <_dtoa_r+0xb24>
- 800c420:	0800fde3 	.word	0x0800fde3
- 800c424:	0800fd40 	.word	0x0800fd40
- 800c428:	0800fd64 	.word	0x0800fd64
+ 800c420:	0800fedb 	.word	0x0800fedb
+ 800c424:	0800fe38 	.word	0x0800fe38
+ 800c428:	0800fe5c 	.word	0x0800fe5c
 
 0800c42c <_localeconv_r>:
  800c42c:	4800      	ldr	r0, [pc, #0]	; (800c430 <_localeconv_r+0x4>)
@@ -29147,8 +29147,8 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800c4bc:	e9c0 3303 	strd	r3, r3, [r0, #12]
  800c4c0:	e7f7      	b.n	800c4b2 <_Balloc+0x66>
  800c4c2:	bf00      	nop
- 800c4c4:	0800fd71 	.word	0x0800fd71
- 800c4c8:	0800fdf4 	.word	0x0800fdf4
+ 800c4c4:	0800fe69 	.word	0x0800fe69
+ 800c4c8:	0800feec 	.word	0x0800feec
 
 0800c4cc <_Bfree>:
  800c4cc:	b570      	push	{r4, r5, r6, lr}
@@ -29176,8 +29176,8 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800c500:	6021      	str	r1, [r4, #0]
  800c502:	f843 4022 	str.w	r4, [r3, r2, lsl #2]
  800c506:	bd70      	pop	{r4, r5, r6, pc}
- 800c508:	0800fd71 	.word	0x0800fd71
- 800c50c:	0800fdf4 	.word	0x0800fdf4
+ 800c508:	0800fe69 	.word	0x0800fe69
+ 800c50c:	0800feec 	.word	0x0800feec
 
 0800c510 <__multadd>:
  800c510:	e92d 41f0 	stmdb	sp!, {r4, r5, r6, r7, r8, lr}
@@ -29231,8 +29231,8 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800c58c:	6125      	str	r5, [r4, #16]
  800c58e:	4620      	mov	r0, r4
  800c590:	e8bd 81f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, pc}
- 800c594:	0800fde3 	.word	0x0800fde3
- 800c598:	0800fdf4 	.word	0x0800fdf4
+ 800c594:	0800fedb 	.word	0x0800fedb
+ 800c598:	0800feec 	.word	0x0800feec
 
 0800c59c <__hi0bits>:
  800c59c:	0c03      	lsrs	r3, r0, #16
@@ -29327,8 +29327,8 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800c65a:	6103      	str	r3, [r0, #16]
  800c65c:	bd10      	pop	{r4, pc}
  800c65e:	bf00      	nop
- 800c660:	0800fde3 	.word	0x0800fde3
- 800c664:	0800fdf4 	.word	0x0800fdf4
+ 800c660:	0800fedb 	.word	0x0800fedb
+ 800c664:	0800feec 	.word	0x0800feec
 
 0800c668 <__multiply>:
  800c668:	e92d 4ff0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, lr}
@@ -29448,8 +29448,8 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800c7ae:	3e01      	subs	r6, #1
  800c7b0:	e79c      	b.n	800c6ec <__multiply+0x84>
  800c7b2:	bf00      	nop
- 800c7b4:	0800fde3 	.word	0x0800fde3
- 800c7b8:	0800fdf4 	.word	0x0800fdf4
+ 800c7b4:	0800fedb 	.word	0x0800fedb
+ 800c7b8:	0800feec 	.word	0x0800feec
 
 0800c7bc <__pow5mult>:
  800c7bc:	e92d 43f8 	stmdb	sp!, {r3, r4, r5, r6, r7, r8, r9, lr}
@@ -29517,9 +29517,9 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800c85c:	4638      	mov	r0, r7
  800c85e:	e8bd 83f8 	ldmia.w	sp!, {r3, r4, r5, r6, r7, r8, r9, pc}
  800c862:	bf00      	nop
- 800c864:	0800ff40 	.word	0x0800ff40
- 800c868:	0800fd71 	.word	0x0800fd71
- 800c86c:	0800fdf4 	.word	0x0800fdf4
+ 800c864:	08010038 	.word	0x08010038
+ 800c868:	0800fe69 	.word	0x0800fe69
+ 800c86c:	0800feec 	.word	0x0800feec
 
 0800c870 <__lshift>:
  800c870:	e92d 47f0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, lr}
@@ -29599,8 +29599,8 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800c942:	d8f9      	bhi.n	800c938 <__lshift+0xc8>
  800c944:	e7ea      	b.n	800c91c <__lshift+0xac>
  800c946:	bf00      	nop
- 800c948:	0800fde3 	.word	0x0800fde3
- 800c94c:	0800fdf4 	.word	0x0800fdf4
+ 800c948:	0800fedb 	.word	0x0800fedb
+ 800c94c:	0800feec 	.word	0x0800feec
 
 0800c950 <__mcmp>:
  800c950:	b530      	push	{r4, r5, lr}
@@ -29725,8 +29725,8 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800ca8e:	e7e0      	b.n	800ca52 <__mdiff+0xca>
  800ca90:	3f01      	subs	r7, #1
  800ca92:	e7ea      	b.n	800ca6a <__mdiff+0xe2>
- 800ca94:	0800fde3 	.word	0x0800fde3
- 800ca98:	0800fdf4 	.word	0x0800fdf4
+ 800ca94:	0800fedb 	.word	0x0800fedb
+ 800ca98:	0800feec 	.word	0x0800feec
 
 0800ca9c <__d2b>:
  800ca9c:	e92d 43f7 	stmdb	sp!, {r0, r1, r2, r4, r5, r6, r7, r8, r9, lr}
@@ -29795,8 +29795,8 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800cb42:	f7ff fd2b 	bl	800c59c <__hi0bits>
  800cb46:	ebc0 1042 	rsb	r0, r0, r2, lsl #5
  800cb4a:	e7df      	b.n	800cb0c <__d2b+0x70>
- 800cb4c:	0800fde3 	.word	0x0800fde3
- 800cb50:	0800fdf4 	.word	0x0800fdf4
+ 800cb4c:	0800fedb 	.word	0x0800fedb
+ 800cb50:	0800feec 	.word	0x0800feec
 
 0800cb54 <_calloc_r>:
  800cb54:	b537      	push	{r0, r1, r2, r4, r5, lr}
@@ -29840,9 +29840,9 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800cba8:	e7f3      	b.n	800cb92 <__assert_func+0x12>
  800cbaa:	bf00      	nop
  800cbac:	20000024 	.word	0x20000024
- 800cbb0:	0800ff4c 	.word	0x0800ff4c
- 800cbb4:	0800ff59 	.word	0x0800ff59
- 800cbb8:	0800ff87 	.word	0x0800ff87
+ 800cbb0:	08010044 	.word	0x08010044
+ 800cbb4:	08010051 	.word	0x08010051
+ 800cbb8:	0801007f 	.word	0x0801007f
 
 0800cbbc <fiprintf>:
  800cbbc:	b40e      	push	{r1, r2, r3}
@@ -30168,14 +30168,14 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800ce94:	f7fe fb18 	bl	800b4c8 <_printf_i>
  800ce98:	e7e4      	b.n	800ce64 <_vfiprintf_r+0x208>
  800ce9a:	bf00      	nop
- 800ce9c:	080100c4 	.word	0x080100c4
- 800cea0:	080100e4 	.word	0x080100e4
- 800cea4:	080100a4 	.word	0x080100a4
- 800cea8:	0800ff92 	.word	0x0800ff92
- 800ceac:	0800ff9c 	.word	0x0800ff9c
+ 800ce9c:	080101bc 	.word	0x080101bc
+ 800cea0:	080101dc 	.word	0x080101dc
+ 800cea4:	0801019c 	.word	0x0801019c
+ 800cea8:	0801008a 	.word	0x0801008a
+ 800ceac:	08010094 	.word	0x08010094
  800ceb0:	0800af81 	.word	0x0800af81
  800ceb4:	0800cc39 	.word	0x0800cc39
- 800ceb8:	0800ff98 	.word	0x0800ff98
+ 800ceb8:	08010090 	.word	0x08010090
 
 0800cebc <__swbuf_r>:
  800cebc:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
@@ -30249,9 +30249,9 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800cf4c:	f04f 37ff 	mov.w	r7, #4294967295
  800cf50:	e7ea      	b.n	800cf28 <__swbuf_r+0x6c>
  800cf52:	bf00      	nop
- 800cf54:	080100c4 	.word	0x080100c4
- 800cf58:	080100e4 	.word	0x080100e4
- 800cf5c:	080100a4 	.word	0x080100a4
+ 800cf54:	080101bc 	.word	0x080101bc
+ 800cf58:	080101dc 	.word	0x080101dc
+ 800cf5c:	0801019c 	.word	0x0801019c
 
 0800cf60 <__ascii_wctomb>:
  800cf60:	b149      	cbz	r1, 800cf76 <__ascii_wctomb+0x16>
@@ -30358,9 +30358,9 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800d044:	e7f7      	b.n	800d036 <__swsetup_r+0xba>
  800d046:	bf00      	nop
  800d048:	20000024 	.word	0x20000024
- 800d04c:	080100c4 	.word	0x080100c4
- 800d050:	080100e4 	.word	0x080100e4
- 800d054:	080100a4 	.word	0x080100a4
+ 800d04c:	080101bc 	.word	0x080101bc
+ 800d050:	080101dc 	.word	0x080101dc
+ 800d054:	0801019c 	.word	0x0801019c
 
 0800d058 <abort>:
  800d058:	b508      	push	{r3, lr}
@@ -30544,9 +30544,9 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800d1da:	bf08      	it	eq
  800d1dc:	68ec      	ldreq	r4, [r5, #12]
  800d1de:	e7da      	b.n	800d196 <_fflush_r+0x22>
- 800d1e0:	080100c4 	.word	0x080100c4
- 800d1e4:	080100e4 	.word	0x080100e4
- 800d1e8:	080100a4 	.word	0x080100a4
+ 800d1e0:	080101bc 	.word	0x080101bc
+ 800d1e4:	080101dc 	.word	0x080101dc
+ 800d1e8:	0801019c 	.word	0x0801019c
 
 0800d1ec <std>:
  800d1ec:	2300      	movs	r3, #0
@@ -30671,7 +30671,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800d2fe:	61a3      	str	r3, [r4, #24]
  800d300:	e7d2      	b.n	800d2a8 <__sinit+0xc>
  800d302:	bf00      	nop
- 800d304:	0800fd2c 	.word	0x0800fd2c
+ 800d304:	0800fe24 	.word	0x0800fe24
  800d308:	0800d235 	.word	0x0800d235
 
 0800d30c <__sfp>:
@@ -30726,7 +30726,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800d38a:	603b      	str	r3, [r7, #0]
  800d38c:	e7ee      	b.n	800d36c <__sfp+0x60>
  800d38e:	bf00      	nop
- 800d390:	0800fd2c 	.word	0x0800fd2c
+ 800d390:	0800fe24 	.word	0x0800fe24
  800d394:	ffff0001 	.word	0xffff0001
 
 0800d398 <_fwalk_reent>:
@@ -31490,8 +31490,8 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800db14:	3ff921fb 	.word	0x3ff921fb
  800db18:	54442d18 	.word	0x54442d18
  800db1c:	3fe921fb 	.word	0x3fe921fb
- 800db20:	08010108 	.word	0x08010108
- 800db24:	08010120 	.word	0x08010120
+ 800db20:	08010200 	.word	0x08010200
+ 800db24:	08010218 	.word	0x08010218
  800db28:	54442d18 	.word	0x54442d18
  800db2c:	c00921fb 	.word	0xc00921fb
  800db30:	54442d18 	.word	0x54442d18
@@ -32186,11 +32186,11 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800e29c:	43400000 	.word	0x43400000
  800e2a0:	0003988e 	.word	0x0003988e
  800e2a4:	000bb679 	.word	0x000bb679
- 800e2a8:	08010138 	.word	0x08010138
+ 800e2a8:	08010230 	.word	0x08010230
  800e2ac:	3ff00000 	.word	0x3ff00000
  800e2b0:	40080000 	.word	0x40080000
- 800e2b4:	08010158 	.word	0x08010158
- 800e2b8:	08010148 	.word	0x08010148
+ 800e2b4:	08010250 	.word	0x08010250
+ 800e2b8:	08010240 	.word	0x08010240
  800e2bc:	a3b5      	add	r3, pc, #724	; (adr r3, 800e594 <__ieee754_pow+0xa54>)
  800e2be:	e9d3 2300 	ldrd	r2, r3, [r3]
  800e2c2:	4640      	mov	r0, r8
@@ -32746,7 +32746,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800e8e0:	3ff921fb 	.word	0x3ff921fb
  800e8e4:	413921fb 	.word	0x413921fb
  800e8e8:	3fe00000 	.word	0x3fe00000
- 800e8ec:	08010168 	.word	0x08010168
+ 800e8ec:	08010260 	.word	0x08010260
  800e8f0:	7fefffff 	.word	0x7fefffff
  800e8f4:	ea4f 5428 	mov.w	r4, r8, asr #20
  800e8f8:	f2a4 4416 	subw	r4, r4, #1046	; 0x416
@@ -32815,7 +32815,7 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800e9ac:	e73a      	b.n	800e824 <__ieee754_rem_pio2+0x284>
  800e9ae:	bf00      	nop
  800e9b0:	41700000 	.word	0x41700000
- 800e9b4:	080101e8 	.word	0x080101e8
+ 800e9b4:	080102e0 	.word	0x080102e0
 
 0800e9b8 <__ieee754_sqrt>:
  800e9b8:	e92d 41f0 	stmdb	sp!, {r4, r5, r6, r7, r8, lr}
@@ -33377,13 +33377,13 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800efc4:	f3af 8000 	nop.w
 	...
  800efd4:	3ff00000 	.word	0x3ff00000
- 800efd8:	08010330 	.word	0x08010330
+ 800efd8:	08010428 	.word	0x08010428
  800efdc:	40200000 	.word	0x40200000
  800efe0:	3ff00000 	.word	0x3ff00000
  800efe4:	3e700000 	.word	0x3e700000
  800efe8:	41700000 	.word	0x41700000
  800efec:	3fe00000 	.word	0x3fe00000
- 800eff0:	080102f0 	.word	0x080102f0
+ 800eff0:	080103e8 	.word	0x080103e8
  800eff4:	1e62      	subs	r2, r4, #1
  800eff6:	ab0e      	add	r3, sp, #56	; 0x38
  800eff8:	f853 3022 	ldr.w	r3, [r3, r2, lsl #2]
@@ -34163,8 +34163,8 @@ uint8_t i2c_readDataByte(I2C_Handler_t *ptrHandlerI2C){
  800f85c:	40038000 	.word	0x40038000
  800f860:	3ff80000 	.word	0x3ff80000
  800f864:	bff00000 	.word	0xbff00000
- 800f868:	08010360 	.word	0x08010360
- 800f86c:	08010340 	.word	0x08010340
+ 800f868:	08010458 	.word	0x08010458
+ 800f86c:	08010438 	.word	0x08010438
 
 0800f870 <fabs>:
  800f870:	ec51 0b10 	vmov	r0, r1, d0
