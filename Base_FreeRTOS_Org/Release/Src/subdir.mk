@@ -8,18 +8,21 @@ C_SRCS += \
 ../Src/main.c \
 ../Src/main2.c \
 ../Src/main4.c \
+../Src/main5.c \
 ../Src/syscalls.c 
 
 OBJS += \
 ./Src/main.o \
 ./Src/main2.o \
 ./Src/main4.o \
+./Src/main5.o \
 ./Src/syscalls.o 
 
 C_DEPS += \
 ./Src/main.d \
 ./Src/main2.d \
 ./Src/main4.d \
+./Src/main5.d \
 ./Src/syscalls.d 
 
 
@@ -30,7 +33,7 @@ Src/%.o Src/%.su: ../Src/%.c Src/subdir.mk
 clean: clean-Src
 
 clean-Src:
-	-$(RM) ./Src/main.d ./Src/main.o ./Src/main.su ./Src/main2.d ./Src/main2.o ./Src/main2.su ./Src/main4.d ./Src/main4.o ./Src/main4.su ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su
+	-$(RM) ./Src/main.d ./Src/main.o ./Src/main.su ./Src/main2.d ./Src/main2.o ./Src/main2.su ./Src/main4.d ./Src/main4.o ./Src/main4.su ./Src/main5.d ./Src/main5.o ./Src/main5.su ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su
 
 .PHONY: clean-Src
 

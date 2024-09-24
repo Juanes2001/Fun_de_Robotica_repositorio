@@ -1,6 +1,7 @@
 "./Src/main.o"
 "./Src/main2.o"
 "./Src/main4.o"
+"./Src/main5.o"
 "./Src/syscalls.o"
 "./Startup/startup_stm32f411retx.o"
 "./ThirdParty/FreeRTOS/croutine.o"
