@@ -722,7 +722,7 @@ void inSystem (void){
 	handlerPinTx.GPIO_PinConfig.GPIO_PinAltFunMode  = AF7;
 	handlerPinTx.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
 	handlerPinTx.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
-	handlerPinTx.GPIO_PinConfig.GPIO_PinNumber      = PIN_2;
+	handlerPinTx.GPIO_PinConfig.GPIO_PinNumber      = PIN_9;
 	handlerPinTx.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	handlerPinTx.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
 	GPIO_Config(&handlerPinTx);
@@ -731,13 +731,13 @@ void inSystem (void){
 	handlerPinRx.GPIO_PinConfig.GPIO_PinAltFunMode  = AF7;
 	handlerPinRx.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
 	handlerPinRx.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
-	handlerPinRx.GPIO_PinConfig.GPIO_PinNumber      = PIN_3;
+	handlerPinRx.GPIO_PinConfig.GPIO_PinNumber      = PIN_10;
 	handlerPinRx.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	handlerPinRx.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_HIGH;
 	GPIO_Config(&handlerPinRx);
 
-	handlerUSART.ptrUSARTx                      = USART2;
-	handlerUSART.USART_Config.USART_MCUvelocity = USART_50MHz_VELOCITY;
+	handlerUSART.ptrUSARTx                      = USART1;
+	handlerUSART.USART_Config.USART_MCUvelocity = USART_100MHz_VELOCITY;
 	handlerUSART.USART_Config.USART_baudrate    = USART_BAUDRATE_19200;
 	handlerUSART.USART_Config.USART_enableInRx  = USART_INTERRUPT_RX_ENABLE;
 	handlerUSART.USART_Config.USART_enableInTx  = USART_INTERRUPT_TX_DISABLE;
@@ -1312,7 +1312,7 @@ void vTask_RollTo( void * pvParameters ){
 		xTaskNotifyWait(0,0,NULL,portMAX_DELAY); // Esoerar hasta que la notificacion salte
 
 		// si estamos aqui, este comando lo que hara es girar el robot indefinidamente
-		Mode_dir.Mode = Mode = Roll;
+ 		Mode_dir.Mode = Mode = Roll;
 		Mode_dir.direction_s_r = fparam;
 
 		// Almacenamos el angulo al que se quiere ir
@@ -1350,6 +1350,8 @@ void vTask_Square( void * pvParameters ){
 		square_dir  = fparam; // Direccion del cuadrado
 		square_side = sparam; // lado del cuadrado en cm
 		parameters_op_Robot.op_Mode = 1; // SETEAMOS EN 1 PARA OPERACIONES DE SQUARE
+		resetParameters();
+
 		xTaskNotify(xHandleTask_CrOp,0,eNoAction);
 
 	}
@@ -1380,6 +1382,8 @@ void vTask_Astar( void * pvParameters ){
 
 		flag_Astar = SET;
 
+		resetParameters();
+
 		writeMsg(&handlerUSART, msg_InsertGrid);
 
 		writeMsg(&handlerUSART, "\n_____________Insert * for  empty space______________\n");
@@ -1403,22 +1407,20 @@ void vTask_Grid( void * pvParameters ){
 		//Esperamos la notificacion desde la interrupcion de comandos
 		 xTaskNotifyWait(0,0,NULL,portMAX_DELAY); // Esoerar hasta que la notificacion salte
 
-		 status = xQueueReceive(xQueue_InputData, &item,0);
+		 status = xQueueReceive(xQueue_InputData, &item ,0);
 		if(status == pdTRUE){
 
 			if (item != '\0'){
-
 
 				if (item == 'z'){
 					memset(stringMatrix, 0, sizeof(stringMatrix));
 					stringRow    = 0;
 					stringColumn = 0;
-					writeMsg(&handlerUSART, "\n------String Vaciado-----\n \r");
+					writeMsg(&handlerUSART, "\n-------String Vaciado-----\n\r");
 					writeMsg(&handlerUSART, msg_InsertGrid);
 					item = '\0';
 				}else if (item != '@'){
-					if (item != '\n'){ // Como estamos en Windows, el enter da un par the caracteres \r\n
-						if (item != '\r'){
+						if (item != '\n'){
 							stringMatrix[stringRow][stringColumn] = item;
 							stringColumn++;
 							item = '\0';
@@ -1427,9 +1429,6 @@ void vTask_Grid( void * pvParameters ){
 							stringColumn = 0;
 							item = '\0';
 						}
-					}else{
-						item = '\0';
-					}
 				}else{
 					doneTransaction = SET;
 
@@ -1457,6 +1456,8 @@ void vTask_Grid( void * pvParameters ){
 				flag_Astar = RESET;
 				doneTransaction = RESET;
 				parameters_op_Robot.op_Mode = 2; // SETEAMOS EN 2 PARA OPERACIONES DE ASTAR
+				xTaskNotify(xHandleTask_CrOp,0,eNoAction);
+
 			}else{
 				writeMsg(&handlerUSART, msg_NotWorking);
 			}
@@ -1543,7 +1544,7 @@ void vTask_PrOp( void * pvParameters ){
 						 pow((parameters_Path_Robot.Operation_List[counter_operation].y_destination*10 - parameters_Pos_Robot.yg_position),2));
 
 
-			sprintf(cmd.payload, "goto %u %.2f" , 1 , parameters_Path_Robot.line_Distance); // Mandamos una direccion hacia adelante
+			sprintf(cmd.payload, "sGoTo %u %u $" , 1 , abs(parameters_Path_Robot.line_Distance)); // Mandamos una direccion hacia adelante
 			// y ademas la distancia a recorrer
 
 			counter_operation++;
@@ -1562,14 +1563,14 @@ void vTask_PrOp( void * pvParameters ){
 
 			if (parameters_Path_Robot.Operation_List[counter_operation].grad_Rotative < 0 ){
 				sprintf(cmd.payload,
-						"rollto %u %.2f" ,
+						"sRollto %u %u $" ,
 						1 , // CCW
-						-parameters_Path_Robot.Operation_List[counter_operation].grad_Rotative -8);
+						abs(parameters_Path_Robot.Operation_List[counter_operation].grad_Rotative) - 8);
 			}else{
 				sprintf(cmd.payload,
-						"rollto %u %.2f" ,
+						"sRollto %u %u $" ,
 						0 , // CW
-						parameters_Path_Robot.Operation_List[counter_operation].grad_Rotative - 8);
+						abs(parameters_Path_Robot.Operation_List[counter_operation].grad_Rotative) - 8);
 			}
 
 
@@ -1581,7 +1582,12 @@ void vTask_PrOp( void * pvParameters ){
 			// cerrar el comando de Astar
 			memset(parameters_Path_Robot.Operation_List,0, sizeof(parameters_Path_Robot.Operation_List));
 			counter_operation = 0;
+			parameters_op_Robot.op_Mode = 0;
 			flag_PrOp = RESET; // Paramos el proceso de procesamiento de operaciones y volvemos a el estado normal del programa
+			end = SET; // Levantamos la bandera de finalizacion y nos vamos a el menu
+
+			xTaskNotify(xHandleTask_Menu,0, eNoAction); //reiniciamos todos los parametros
+
 		}
 
 
@@ -1685,7 +1691,7 @@ int extract_command (command_t *cmd){
 				cmd->payload[counter_j++] = item;
 
 			}
-		}while(item != '#');
+		}while(item != '$');
 
 		cmd->payload[counter_j] = '\0'; // Agregamos la terminacion nula para que tengamos un string
 
@@ -1716,6 +1722,8 @@ int extract_command (command_t *cmd){
 			cmd->functionType = -1;
 		}
 
+		memset(data,0,sizeof(data)); // Limpiamos el data
+
 	}else{
 		// Si estamos aqui es porque la bandera de procesamiento de operaciones esta levantada, por lo que se quiere solo procesar
 		// un comando desde el codigo, no desde terminal
@@ -1727,9 +1735,11 @@ int extract_command (command_t *cmd){
 		// Solo nos interesan los estados de ir a y girar a
 		if (strcmp(data, "sGoTo") == 0){
 			cmd->functionType = 2;
-		}else if (strcmp(data, "sRollTo") == 0){
+		}else if (strcmp(data, "sRollto") == 0){
 			cmd->functionType = 4;
 		}
+
+		memset(data,0,sizeof(data)); // Limpiamos el data
 
 	}
 	return 0;
@@ -1753,12 +1763,12 @@ void callback_extInt3(void){
 
 
 //Interripcion USART2
-void usart2Rx_Callback(void){
+void usart1Rx_Callback(void){
 
 	rxData = getRxData();
 //	writeChar(&handlerUSART, rxData);
 
-	if (rxData == '\r'){
+	if (rxData == '\r' && !flag_Astar){
 		wrong_command = SET;
 	}
 	BaseType_t xHigerPriorituTaskWoken;
@@ -1771,14 +1781,15 @@ void usart2Rx_Callback(void){
 
 	if (xReturned != pdTRUE ){
 
-		xQueueSendToBackFromISR(xQueue_InputData,
-								(void*) &rxData,
-								NULL);
-
+		if (rxData != '\r'){
+			xQueueSendToBackFromISR(xQueue_InputData,
+								    (void*) &rxData,
+									NULL);
+		}
 	}else{
 
 
-		if (rxData == '#'){
+		if (rxData == '$'){
 
 			xQueueReceiveFromISR(xQueue_InputData,
 								 (void *) &rxData,
@@ -1791,7 +1802,7 @@ void usart2Rx_Callback(void){
 	}
 
 	if (!flag_Astar){
-		if (rxData == '#' || rxData == '\r'){
+		if (rxData == '$' || rxData == '\r'){
 			// Se manda la notificacion de la tarea que se quiere mover al estado de RUN
 			xTaskNotifyFromISR(xHandleTask_Commands,
 							   0,
@@ -1806,6 +1817,8 @@ void usart2Rx_Callback(void){
 						   eNoAction,
 						   NULL);
 	}
+
+	rxData = '\0';
 }
 
 //Definimos la funcion que se desea ejecutar cuando se genera la interrupcion por el TIM2
@@ -2580,7 +2593,7 @@ int extract_info ( command_t *cmd ,
 		// nos movemos a la siguiente posicion, ya que la posicion actual es un espacio
 		counter++;
 
-		if (cmd->payload[counter] == '#'){
+		if (cmd->payload[counter] == '$'){
 			break;
 		}
 
@@ -2602,7 +2615,7 @@ int extract_info ( command_t *cmd ,
 		// nos movemos a la siguiente posicion, ya que la posicion actual es un espacio
 		counter++;
 
-		if (cmd->payload[counter] == '#'){
+		if (cmd->payload[counter] == '$'){
 			break;
 		}
 
@@ -2624,7 +2637,7 @@ int extract_info ( command_t *cmd ,
 		// nos movemos a la siguiente posicion, ya que la posicion actual es un espacio
 		counter++;
 
-		if (cmd->payload[counter] == '#'){
+		if (cmd->payload[counter] == '$'){
 			break;
 		}
 
@@ -2646,7 +2659,7 @@ int extract_info ( command_t *cmd ,
 		// nos movemos a la siguiente posicion, ya que la posicion actual es un espacio
 		counter++;
 
-		if (cmd->payload[counter] == '#'){
+		if (cmd->payload[counter] == '$'){
 			break;
 		}
 	}
