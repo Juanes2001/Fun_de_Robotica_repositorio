@@ -75,7 +75,7 @@ char userMsg[64];
 char bufferMsg[64];
 
 // Definición de la matriz de string que almacenará
-char stringMatrix[52][52];
+char stringMatrix[7][7];
 
 uint8_t stringColumn = 0;
 uint8_t stringRow = 0;

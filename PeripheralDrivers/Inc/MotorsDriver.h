@@ -13,6 +13,12 @@
 #include "PwmDriver.h"
 #include "BasicTimer.h"
 
+#define TYPE_ANGLE  0
+#define TYPE_LENGHT 1
+#define TYPE_M1     2
+#define TYPE_M2     3
+
+
 
 typedef struct
 {
@@ -20,7 +26,7 @@ typedef struct
 	float    e0;			//Error
 	float    e_int; 			//Suma integral
 	float    e_prev;   			//Error previo
-	float    kp,ki,kd;      // Constantes PID
+	float    kp,ki,kd;    // Constantes PID para la distancia a la recta
 }PID_Parameters_t;
 
 

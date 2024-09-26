@@ -59,8 +59,8 @@ all: main-build
 main-build: Prueba_Astar.elf secondary-outputs
 
 # Tool invocations
-Prueba_Astar.elf Prueba_Astar.map: $(OBJS) $(USER_OBJS) D:\Archivos,\ documentos\ Universidad\Fundamentos\ de\ robotica\Github\Fun_de_Robotica_repositorio\Prueba_Astar\STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Prueba_Astar.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Archivos, documentos Universidad\Fundamentos de robotica\Github\Fun_de_Robotica_repositorio\Prueba_Astar\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Prueba_Astar.map" -Wl,--gc-sections -static -L"D:\Archivos, documentos Universidad\Fundamentos de robotica\Github\Fun_de_Robotica_repositorio/PeripheralDrivers/Debug" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
+Prueba_Astar.elf Prueba_Astar.map: $(OBJS) $(USER_OBJS) C:\Users\juane\OneDrive\Desktop\STM_IDE\GitHub\Fun_de_Robotica_repositorio\Prueba_Astar\STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Prueba_Astar.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\juane\OneDrive\Desktop\STM_IDE\GitHub\Fun_de_Robotica_repositorio\Prueba_Astar\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Prueba_Astar.map" -Wl,--gc-sections -static -L"C:\Users\juane\OneDrive\Desktop\STM_IDE\GitHub\Fun_de_Robotica_repositorio/PeripheralDrivers/Debug" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

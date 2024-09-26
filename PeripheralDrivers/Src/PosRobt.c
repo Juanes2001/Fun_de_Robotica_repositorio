@@ -125,7 +125,7 @@ double distance_to_straight_line(Parameters_Path_t  *ptrParameterPath, double cu
 {
 	// Calculo de la distancia del robot a la linea recta usando los parametros
 	double distance = -1*((ptrParameterPath->dis_point_Parte_1 * current_pos_x + ptrParameterPath->dis_point_Parte_2 * current_pos_y
-				       + ptrParameterPath->dis_point_Parte_1_2) / ptrParameterPath->magnitude_director);
+				       + ptrParameterPath->dis_point_Parte_1_2) / (ptrParameterPath->magnitude_director + 0.001));
 
 	return distance;
 }
