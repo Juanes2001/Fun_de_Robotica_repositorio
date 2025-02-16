@@ -1,0 +1,7 @@
+D:/Workspace_STM/CMSIS-repo/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include/core_cm4.h:1688:22:__NVIC_EnableIRQ	2
+../Src/CaptureFreqDriver.c:12:6:capture_Config	17
+../Src/CaptureFreqDriver.c:204:6:startCapture	5
+../Src/CaptureFreqDriver.c:233:6:stopCapture	5
+../Src/CaptureFreqDriver.c:270:10:timeStamp	5
+../Src/CaptureFreqDriver.c:313:10:getFreq	7
+../Src/CaptureFreqDriver.c:341:6:clean	5

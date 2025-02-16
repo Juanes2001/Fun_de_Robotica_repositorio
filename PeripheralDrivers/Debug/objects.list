@@ -1,5 +1,4 @@
 "./Src/AdcDriver.o"
-"./Src/Astar.o"
 "./Src/BasicTimer.o"
 "./Src/CaptureFreqDriver.o"
 "./Src/DMA.o"
