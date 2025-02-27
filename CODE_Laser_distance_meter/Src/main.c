@@ -29,6 +29,7 @@
 #include "BasicTimer.h"
 #include "USARTxDriver.h"
 #include "RCCHunMHz.h"
+#include "PwmDriver.h"
 
 void inSystem (void);
 void parseCommands(char *stringVector);
@@ -45,12 +46,18 @@ GPIO_Handler_t handlerPinA5         = {0};
 GPIO_Handler_t handlerPinRx         = {0};
 GPIO_Handler_t handlerPinTx         = {0};
 
+// Pin de salida PWM
+GPIO_Handler_t handlerPinPWM = {0};
+
 //Pin para visualizar la velocidad del micro
 GPIO_Handler_t handlerMCO2Show      = {0};
 
 //Timers
 BasicTimer_Handler_t handlerTimerBlinky = {0}; // Timer 3
 BasicTimer_Handler_t handlerADCTim = {0}; // Timer 4 ADC
+
+//PWM
+PWM_Handler_t handlerPwm   = {0};
 
 //handler para ADC
 ADC_Config_t handlerADCJoy = {0};
@@ -61,7 +68,6 @@ USART_Handler_t handlerUSART ={0};
 // Variables para los comandos
 char bufferReception[64];
 uint8_t counterReception = 0;
-uint8_t doneTransaction = RESET;
 uint8_t rxData = '\0';
 char cmd[32];
 unsigned int firstParameter;
@@ -72,25 +78,21 @@ char bufferMsg[64];
 
 // ADC variables
 uint32_t adcData[2] ;
-uint8_t adcFlag = RESET;
 uint8_t counterADC = 0;
 
-// Definición de la matriz de string que almacenará
-char stringMatrix[7][7];
-
-uint8_t stringColumn = 0;
-uint8_t stringRow = 0;
-
 // Banderas
+uint8_t adcFlag = RESET;
+uint8_t doneTransaction = RESET;
 
 //Mensajes
 const char* msg_NotWorking = "\n--------Astar isn't working properly----------\n";
 const char* msg_InsertGrid = "\n------------Insert the char grid--------------\n";
 
+// OTRAS VARIABLES
+uint8_t dutty_cycle = 0;
 
 int main(void)
 {
-
 
 	//Activamos el FPU o la unidad de punto flotante
  	SCB -> CPACR |= (0xF << 20);
@@ -101,6 +103,32 @@ int main(void)
 
     /* Loop forever */
 	while(1){
+
+
+
+
+
+		if (rxData != '\0'){
+			bufferReception[counterReception] = rxData;
+			counterReception++;
+
+			if (rxData == '@'){
+				doneTransaction = SET;
+
+				bufferReception[counterReception] = '\0';
+
+				counterReception = 0;
+
+			}
+
+			rxData = '\0';
+
+		}
+
+		if (doneTransaction){
+			parseCommands(bufferReception);
+			doneTransaction = RESET;
+		}
 
 
 	}// FIN DEL LOOP
@@ -121,7 +149,6 @@ void inSystem (void){
 //	GPIO_Config(&handlerMCO2Show);
 
 	//BLINKY LED
-
 	handlerPinA5.pGPIOx = GPIOA;
 	handlerPinA5.GPIO_PinConfig.GPIO_PinAltFunMode = AF0;
 	handlerPinA5.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
@@ -182,10 +209,10 @@ void inSystem (void){
 
 	//Conversion del JOYSTICK
 	handlerADCTim.ptrTIMx = TIM4;
-	handlerADCTim.TIMx_Config.TIMx_interruptEnable = 1;
+	handlerADCTim.TIMx_Config.TIMx_interruptEnable = BTIMER_ENABLE_INTERRUPT;
 	handlerADCTim.TIMx_Config.TIMx_mode = BTIMER_MODE_UP;
 	handlerADCTim.TIMx_Config.TIMx_period = 100;
-	handlerADCTim.TIMx_Config.TIMx_speed = BTIMER_SPEED_100us;
+	handlerADCTim.TIMx_Config.TIMx_speed = BTIMER_SPEED_100MHz_100us;
 	BasicTimer_Config(&handlerADCTim);
 
 
@@ -198,7 +225,13 @@ void inSystem (void){
 
 
 
-
+	// PWM definicion y PIN
+	handlerPwmB.ptrTIMx           = TIM2;
+	handlerPwmB.config.channel    = PWM_CHANNEL_1;
+	handlerPwmB.config.duttyCicle = ;
+	handlerPwmB.config.periodo    = 100;
+	handlerPwmB.config.prescaler  = BTIMER_SPEED_100MHz_100us;
+	pwm_Config(&handlerPwmB);
 
 }
 
@@ -241,12 +274,8 @@ void adcComplete_Callback(void){
 		adcData[0] = getADC();
 	}else if ((counterADC % 2) == 0){
 		adcData[1] = getADC();
-	}
-
-	if ((counterADC % 2) == 0){
 		adcFlag = SET;
 	}
-
 
 }
 
