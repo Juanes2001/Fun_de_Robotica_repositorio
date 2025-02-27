@@ -293,7 +293,6 @@ void inSystem (void){
     ADC_ConfigMultichannel(&handlerADCJoy, 2);
 
     //Comunicacion Serial
-
     handlerPinTx.pGPIOx                             = GPIOA;
     handlerPinTx.GPIO_PinConfig.GPIO_PinAltFunMode  = AF7;
     handlerPinTx.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;

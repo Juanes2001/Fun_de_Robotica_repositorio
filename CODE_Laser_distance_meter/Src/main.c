@@ -50,6 +50,10 @@ GPIO_Handler_t handlerMCO2Show      = {0};
 
 //Timers
 BasicTimer_Handler_t handlerTimerBlinky = {0}; // Timer 3
+BasicTimer_Handler_t handlerADCTim = {0}; // Timer 4 ADC
+
+//handler para ADC
+ADC_Config_t handlerADCJoy = {0};
 
 //Usart
 USART_Handler_t handlerUSART ={0};
@@ -66,6 +70,11 @@ unsigned int thirdParameter;
 char userMsg[64];
 char bufferMsg[64];
 
+// ADC variables
+uint32_t adcData[2] ;
+uint8_t adcFlag = RESET;
+uint8_t counterADC = 0;
+
 // Definición de la matriz de string que almacenará
 char stringMatrix[7][7];
 
@@ -73,8 +82,6 @@ uint8_t stringColumn = 0;
 uint8_t stringRow = 0;
 
 // Banderas
-uint8_t flagAstar   = RESET;
-uint8_t starWorking = RESET;
 
 //Mensajes
 const char* msg_NotWorking = "\n--------Astar isn't working properly----------\n";
@@ -172,6 +179,27 @@ void inSystem (void){
 	USART_Config(&handlerUSART);
 
 
+
+	//Conversion del JOYSTICK
+	handlerADCTim.ptrTIMx = TIM4;
+	handlerADCTim.TIMx_Config.TIMx_interruptEnable = 1;
+	handlerADCTim.TIMx_Config.TIMx_mode = BTIMER_MODE_UP;
+	handlerADCTim.TIMx_Config.TIMx_period = 100;
+	handlerADCTim.TIMx_Config.TIMx_speed = BTIMER_SPEED_100us;
+	BasicTimer_Config(&handlerADCTim);
+
+
+	handlerADCJoy.channelVector[0] = 0;
+	handlerADCJoy.channelVector[1] = 1;
+	handlerADCJoy.dataAlignment = ADC_ALIGNMENT_RIGHT;
+	handlerADCJoy.resolution = ADC_RESOLUTION_12_BIT;
+	handlerADCJoy.samplingPeriod = ADC_SAMPLING_PERIOD_28_CYCLES;
+	ADC_ConfigMultichannel(&handlerADCJoy, 2);
+
+
+
+
+
 }
 
 
@@ -197,6 +225,28 @@ void parseCommands(char *stringVector){
 void usart2Rx_Callback(void){
 
 	rxData = getRxData();
+
+}
+
+//Callback para comando de setear conversion ADC
+void BasicTimer4_Callback(void){
+	startSingleADC();
+}
+
+
+//Callback para interrupciones posterior a la multiconversion
+void adcComplete_Callback(void){
+	counterADC++;
+	if ((counterADC % 2) != 0){
+		adcData[0] = getADC();
+	}else if ((counterADC % 2) == 0){
+		adcData[1] = getADC();
+	}
+
+	if ((counterADC % 2) == 0){
+		adcFlag = SET;
+	}
+
 
 }
 
