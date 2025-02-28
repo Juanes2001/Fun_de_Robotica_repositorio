@@ -74,8 +74,6 @@ GPIO_Handler_t handlerEncoder2PinC3 = {0};
 // Pines para I2C1
 GPIO_Handler_t handler_PINB8_I2C1   = {0};
 GPIO_Handler_t handler_PINB9_I2C1   = {0};
-
-//Extis
 EXTI_Config_t handlerExtiConEnc_1 = {0};
 EXTI_Config_t handlerExtiConEnc_2 = {0};
 

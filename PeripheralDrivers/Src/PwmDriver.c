@@ -130,9 +130,6 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler){
 
 	}// fin del switch-case
 
-
-
-
 }
 
 /* Función para activar el Timer y activar todo el módulo PWM */

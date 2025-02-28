@@ -30,6 +30,8 @@
 #include "USARTxDriver.h"
 #include "RCCHunMHz.h"
 #include "PwmDriver.h"
+#include "I2CDriver.h"
+#include "AdcDriver.h"
 
 void inSystem (void);
 void parseCommands(char *stringVector);
@@ -52,15 +54,22 @@ GPIO_Handler_t handlerPinPWM = {0};
 //Pin para visualizar la velocidad del micro
 GPIO_Handler_t handlerMCO2Show      = {0};
 
+// Pines para I2C1
+GPIO_Handler_t handler_PINB8_I2C1   = {0};
+GPIO_Handler_t handler_PINB9_I2C1   = {0};
+
 //Timers
 BasicTimer_Handler_t handlerTimerBlinky = {0}; // Timer 3
 BasicTimer_Handler_t handlerADCTim = {0}; // Timer 4 ADC
 
 //PWM
-PWM_Handler_t handlerPwm   = {0};
+PWM_Handler_t handlerPWM   = {0};
+
+//I2C
+I2C_Handler_t handler_I2C1 = {0};
 
 //handler para ADC
-ADC_Config_t handlerADCJoy = {0};
+ADC_Config_t handlerADC = {0};
 
 //Usart
 USART_Handler_t handlerUSART ={0};
@@ -76,8 +85,13 @@ unsigned int thirdParameter;
 char userMsg[64];
 char bufferMsg[64];
 
+float t_mosfet = 10; // Tiempo en de delay en el que se demora el mosfet en prenderse
+float t_lockin = 30; // Tiempo en el que se demora la señal en ser procesada en el lock in, esto
+					 // incluye el tiemoo de demora de la deteccion, el tiempo de procesamiento de la señal
+					 // dentro del lock in hasta que sea detectado por el ADC.
+
 // ADC variables
-uint32_t adcData[2] ;
+uint32_t adcData[3] ;
 uint8_t counterADC = 0;
 
 // Banderas
@@ -103,6 +117,47 @@ int main(void)
 
     /* Loop forever */
 	while(1){
+
+		// --COMENZAMOS LA MEDICION MIDIENDO EL MOMENTO EN EL QUE SE ENCIENDE EL LASER USANDO EL TIEMPO
+		//   t0 = 0 + tdelay_mosfet_o_bjt (no hay necesidad de ADC o ningun fotodiodo a la entrada por
+		//   facilidad)
+
+
+		if (rxData == 'm'){
+
+			// Aqui colocamos la funcion de comenzar pulso de tal forma que se pueda sincronizar
+			// el tiempo de comienzo con el tiempo de finalizacion del proceso
+
+
+
+			rxData = '\0';
+		}
+
+		// --Se medira el pulso de luz usando un timer de tal manera que podamos encender y apagar en el proceso cada vez que un pulso
+		//   de luz sea enviado por lo que es necesario un conteo rapido y preciso del tiempo que transcurre midiendo la cantidad de cuentas
+		//   que el timer ha contado desde el momento cero, por lo que tdelay_mosfet_o_bjt debe ser un parametro constante que se debe de pasar a cuentas
+		//	 para luego ser tomado en cuenta en el calculo del tiempo del recorrido.
+
+		// --Luego el pulso de luz recorre la distancia y regresa y entra al circuito amplificador lock in
+		//   en el cual es necesario medir los tiempos que tarda el lockin en lockear el ruido y extraer la señal
+		//   que se requiere, este tiempo en total seria t_lockin el cual es un parametro fijo constante el cual se transforma
+		//   en cuentas del timer par aluego hacer la conversion mas facilmente.
+
+
+		// --Luego de extraida la señal del ruido de fondo, el ADC esta continuamente midiendo, por lo que es necesario
+		//   hacer pruebas primero para saber como diferenciar entre ruido de fondo(lo que entrega a la salida el lock in
+		//	 Vx y Vy que luego la señal de voltaje total será Vtotal = sqrt(Vx^2+Vy^2). )
+
+		// --Si si existen diferencias gracias a las pruebas, entonces al ser detectada Vtotal (Puede ser detectada)
+		//	 usando depronto un threshold, pero solo puede lograrse gracias a pruebas)
+		//	 entonces se para inmediatamente el timer y se toman las cuentas totales medidas y se hace la resta y la conversion.
+		//   Este sera entonces el tiempo total medido desde el momento en el que se enciende el mosfet hasta el momento
+		//   en el que se cierra la medicion con el ADC.
+
+		// --Finalmente teniendo las cuentas totales medidas, se hace la conversion entre cuentas y tiempo en segundos, y luego se mide
+		//   la distancia usando la formula de velocidad = distancia/tiempo
+		//   distancia = C/(t_total-t0-t_lockin).
+
 
 
 
@@ -216,22 +271,64 @@ void inSystem (void){
 	BasicTimer_Config(&handlerADCTim);
 
 
-	handlerADCJoy.channelVector[0] = 0;
-	handlerADCJoy.channelVector[1] = 1;
-	handlerADCJoy.dataAlignment = ADC_ALIGNMENT_RIGHT;
-	handlerADCJoy.resolution = ADC_RESOLUTION_12_BIT;
-	handlerADCJoy.samplingPeriod = ADC_SAMPLING_PERIOD_28_CYCLES;
-	ADC_ConfigMultichannel(&handlerADCJoy, 2);
+	handlerADC.channelVector[0] = 0;
+	handlerADC.channelVector[1] = 1;
+	handlerADC.dataAlignment = ADC_ALIGNMENT_RIGHT;
+	handlerADC.resolution = ADC_RESOLUTION_12_BIT;
+	handlerADC.samplingPeriod = ADC_SAMPLING_PERIOD_28_CYCLES;
+	ADC_ConfigMultichannel(&handlerADC, 2);
 
 
 
 	// PWM definicion y PIN
-	handlerPwmB.ptrTIMx           = TIM2;
-	handlerPwmB.config.channel    = PWM_CHANNEL_1;
-	handlerPwmB.config.duttyCicle = ;
-	handlerPwmB.config.periodo    = 100;
-	handlerPwmB.config.prescaler  = BTIMER_SPEED_100MHz_100us;
-	pwm_Config(&handlerPwmB);
+	handlerPWM.ptrTIMx            = TIM5;
+	handlerPWM.config.channel     = PWM_CHANNEL_2;
+	handlerPWM.config.duttyCicle  = dutty_cycle;
+	handlerPWM.config.periodo     = 33;// se maneja 25 hz por testeo
+	handlerPWM.config.prescaler   = PWM_SPEED_100MHz_1us;
+	handlerPWM.config.polarity    = PWM_DISABLE_POLARITY;
+	handlerPWM.config.optocoupler = PWM_DISABLE_OPTOCOUPLER;
+	pwm_Config(&handlerPWM);
+	startPwmSignal(&handlerPWM);
+
+	handlerPinPWM.pGPIOx                             = GPIOA;
+	handlerPinPWM.GPIO_PinConfig.GPIO_PinAltFunMode  = AF2;
+	handlerPinPWM.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
+	handlerPinPWM.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
+	handlerPinPWM.GPIO_PinConfig.GPIO_PinNumber      = PIN_1;
+	handlerPinPWM.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+	handlerPinPWM.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
+	GPIO_Config(&handlerPinPWM);
+
+
+
+
+	////////////////////////////////Configuracion PINES B8 (SCL) B9 (SDA) e I2C1 //////////////////////////////////////////////
+
+
+	handler_PINB8_I2C1.pGPIOx                             = GPIOB;
+	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinAltFunMode  = AF4;
+	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
+	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinNumber      = PIN_8;
+	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_OPENDRAIN;
+	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
+	GPIO_Config(&handler_PINB8_I2C1);
+
+	handler_PINB9_I2C1.pGPIOx                             = GPIOB;
+	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinAltFunMode  = AF4;
+	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
+	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinNumber      = PIN_9;
+	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_OPENDRAIN;
+	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
+	GPIO_Config(&handler_PINB9_I2C1);
+
+	handler_I2C1.ptrI2Cx = I2C1;
+	handler_I2C1.I2C_Config.clkSpeed = MAIN_CLOCK_50_MHz_FOR_I2C;
+	handler_I2C1.I2C_Config.slaveAddress = 0;
+	handler_I2C1.I2C_Config.modeI2C = I2C_MODE_FM;
+	i2c_config(&handler_I2C1);
 
 }
 
@@ -244,7 +341,6 @@ void parseCommands(char *stringVector){
 	if (strcmp(cmd, "help") == 0){
 
 		writeMsg(&handlerUSART, "HELP MENU CMD : \n");
-		writeMsg(&handlerUSART, "1)  astar #parallel Distance #diagonal Distance  \n");
 
 	}
 
@@ -269,14 +365,11 @@ void BasicTimer4_Callback(void){
 
 //Callback para interrupciones posterior a la multiconversion
 void adcComplete_Callback(void){
-	counterADC++;
-	if ((counterADC % 2) != 0){
-		adcData[0] = getADC();
-	}else if ((counterADC % 2) == 0){
-		adcData[1] = getADC();
-		adcFlag = SET;
-	}
+	adcData[0] = getADC();
+	adcData[1] = getADC();
+	adcData[3] = getADC();
 
+	adcFlag = SET;
 }
 
 //Interrupción Timer 3
