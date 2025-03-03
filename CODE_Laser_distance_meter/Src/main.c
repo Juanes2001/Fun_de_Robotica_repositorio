@@ -112,7 +112,7 @@ int main(void)
  	SCB -> CPACR |= (0xF << 20);
 
 
-	inSystem ();
+	inSystem();
 
 
     /* Loop forever */

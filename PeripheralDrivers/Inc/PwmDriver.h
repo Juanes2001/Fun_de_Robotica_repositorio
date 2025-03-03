@@ -15,6 +15,10 @@
 #define PWM_CHANNEL_3	2
 #define PWM_CHANNEL_4	3
 
+#define PWM_IN_CHANNEL_1	0
+#define PWM_IN_CHANNEL_2	1
+
+
 
 #define PWM_SPEED_16MHz_1us	    16
 #define PWM_SPEED_16MHz_10us	160
@@ -74,15 +78,21 @@
 #define PWM_ENABLE_OPTOCOUPLER   1
 #define PWM_DISABLE_OPTOCOUPLER  0
 
+#define PWM_ENABLE_ONE_PULSE   1
+#define PWM_DISABLE_ONE_PULSE  0
+
+
 /**/
 typedef struct
 {
 	uint8_t		channel; 		// Canal PWM relacionado con el TIMER
 	uint32_t	prescaler;		// A qué velocidad se incrementa el Timer
-	double	periodo;		// Indica el número de veces que el Timer se incrementa, el periodo de la frecuencia viene dado por Time_Fosc * PSC * ARR
+	double		periodo;		// Indica el número de veces que el Timer se incrementa, el periodo de la frecuencia viene dado por Time_Fosc * PSC * ARR
 	float   	duttyCicle;		// Valor en porcentaje (%) del tiempo que la señal está en alto
 	uint8_t     polarity;       // Se activa el modo de polaridad o no
 	uint8_t     optocoupler;    // Se activa la opcion de optoacolpador donde se cambia toda la propiedad del dutty
+	uint8_t     one_pulse;      // Se activa o se desactiva la opcion de un pulso
+	uint8_t     channel_in;		// Seleccionamos el canal en el que se hara el trigger de entrada
 }PWM_Config_t;
 
 /**/
