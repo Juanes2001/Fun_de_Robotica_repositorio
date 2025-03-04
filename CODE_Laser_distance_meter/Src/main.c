@@ -49,7 +49,7 @@ GPIO_Handler_t handlerPinRx         = {0};
 GPIO_Handler_t handlerPinTx         = {0};
 
 // Pin de salida PWM
-GPIO_Handler_t handlerPinPWM = {0};
+GPIO_Handler_t handlerPin_one_pulse = {0};
 
 //Pin para visualizar la velocidad del micro
 GPIO_Handler_t handlerMCO2Show      = {0};
@@ -63,7 +63,7 @@ BasicTimer_Handler_t handlerTimerBlinky = {0}; // Timer 3
 BasicTimer_Handler_t handlerADCTim = {0}; // Timer 4 ADC
 
 //PWM
-PWM_Handler_t handlerPWM   = {0};
+PWM_Handler_t handlerPWM_one_pulse   = {0};
 
 //I2C
 I2C_Handler_t handler_I2C1 = {0};
@@ -281,24 +281,26 @@ void inSystem (void){
 
 
 	// PWM definicion y PIN
-	handlerPWM.ptrTIMx            = TIM5;
-	handlerPWM.config.channel     = PWM_CHANNEL_2;
-	handlerPWM.config.duttyCicle  = dutty_cycle;
-	handlerPWM.config.periodo     = 33;// se maneja 25 hz por testeo
-	handlerPWM.config.prescaler   = PWM_SPEED_100MHz_1us;
-	handlerPWM.config.polarity    = PWM_DISABLE_POLARITY;
-	handlerPWM.config.optocoupler = PWM_DISABLE_OPTOCOUPLER;
-	pwm_Config(&handlerPWM);
-	startPwmSignal(&handlerPWM);
+	handlerPWM_one_pulse.ptrTIMx            = TIM1;
+	handlerPWM_one_pulse.config.channel     = PWM_CHANNEL_1;
+	handlerPWM_one_pulse.config.duttyCicle  = dutty_cycle;
+	handlerPWM_one_pulse.config.periodo     = 33;// se maneja 25 hz por testeo
+	handlerPWM_one_pulse.config.prescaler   = PWM_SPEED_100MHz_1us;
+	handlerPWM_one_pulse.config.polarity    = PWM_DISABLE_POLARITY;
+	handlerPWM_one_pulse.config.optocoupler = PWM_DISABLE_OPTOCOUPLER;
+	handlerPWM_one_pulse.config.one_pulse   = PWM_ENABLE_ONE_PULSE;
+	handlerPWM_one_pulse.config.channel_in  = PWM_IN_CHANNEL_1;
+	pwm_Config(&handlerPWM_one_pulse);
+	enableComplementaryOutput(&handlerPWM_one_pulse);
 
-	handlerPinPWM.pGPIOx                             = GPIOA;
-	handlerPinPWM.GPIO_PinConfig.GPIO_PinAltFunMode  = AF2;
-	handlerPinPWM.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
-	handlerPinPWM.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
-	handlerPinPWM.GPIO_PinConfig.GPIO_PinNumber      = PIN_1;
-	handlerPinPWM.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-	handlerPinPWM.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
-	GPIO_Config(&handlerPinPWM);
+	handlerPin_one_pulse.pGPIOx                             = GPIOA;
+	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinAltFunMode  = AF2;
+	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
+	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
+	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinNumber      = PIN_1;
+	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
+	GPIO_Config(&handlerPin_one_pulse);
 
 
 

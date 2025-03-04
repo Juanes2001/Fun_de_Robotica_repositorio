@@ -159,14 +159,18 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler){
 				// En modo slave le diremos configuramos que el trigger input seleccionado es
 				// esta en modo trigger.
 
-				ptrPwmHandler->ptrTIMx->SMCR = ;
+				ptrPwmHandler->ptrTIMx->SMCR &= ~TIM_SMCR_TS;
 
+				ptrPwmHandler->ptrTIMx->SMCR |= (TIM_SMCR_TS_2) | ((~TIM_SMCR_TS_1) | TIM_SMCR_TS_0);
 
+				// Configuramos el Slave mode a modo de trigger mode de tal forma que el counter inicie
+				// cuando llegue señal de entrada (flanco de subida o bajada), solo inicia el counter mas no lo resetea
+				ptrPwmHandler->ptrTIMx->SMCR &= ~TIM_SMCR_SMS;
 
+				ptrPwmHandler->ptrTIMx->SMCR |= TIM_SMCR_SMS_2 | (TIM_SMCR_SMS_1 | (~TIM_SMCR_SMS_0));
 
-
-				// Configuramos el canal como PWM
-				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2;
+				// Configuramos el canal como PWM modo 2
+				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1 | (~TIM_CCMR1_OC1M_0);
 
 				// Activamos la funcionalidad de pre-load
 				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC1PE;
@@ -176,11 +180,32 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler){
 
 			case PWM_IN_CHANNEL_2:{
 
-				// Seleccionamos como salida el canal
+				// Seleccionamos como entrada el canal
+
 				ptrPwmHandler->ptrTIMx->CCMR1 &= ~TIM_CCMR1_CC2S;
 
-				// Configuramos el canal como PWM
-				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2;
+				ptrPwmHandler->ptrTIMx->CCMR1 |= ((~TIM_CCMR1_CC2S_1) | TIM_CCMR1_CC2S_0);
+
+				// Configuramos que queremos una deteccion de subida
+				ptrPwmHandler->ptrTIMx->CCER &= ~TIM_CCER_CC2P;
+				ptrPwmHandler->ptrTIMx->CCER &= ~TIM_CCER_CC2NP;
+
+
+				// En modo slave le diremos configuramos que el trigger input seleccionado es
+				// esta en modo trigger.
+
+				ptrPwmHandler->ptrTIMx->SMCR &= ~TIM_SMCR_TS;
+
+				ptrPwmHandler->ptrTIMx->SMCR |= (TIM_SMCR_TS_2) | (TIM_SMCR_TS_1 | (~TIM_SMCR_TS_0));
+
+				// Configuramos el Slave mode a modo de trigger mode de tal forma que el counter inicie
+				// cuando llegue señal de entrada (flanco de subida o bajada), solo inicia el counter mas no lo resetea
+				ptrPwmHandler->ptrTIMx->SMCR &= ~TIM_SMCR_SMS;
+
+				ptrPwmHandler->ptrTIMx->SMCR |= TIM_SMCR_SMS_2 | (TIM_SMCR_SMS_1 | (~TIM_SMCR_SMS_0));
+
+				// Configuramos el canal como PWM modo 2
+				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1 | (~TIM_CCMR1_OC2M_0);
 
 				// Activamos la funcionalidad de pre-load
 				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC2PE;
@@ -194,8 +219,36 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler){
 			}
 
 		}// fin del switch-case
-	}
-}
+
+
+		// preguntamos si se estan usando optoacopladores
+
+			if(ptrPwmHandler->config.optocoupler == PWM_DISABLE_OPTOCOUPLER){
+				/* 1. Cargamos la frecuencia deseada */
+				setFrequency(ptrPwmHandler);
+
+				/* 2. Cargamos el valor del dutty-Cycle*/
+				setDuttyCycle(ptrPwmHandler);
+			}else{
+
+				/* 1. Cargamos la frecuencia deseada */
+				setFrequency(ptrPwmHandler);
+
+				/* 2. Cargamos el valor del dutty-Cycle*/
+				setDuttyCycleAfOpt(ptrPwmHandler);
+			}
+
+			/* 2a. Estamos en UP_Mode, el limite se carga en ARR y se comienza en 0 */
+			ptrPwmHandler->ptrTIMx->CR1 &= ~TIM_CR1_DIR;
+
+
+			ptrPwmHandler->ptrTIMx->CNT = 0;
+
+
+
+	}// fin del if else
+
+}// fin de la funcion
 
 /* Función para activar el Timer y activar todo el módulo PWM */
 void startPwmSignal(PWM_Handler_t *ptrPwmHandler) {
@@ -280,6 +333,78 @@ uint8_t enableOutput(PWM_Handler_t *ptrPwmHandler) {
 
 				break;
 			}
+
+			default: {
+				break;
+			}
+
+		}
+	}
+	return SET;
+}
+
+
+
+
+/* Función encargada de activar cada uno de los canales con los que cuenta el TimerX */
+uint8_t enableComplementaryOutput(PWM_Handler_t *ptrPwmHandler) {
+
+	if (ptrPwmHandler->ptrTIMx == TIM1){
+		// Para el caso de Timer 1, devemos primero activar la opcion MOE en el BDTR register
+
+		ptrPwmHandler->ptrTIMx->BDTR |= TIM_BDTR_MOE;
+
+		switch (ptrPwmHandler->config.channel) {
+			case PWM_CHANNEL_1: {
+				// Activamos la salida del canal 1
+				ptrPwmHandler->ptrTIMx->CCER |= TIM_CCER_CC1NE;
+
+				break;
+			}
+
+			case PWM_CHANNEL_2: {
+				// Activamos la salida del canal 2
+				ptrPwmHandler->ptrTIMx->CCER |= TIM_CCER_CC2NE;
+
+				break;
+			}
+
+			case PWM_CHANNEL_3: {
+				// Activamos la salida del canal 3
+				ptrPwmHandler->ptrTIMx->CCER |= TIM_CCER_CC3NE;
+
+				break;
+			}
+
+
+			default: {
+				break;
+			}
+
+		}
+
+	}else{
+		switch (ptrPwmHandler->config.channel) {
+			case PWM_CHANNEL_1: {
+				// Activamos la salida del canal 1
+				ptrPwmHandler->ptrTIMx->CCER |= TIM_CCER_CC1NE;
+
+				break;
+			}
+
+			case PWM_CHANNEL_2: {
+				// Activamos la salida del canal 2
+				ptrPwmHandler->ptrTIMx->CCER |= TIM_CCER_CC2NE;
+
+				break;
+			}
+
+			case PWM_CHANNEL_3: {
+				// Activamos la salida del canal 3
+				ptrPwmHandler->ptrTIMx->CCER |= TIM_CCER_CC3NE;
+
+				break;
+			}// NO EXISTE EL CANAL COMPLEMENTARIO EN EL CANAL 4
 
 			default: {
 				break;
