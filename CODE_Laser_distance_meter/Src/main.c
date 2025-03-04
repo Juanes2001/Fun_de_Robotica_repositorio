@@ -61,6 +61,7 @@ GPIO_Handler_t handler_PINB9_I2C1   = {0};
 //Timers
 BasicTimer_Handler_t handlerTimerBlinky = {0}; // Timer 3
 BasicTimer_Handler_t handlerADCTim = {0}; // Timer 4 ADC
+BasicTimer_Handler_t handlerTim1_Conteo = {0}; // Timer1, para conteo a alta resolucion
 
 //PWM
 PWM_Handler_t handlerPWM_one_pulse   = {0};
@@ -104,6 +105,7 @@ const char* msg_InsertGrid = "\n------------Insert the char grid--------------\n
 
 // OTRAS VARIABLES
 uint8_t dutty_cycle = 0;
+uint64_t t_total = 0;
 
 int main(void)
 {
@@ -119,7 +121,7 @@ int main(void)
 	while(1){
 
 		// --COMENZAMOS LA MEDICION MIDIENDO EL MOMENTO EN EL QUE SE ENCIENDE EL LASER USANDO EL TIEMPO
-		//   t0 = 0 + tdelay_mosfet_o_bjt (no hay necesidad de ADC o ningun fotodiodo a la entrada por
+		//   t0 = tdelay,  tdelay_mosfet_o_bjt (no hay necesidad de ADC o ningun fotodiodo a la entrada por
 		//   facilidad)
 
 
@@ -128,7 +130,15 @@ int main(void)
 			// Aqui colocamos la funcion de comenzar pulso de tal forma que se pueda sincronizar
 			// el tiempo de comienzo con el tiempo de finalizacion del proceso
 
+			GPIOxTooglePin(&handlerPin_one_pulse);
 
+			GPIOxTooglePin(&handlerPin_one_pulse);
+
+			while(vtotal != threshold){
+
+				t_total = ;
+
+			}
 
 			rxData = '\0';
 		}
@@ -214,7 +224,7 @@ void inSystem (void){
 	GPIO_Config(&handlerPinA5);
 	GPIO_WritePin(&handlerPinA5, SET);
 
-	handlerTimerBlinky.ptrTIMx                           = TIM3;
+	handlerTimerBlinky.ptrTIMx                           = TIM2;
 	handlerTimerBlinky.TIMx_Config.TIMx_interruptEnable  = BTIMER_ENABLE_INTERRUPT;
 	handlerTimerBlinky.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
 	handlerTimerBlinky.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_100us;
@@ -262,7 +272,7 @@ void inSystem (void){
 
 
 
-	//Conversion del JOYSTICK
+	//Conversion
 	handlerADCTim.ptrTIMx = TIM4;
 	handlerADCTim.TIMx_Config.TIMx_interruptEnable = BTIMER_ENABLE_INTERRUPT;
 	handlerADCTim.TIMx_Config.TIMx_mode = BTIMER_MODE_UP;
@@ -275,13 +285,23 @@ void inSystem (void){
 	handlerADC.channelVector[1] = 1;
 	handlerADC.dataAlignment = ADC_ALIGNMENT_RIGHT;
 	handlerADC.resolution = ADC_RESOLUTION_12_BIT;
-	handlerADC.samplingPeriod = ADC_SAMPLING_PERIOD_28_CYCLES;
+	handlerADC.samplingPeriod = ADC_SAMPLING_PERIOD_3_CYCLES;
 	ADC_ConfigMultichannel(&handlerADC, 2);
 
 
 
-	// PWM definicion y PIN
-	handlerPWM_one_pulse.ptrTIMx            = TIM1;
+	// TIMER 1 PARA CONTEO DE TIEMPO DEL PROCESO, ALTA RESOLUCION DE CONTEO
+	handlerADCTim.ptrTIMx = TIM4;
+	handlerADCTim.TIMx_Config.TIMx_interruptEnable = BTIMER_ENABLE_INTERRUPT;
+	handlerADCTim.TIMx_Config.TIMx_mode = BTIMER_MODE_UP;
+	handlerADCTim.TIMx_Config.TIMx_period = 100;
+	handlerADCTim.TIMx_Config.TIMx_speed = BTIMER_SPEED_100MHz_100us;
+	BasicTimer_Config(&handlerADCTim);
+
+
+
+	// PWM definicion y PIN USANDO EL MODO DE SIMGLE PULSE
+	handlerPWM_one_pulse.ptrTIMx            = TIM3;
 	handlerPWM_one_pulse.config.channel     = PWM_CHANNEL_1;
 	handlerPWM_one_pulse.config.duttyCicle  = dutty_cycle;
 	handlerPWM_one_pulse.config.periodo     = 33;// se maneja 25 hz por testeo
@@ -301,6 +321,7 @@ void inSystem (void){
 	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
 	GPIO_Config(&handlerPin_one_pulse);
+	GPIO_WritePin(&handlerPin_one_pulse, RESET);
 
 
 
@@ -375,7 +396,7 @@ void adcComplete_Callback(void){
 }
 
 //Interrupción Timer 3
-void BasicTimer3_Callback(void){
+void BasicTimer2_Callback(void){
 
 	GPIOxTooglePin(&handlerPinA5);
 
