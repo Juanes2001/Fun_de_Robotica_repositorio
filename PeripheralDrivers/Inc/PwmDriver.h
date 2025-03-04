@@ -121,6 +121,7 @@ void enableEvent(PWM_Handler_t *ptrPwmHandler);
 void disableEvent(PWM_Handler_t *ptrPwmHandler);
 void PWMx_Toggle(PWM_Handler_t *ptrPwmHandler);
 uint8_t enableComplementaryOutput(PWM_Handler_t *ptrPwmHandler);
+void outputSelector(PWM_Handler_t *ptrPwmHandler);
 
 uint8_t showPWM (PWM_Handler_t *ptrPwmHandler);
 uint8_t showPWMBfOpt (PWM_Handler_t *ptrPwmHandler);

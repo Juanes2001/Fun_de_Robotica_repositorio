@@ -72,64 +72,7 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler){
 		 *
 		 * 5. Y además activamos el preload bit, para que cada vez que exista un update-event
 		 * el valor cargado en el CCRx será recargado en el registro "shadow" del PWM */
-		switch(ptrPwmHandler->config.channel){
-			case PWM_CHANNEL_1:{
-				// Seleccionamos como salida el canal
-				ptrPwmHandler->ptrTIMx->CCMR1 &= ~TIM_CCMR1_CC1S;
-
-				// Configuramos el canal como PWM
-				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2;
-
-				// Activamos la funcionalidad de pre-load
-				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC1PE;
-
-
-				break;
-			}
-
-			case PWM_CHANNEL_2:{
-				// Seleccionamos como salida el canal
-				ptrPwmHandler->ptrTIMx->CCMR1 &= ~TIM_CCMR1_CC2S;
-
-				// Configuramos el canal como PWM
-				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2;
-
-				// Activamos la funcionalidad de pre-load
-				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC2PE;
-
-				break;
-			}
-
-			case PWM_CHANNEL_3:{
-					// Seleccionamos como salida el canal
-				ptrPwmHandler->ptrTIMx->CCMR2 &= ~TIM_CCMR2_CC3S;
-
-				// Configuramos el canal como PWM
-				ptrPwmHandler->ptrTIMx->CCMR2 |= TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_2;
-
-				// Activamos la funcionalidad de pre-load
-				ptrPwmHandler->ptrTIMx->CCMR2 |= TIM_CCMR2_OC3PE;
-
-				break;
-			}
-			case PWM_CHANNEL_4:{
-					// Seleccionamos como salida el canal
-				ptrPwmHandler->ptrTIMx->CCMR2 &= ~TIM_CCMR2_CC4S;
-
-				// Configuramos el canal como PWM
-				ptrPwmHandler->ptrTIMx->CCMR2 |= TIM_CCMR2_OC4M_1 | TIM_CCMR2_OC4M_2;
-
-				// Activamos la funcionalidad de pre-load
-				ptrPwmHandler->ptrTIMx->CCMR2 |= TIM_CCMR2_OC4PE;
-
-				break;
-			}
-
-			default:{
-				break;
-			}
-
-		}// fin del switch-case
+		outputSelector(ptrPwmHandler);
 
 	}else{
 
@@ -149,7 +92,7 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler){
 
 				ptrPwmHandler->ptrTIMx->CCMR1 &= ~TIM_CCMR1_CC1S;
 
-				ptrPwmHandler->ptrTIMx->CCMR1 |= ((~TIM_CCMR1_CC1S_1) | TIM_CCMR1_CC1S_0);
+				ptrPwmHandler->ptrTIMx->CCMR1 |= ((0*TIM_CCMR1_CC1S_1) | TIM_CCMR1_CC1S_0);
 
 				// Configuramos que queremos una deteccion de subida
 				ptrPwmHandler->ptrTIMx->CCER &= ~TIM_CCER_CC1P;
@@ -161,16 +104,16 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler){
 
 				ptrPwmHandler->ptrTIMx->SMCR &= ~TIM_SMCR_TS;
 
-				ptrPwmHandler->ptrTIMx->SMCR |= (TIM_SMCR_TS_2) | ((~TIM_SMCR_TS_1) | TIM_SMCR_TS_0);
+				ptrPwmHandler->ptrTIMx->SMCR |= (TIM_SMCR_TS_2) | ((0*TIM_SMCR_TS_1) | TIM_SMCR_TS_0);
 
 				// Configuramos el Slave mode a modo de trigger mode de tal forma que el counter inicie
 				// cuando llegue señal de entrada (flanco de subida o bajada), solo inicia el counter mas no lo resetea
 				ptrPwmHandler->ptrTIMx->SMCR &= ~TIM_SMCR_SMS;
 
-				ptrPwmHandler->ptrTIMx->SMCR |= TIM_SMCR_SMS_2 | (TIM_SMCR_SMS_1 | (~TIM_SMCR_SMS_0));
+				ptrPwmHandler->ptrTIMx->SMCR |= TIM_SMCR_SMS_2 | (TIM_SMCR_SMS_1 | (0*TIM_SMCR_SMS_0));
 
 				// Configuramos el canal como PWM modo 2
-				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1 | (~TIM_CCMR1_OC1M_0);
+				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1 | (0*TIM_CCMR1_OC1M_0);
 
 				// Activamos la funcionalidad de pre-load
 				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC1PE;
@@ -184,7 +127,7 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler){
 
 				ptrPwmHandler->ptrTIMx->CCMR1 &= ~TIM_CCMR1_CC2S;
 
-				ptrPwmHandler->ptrTIMx->CCMR1 |= ((~TIM_CCMR1_CC2S_1) | TIM_CCMR1_CC2S_0);
+				ptrPwmHandler->ptrTIMx->CCMR1 |= ((0*TIM_CCMR1_CC2S_1) | TIM_CCMR1_CC2S_0);
 
 				// Configuramos que queremos una deteccion de subida
 				ptrPwmHandler->ptrTIMx->CCER &= ~TIM_CCER_CC2P;
@@ -196,16 +139,52 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler){
 
 				ptrPwmHandler->ptrTIMx->SMCR &= ~TIM_SMCR_TS;
 
-				ptrPwmHandler->ptrTIMx->SMCR |= (TIM_SMCR_TS_2) | (TIM_SMCR_TS_1 | (~TIM_SMCR_TS_0));
+				ptrPwmHandler->ptrTIMx->SMCR |= (TIM_SMCR_TS_2) | (TIM_SMCR_TS_1 | (0*TIM_SMCR_TS_0));
 
 				// Configuramos el Slave mode a modo de trigger mode de tal forma que el counter inicie
 				// cuando llegue señal de entrada (flanco de subida o bajada), solo inicia el counter mas no lo resetea
 				ptrPwmHandler->ptrTIMx->SMCR &= ~TIM_SMCR_SMS;
 
-				ptrPwmHandler->ptrTIMx->SMCR |= TIM_SMCR_SMS_2 | (TIM_SMCR_SMS_1 | (~TIM_SMCR_SMS_0));
+				ptrPwmHandler->ptrTIMx->SMCR |= TIM_SMCR_SMS_2 | (TIM_SMCR_SMS_1 | (0*TIM_SMCR_SMS_0));
 
 				// Configuramos el canal como PWM modo 2
-				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1 | (~TIM_CCMR1_OC2M_0);
+				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1 | (0*TIM_CCMR1_OC2M_0);
+
+				// Activamos la funcionalidad de pre-load
+				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC2PE;
+
+				break;
+			}
+
+
+			default:{
+				break;
+			}
+
+		}// fin del switch-case
+
+		switch(ptrPwmHandler->config.channel){
+			case PWM_CHANNEL_1:{
+
+				// Seleccionamos como salida el canal
+				ptrPwmHandler->ptrTIMx->CCMR1 &= ~TIM_CCMR1_CC1S;
+
+				// Configuramos el canal como PWM modo 1
+				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_0;
+
+				// Activamos la funcionalidad de pre-load
+				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC1PE;
+
+				break;
+			}
+
+			case PWM_CHANNEL_2:{
+
+				// Seleccionamos como salida el canal
+				ptrPwmHandler->ptrTIMx->CCMR1 &= ~TIM_CCMR1_CC2S;
+
+				// Configuramos el canal como PWM modo 2
+				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_0;
 
 				// Activamos la funcionalidad de pre-load
 				ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC2PE;
@@ -250,6 +229,72 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler){
 
 }// fin de la funcion
 
+
+// Selector de output y tipo de PWM
+void outputSelector(PWM_Handler_t *ptrPwmHandler){
+
+	switch(ptrPwmHandler->config.channel){
+		case PWM_CHANNEL_1:{
+			// Seleccionamos como salida el canal
+			ptrPwmHandler->ptrTIMx->CCMR1 &= ~TIM_CCMR1_CC1S;
+
+			// Configuramos el canal como PWM
+			ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2;
+
+			// Activamos la funcionalidad de pre-load
+			ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC1PE;
+
+
+			break;
+		}
+
+		case PWM_CHANNEL_2:{
+			// Seleccionamos como salida el canal
+			ptrPwmHandler->ptrTIMx->CCMR1 &= ~TIM_CCMR1_CC2S;
+
+			// Configuramos el canal como PWM
+			ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2;
+
+			// Activamos la funcionalidad de pre-load
+			ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC2PE;
+
+			break;
+		}
+
+		case PWM_CHANNEL_3:{
+				// Seleccionamos como salida el canal
+			ptrPwmHandler->ptrTIMx->CCMR2 &= ~TIM_CCMR2_CC3S;
+
+			// Configuramos el canal como PWM
+			ptrPwmHandler->ptrTIMx->CCMR2 |= TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3M_2;
+
+			// Activamos la funcionalidad de pre-load
+			ptrPwmHandler->ptrTIMx->CCMR2 |= TIM_CCMR2_OC3PE;
+
+			break;
+		}
+		case PWM_CHANNEL_4:{
+				// Seleccionamos como salida el canal
+			ptrPwmHandler->ptrTIMx->CCMR2 &= ~TIM_CCMR2_CC4S;
+
+			// Configuramos el canal como PWM
+			ptrPwmHandler->ptrTIMx->CCMR2 |= TIM_CCMR2_OC4M_1 | TIM_CCMR2_OC4M_2;
+
+			// Activamos la funcionalidad de pre-load
+			ptrPwmHandler->ptrTIMx->CCMR2 |= TIM_CCMR2_OC4PE;
+
+			break;
+		}
+
+		default:{
+			break;
+		}
+
+	}// fin del switch-case
+
+}
+
+
 /* Función para activar el Timer y activar todo el módulo PWM */
 void startPwmSignal(PWM_Handler_t *ptrPwmHandler) {
 	ptrPwmHandler->ptrTIMx->CR1 |= TIM_CR1_CEN;
@@ -265,7 +310,7 @@ void stopPwmSignal(PWM_Handler_t *ptrPwmHandler) {
 uint8_t enableOutput(PWM_Handler_t *ptrPwmHandler) {
 
 	if (ptrPwmHandler->ptrTIMx == TIM1){
-		// Para el caso de Timer 1, devemos primero activar la opcion MOE en el BDTR register
+		// Para el caso de Timer 1, debemos primero activar la opcion MOE en el BDTR register
 
 		ptrPwmHandler->ptrTIMx->BDTR |= TIM_BDTR_MOE;
 

@@ -49,7 +49,10 @@ GPIO_Handler_t handlerPinRx         = {0};
 GPIO_Handler_t handlerPinTx         = {0};
 
 // Pin de salida PWM
-GPIO_Handler_t handlerPin_one_pulse = {0};
+GPIO_Handler_t handlerPin_one_pulse 	= {0};
+GPIO_Handler_t handlerPin_one_pulse_out = {0};
+GPIO_Handler_t handlerPin_one_pulse_in  = {0};
+
 
 //Pin para visualizar la velocidad del micro
 GPIO_Handler_t handlerMCO2Show      = {0};
@@ -104,8 +107,11 @@ const char* msg_NotWorking = "\n--------Astar isn't working properly----------\n
 const char* msg_InsertGrid = "\n------------Insert the char grid--------------\n";
 
 // OTRAS VARIABLES
-uint8_t dutty_cycle = 0;
-uint64_t t_total = 0;
+uint8_t dutty_cycle = 50;
+uint64_t t_total    = 0;
+double vtotal       = 0;
+double threshold    = 0;
+
 
 int main(void)
 {
@@ -131,14 +137,16 @@ int main(void)
 			// el tiempo de comienzo con el tiempo de finalizacion del proceso
 
 			GPIOxTooglePin(&handlerPin_one_pulse);
-
+			startTimer(&handlerTim1_Conteo);
 			GPIOxTooglePin(&handlerPin_one_pulse);
 
-			while(vtotal != threshold){
+			while(vtotal <= threshold){
 
-				t_total = ;
+				t_total += handlerTim1_Conteo.ptrTIMx->CNT;
 
 			}
+
+
 
 			rxData = '\0';
 		}
@@ -166,7 +174,7 @@ int main(void)
 
 		// --Finalmente teniendo las cuentas totales medidas, se hace la conversion entre cuentas y tiempo en segundos, y luego se mide
 		//   la distancia usando la formula de velocidad = distancia/tiempo
-		//   distancia = C/(t_total-t0-t_lockin).
+		//   distancia = C*(t_total-t0-t_lockin)/2.
 
 
 
@@ -276,7 +284,7 @@ void inSystem (void){
 	handlerADCTim.ptrTIMx = TIM4;
 	handlerADCTim.TIMx_Config.TIMx_interruptEnable = BTIMER_ENABLE_INTERRUPT;
 	handlerADCTim.TIMx_Config.TIMx_mode = BTIMER_MODE_UP;
-	handlerADCTim.TIMx_Config.TIMx_period = 100;
+	handlerADCTim.TIMx_Config.TIMx_period = 1000;
 	handlerADCTim.TIMx_Config.TIMx_speed = BTIMER_SPEED_100MHz_100us;
 	BasicTimer_Config(&handlerADCTim);
 
@@ -291,39 +299,55 @@ void inSystem (void){
 
 
 	// TIMER 1 PARA CONTEO DE TIEMPO DEL PROCESO, ALTA RESOLUCION DE CONTEO
-	handlerADCTim.ptrTIMx = TIM4;
-	handlerADCTim.TIMx_Config.TIMx_interruptEnable = BTIMER_ENABLE_INTERRUPT;
-	handlerADCTim.TIMx_Config.TIMx_mode = BTIMER_MODE_UP;
-	handlerADCTim.TIMx_Config.TIMx_period = 100;
-	handlerADCTim.TIMx_Config.TIMx_speed = BTIMER_SPEED_100MHz_100us;
-	BasicTimer_Config(&handlerADCTim);
+	handlerTim1_Conteo.ptrTIMx = TIM1;
+	handlerTim1_Conteo.TIMx_Config.TIMx_interruptEnable = BTIMER_ENABLE_INTERRUPT;
+	handlerTim1_Conteo.TIMx_Config.TIMx_mode = BTIMER_MODE_UP;
+	handlerTim1_Conteo.TIMx_Config.TIMx_period = 100;
+	handlerTim1_Conteo.TIMx_Config.TIMx_speed = BTIMER_SPEED_100MHz_100us;
+	BasicTimer_Config(&handlerTim1_Conteo);
 
 
 
 	// PWM definicion y PIN USANDO EL MODO DE SIMGLE PULSE
-	handlerPWM_one_pulse.ptrTIMx            = TIM3;
+	handlerPWM_one_pulse.ptrTIMx            = TIM5;
 	handlerPWM_one_pulse.config.channel     = PWM_CHANNEL_1;
 	handlerPWM_one_pulse.config.duttyCicle  = dutty_cycle;
-	handlerPWM_one_pulse.config.periodo     = 33;// se maneja 25 hz por testeo
+	handlerPWM_one_pulse.config.periodo     = 50;
 	handlerPWM_one_pulse.config.prescaler   = PWM_SPEED_100MHz_1us;
 	handlerPWM_one_pulse.config.polarity    = PWM_DISABLE_POLARITY;
 	handlerPWM_one_pulse.config.optocoupler = PWM_DISABLE_OPTOCOUPLER;
 	handlerPWM_one_pulse.config.one_pulse   = PWM_ENABLE_ONE_PULSE;
-	handlerPWM_one_pulse.config.channel_in  = PWM_IN_CHANNEL_1;
+	handlerPWM_one_pulse.config.channel_in  = PWM_IN_CHANNEL_2;
 	pwm_Config(&handlerPWM_one_pulse);
-	enableComplementaryOutput(&handlerPWM_one_pulse);
+	enableOutput(&handlerPWM_one_pulse);
 
 	handlerPin_one_pulse.pGPIOx                             = GPIOA;
-	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinAltFunMode  = AF2;
-	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
+	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinAltFunMode  = AF0;
+	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_OUT;
 	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
-	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinNumber      = PIN_1;
+	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinNumber      = PIN_4;
 	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
 	GPIO_Config(&handlerPin_one_pulse);
 	GPIO_WritePin(&handlerPin_one_pulse, RESET);
 
+	handlerPin_one_pulse_out.pGPIOx                             = GPIOA;
+	handlerPin_one_pulse_out.GPIO_PinConfig.GPIO_PinAltFunMode  = AF2;
+	handlerPin_one_pulse_out.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
+	handlerPin_one_pulse_out.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
+	handlerPin_one_pulse_out.GPIO_PinConfig.GPIO_PinNumber      = PIN_0;
+	handlerPin_one_pulse_out.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+	handlerPin_one_pulse_out.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
+	GPIO_Config(&handlerPin_one_pulse_out);
 
+	handlerPin_one_pulse_in.pGPIOx                             = GPIOA;
+	handlerPin_one_pulse_in.GPIO_PinConfig.GPIO_PinAltFunMode  = AF2;
+	handlerPin_one_pulse_in.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
+	handlerPin_one_pulse_in.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
+	handlerPin_one_pulse_in.GPIO_PinConfig.GPIO_PinNumber      = PIN_1;
+	handlerPin_one_pulse_in.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+	handlerPin_one_pulse_in.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
+	GPIO_Config(&handlerPin_one_pulse_in);
 
 
 	////////////////////////////////Configuracion PINES B8 (SCL) B9 (SDA) e I2C1 //////////////////////////////////////////////
