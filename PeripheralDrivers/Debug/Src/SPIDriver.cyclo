@@ -1,5 +1,0 @@
-../Src/SPIDriver.c:10:6:spi_config	12
-../Src/SPIDriver.c:92:6:spi_transmit	5
-../Src/SPIDriver.c:130:6:spi_receive	4
-../Src/SPIDriver.c:154:6:spi_selectSlave	1
-../Src/SPIDriver.c:160:6:spi_unselectSlave	1

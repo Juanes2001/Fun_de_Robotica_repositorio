@@ -1,4 +1,0 @@
-../Src/MotorsDriver.c:12:6:updateDuttyMotor	1
-../Src/MotorsDriver.c:21:6:updateFrequencyMotor	1
-../Src/MotorsDriver.c:30:6:updateDirMotor	1
-../Src/MotorsDriver.c:39:8:map	1

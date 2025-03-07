@@ -1,5 +1,0 @@
-../Src/GPIOxDriver.c:22:6:GPIO_Config	9
-../Src/GPIOxDriver.c:151:6:GPIO_WritePin	2
-../Src/GPIOxDriver.c:166:6:GPIO_WritePin_Afopt	2
-../Src/GPIOxDriver.c:187:10:GPIO_ReadPin	1
-../Src/GPIOxDriver.c:201:6:GPIOxTooglePin	1
