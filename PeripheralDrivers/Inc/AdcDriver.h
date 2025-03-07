@@ -54,6 +54,10 @@
 #define ADC_MULTCH_DISABLE 0
 #define ADC_MULTCH_ENABLE  1
 
+#define ADC_WATCHDOG_DISABLE 0
+#define ADC_WATCHDOG_ENABLE  1
+
+
 
 typedef struct
 {
@@ -66,6 +70,9 @@ typedef struct
 	uint8_t     continuosModeEnable; // Modo de conversion continua
 	uint8_t 	multiChannel;        // Activa el multicanal o la conversion sigle channel.
 	uint8_t     numeroDeCanales;	 // Cantidad de canales a convertir
+	uint8_t 	watchdogs_Enable;    // Activamos o desactivamos el modo de WatchDosgs
+	uint16_t 	threshold_up;		 // Limite superior del watchdog
+	uint16_t 	threshold_down;		 // Limite inferior del watchdog
 }ADC_Config_t;
 
 enum {
@@ -82,13 +89,19 @@ enum {
 };
 
 void adc_Config(ADC_Config_t *adcConfig);
+
+void adc_ON(void);
+void adc_OFF(void);
+void adc_CONT_ON(void);
+void adc_CONT_OFF(void);
 void adcComplete_Callback(void);
-void startSingleADC(void);
-void startContinousADC(void);
+void watchdogs_Callback(void);
+void startConvertion(void);
 uint16_t getADC(void);
 void adcExternalEXTIConfig ();
 void adcTimerEventConfig();
 void adc_Set_Priority(ADC_Config_t *ptrAdcConfig, uint8_t newPriority);
-void ADC_ConfigMultichannel (ADC_Config_t *adcConfig, uint8_t numeroDeCanales);
+
+void ADC_IRQHandler(void);
 
 #endif /* INC_ADCDRIVER_H_ */

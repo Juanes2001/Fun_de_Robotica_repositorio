@@ -1,0 +1,15 @@
+D:/Workspace_STM/CMSIS-repo/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include/core_cm4.h:1688:22:__NVIC_EnableIRQ	2
+D:/Workspace_STM/CMSIS-repo/STM32Cube_FW_F4_V1.27.0/Drivers/CMSIS/Core/Include/core_cm4.h:1816:22:__NVIC_SetPriority	2
+../Src/USARTxDriver.c:23:6:USART_Config	24
+../Src/USARTxDriver.c:309:10:brrCalculus	5
+../Src/USARTxDriver.c:412:6:writeChar	2
+../Src/USARTxDriver.c:422:6:writeMsg	2
+../Src/USARTxDriver.c:430:28:usart2Rx_Callback	1
+../Src/USARTxDriver.c:433:28:usart1Rx_Callback	1
+../Src/USARTxDriver.c:436:28:usart6Rx_Callback	1
+../Src/USARTxDriver.c:442:9:getRxData	1
+../Src/USARTxDriver.c:446:6:USART2_IRQHandler	2
+../Src/USARTxDriver.c:462:6:USART1_IRQHandler	2
+../Src/USARTxDriver.c:480:6:USART6_IRQHandler	2
+../Src/USARTxDriver.c:490:7:roundToNDecimals	1
+../Src/USARTxDriver.c:503:6:usart_Set_Priority	4

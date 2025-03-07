@@ -33,6 +33,8 @@
 #include "I2CDriver.h"
 #include "AdcDriver.h"
 
+#define C0 299792458
+
 void inSystem (void);
 void parseCommands(char *stringVector);
 void builtTerminalString (char** terminalString);
@@ -52,6 +54,8 @@ GPIO_Handler_t handlerPinTx         = {0};
 GPIO_Handler_t handlerPin_one_pulse 	= {0};
 GPIO_Handler_t handlerPin_one_pulse_out = {0};
 GPIO_Handler_t handlerPin_one_pulse_in  = {0};
+GPIO_Handler_t handlerPin_ADC_Vx 		= {0};
+GPIO_Handler_t handlerPin_ADC_Vy 		= {0};
 
 
 //Pin para visualizar la velocidad del micro
@@ -99,18 +103,24 @@ uint32_t adcData[3] ;
 uint8_t counterADC = 0;
 
 // Banderas
-uint8_t adcFlag = RESET;
+uint8_t adcFlag 		= RESET;
 uint8_t doneTransaction = RESET;
+uint8_t stopTimerFlag	= RESET;
+uint8_t flagMeas 		= RESET;
 
 //Mensajes
 const char* msg_NotWorking = "\n--------Astar isn't working properly----------\n";
 const char* msg_InsertGrid = "\n------------Insert the char grid--------------\n";
 
 // OTRAS VARIABLES
-uint8_t dutty_cycle = 50;
-uint64_t t_total    = 0;
-double vtotal       = 0;
-double threshold    = 0;
+uint8_t dutty_cycle 		= 50;
+uint64_t cuentas_totales    = 0;
+double t_total 				= 0;
+double threshold    		= 0;
+float voltageX 				= 0;
+float voltageY 				= 0;
+int counter 				= 0;
+double distancia 			= 0;
 
 
 int main(void)
@@ -118,6 +128,7 @@ int main(void)
 
 	//Activamos el FPU o la unidad de punto flotante
  	SCB -> CPACR |= (0xF << 20);
+
 
 
 	inSystem();
@@ -131,25 +142,54 @@ int main(void)
 		//   facilidad)
 
 
+
+
 		if (rxData == 'm'){
+			startTimer(&handlerTimerBlinky);
+			flagMeas =SET;
+			rxData = '\0';
+		}
 
 			// Aqui colocamos la funcion de comenzar pulso de tal forma que se pueda sincronizar
 			// el tiempo de comienzo con el tiempo de finalizacion del proceso
 
-			GPIOxTooglePin(&handlerPin_one_pulse);
+
+		if (flagMeas){
 			startTimer(&handlerTim1_Conteo);
-			GPIOxTooglePin(&handlerPin_one_pulse);
+			startConvertion();
 
-			while(vtotal <= threshold){
+			while(~stopTimerFlag){
 
-				t_total += handlerTim1_Conteo.ptrTIMx->CNT;
+				cuentas_totales += handlerTim1_Conteo.ptrTIMx->CNT;
+
+				if (adcFlag){
+
+					voltageX = adcData[0]*(3.3/(powf(2.0,12)));
+					voltageY = adcData[1]*(3.3/(powf(2.0,12)));
+
+
+					sprintf(userMsg,"%.3f\t%.2f\t%.3f\t%.2f\n",voltageX,1.65,voltageY,1.65);
+
+					writeMsg(&handlerUSART, userMsg);
+
+					adcFlag = RESET;
+					adc_CONT_ON();
+					startConvertion();
+				}
 
 			}
 
+			t_total = counts2time(cuentas_totales);
 
+			t_luz = t_total-t_lockin-t_mosfet;
 
-			rxData = '\0';
+			distancia = (C0*t_luz)/2;
+			distancia *= pow(10,-9);
+
 		}
+
+
+
 
 		// --Se medira el pulso de luz usando un timer de tal manera que podamos encender y apagar en el proceso cada vez que un pulso
 		//   de luz sea enviado por lo que es necesario un conteo rapido y preciso del tiempo que transcurre midiendo la cantidad de cuentas
@@ -181,27 +221,27 @@ int main(void)
 
 
 
-		if (rxData != '\0'){
-			bufferReception[counterReception] = rxData;
-			counterReception++;
-
-			if (rxData == '@'){
-				doneTransaction = SET;
-
-				bufferReception[counterReception] = '\0';
-
-				counterReception = 0;
-
-			}
-
-			rxData = '\0';
-
-		}
-
-		if (doneTransaction){
-			parseCommands(bufferReception);
-			doneTransaction = RESET;
-		}
+//		if (rxData != '\0'){
+//			bufferReception[counterReception] = rxData;
+//			counterReception++;
+//
+//			if (rxData == '@'){
+//				doneTransaction = SET;
+//
+//				bufferReception[counterReception] = '\0';
+//
+//				counterReception = 0;
+//
+//			}
+//
+//			rxData = '\0';
+//
+//		}
+//
+//		if (doneTransaction){
+//			parseCommands(bufferReception);
+//			doneTransaction = RESET;
+//		}
 
 
 	}// FIN DEL LOOP
@@ -230,7 +270,7 @@ void inSystem (void){
 	handlerPinA5.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	handlerPinA5.GPIO_PinConfig.GPIO_PinSpeed = GPIO_OSPEEDR_FAST;
 	GPIO_Config(&handlerPinA5);
-	GPIO_WritePin(&handlerPinA5, SET);
+	GPIO_WritePin(&handlerPinA5, RESET);
 
 	handlerTimerBlinky.ptrTIMx                           = TIM2;
 	handlerTimerBlinky.TIMx_Config.TIMx_interruptEnable  = BTIMER_ENABLE_INTERRUPT;
@@ -238,7 +278,6 @@ void inSystem (void){
 	handlerTimerBlinky.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_100us;
 	handlerTimerBlinky.TIMx_Config.TIMx_period           = 1000;
 	BasicTimer_Config(&handlerTimerBlinky);
-	startTimer(&handlerTimerBlinky);
 
 
 
@@ -280,30 +319,46 @@ void inSystem (void){
 
 
 
-	//Conversion
-	handlerADCTim.ptrTIMx = TIM4;
-	handlerADCTim.TIMx_Config.TIMx_interruptEnable = BTIMER_ENABLE_INTERRUPT;
-	handlerADCTim.TIMx_Config.TIMx_mode = BTIMER_MODE_UP;
-	handlerADCTim.TIMx_Config.TIMx_period = 1000;
-	handlerADCTim.TIMx_Config.TIMx_speed = BTIMER_SPEED_100MHz_100us;
-	BasicTimer_Config(&handlerADCTim);
 
+	// Conversión
+	handlerADC.channelVector[0] 	= ADC_CHANNEL_6;
+	handlerADC.channelVector[1] 	= ADC_CHANNEL_7;
+	handlerADC.dataAlignment 		= ADC_ALIGNMENT_RIGHT;
+	handlerADC.resolution			= ADC_RESOLUTION_12_BIT;
+	handlerADC.samplingPeriod 		= ADC_SAMPLING_PERIOD_3_CYCLES;
+	handlerADC.continuosModeEnable  = ADC_CONT_ENABLE;
+	handlerADC.multiChannel 		= ADC_MULTCH_ENABLE;
+	handlerADC.watchdogs_Enable 	= ADC_WATCHDOG_ENABLE;
+	handlerADC.threshold_up 		= pow(2.0,12)/2;
+	handlerADC.threshold_down 		= 0;
+	adc_Config(&handlerADC);
 
-	handlerADC.channelVector[0] = 0;
-	handlerADC.channelVector[1] = 1;
-	handlerADC.dataAlignment = ADC_ALIGNMENT_RIGHT;
-	handlerADC.resolution = ADC_RESOLUTION_12_BIT;
-	handlerADC.samplingPeriod = ADC_SAMPLING_PERIOD_3_CYCLES;
-	ADC_ConfigMultichannel(&handlerADC, 2);
+	handlerPin_ADC_Vx.pGPIOx = GPIOA;
+	handlerPin_ADC_Vx.GPIO_PinConfig.GPIO_PinAltFunMode = AF0;
+	handlerPin_ADC_Vx.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
+	handlerPin_ADC_Vx.GPIO_PinConfig.GPIO_PinOPType = GPIO_OTYPE_PUSHPULL;
+	handlerPin_ADC_Vx.GPIO_PinConfig.GPIO_PinNumber = PIN_6;
+	handlerPin_ADC_Vx.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+	handlerPin_ADC_Vx.GPIO_PinConfig.GPIO_PinSpeed = GPIO_OSPEEDR_FAST;
+	GPIO_Config(&handlerPin_ADC_Vx);
+
+	handlerPin_ADC_Vy.pGPIOx = GPIOA;
+	handlerPin_ADC_Vy.GPIO_PinConfig.GPIO_PinAltFunMode = AF0;
+	handlerPin_ADC_Vy.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
+	handlerPin_ADC_Vy.GPIO_PinConfig.GPIO_PinOPType = GPIO_OTYPE_PUSHPULL;
+	handlerPin_ADC_Vy.GPIO_PinConfig.GPIO_PinNumber = PIN_7;
+	handlerPin_ADC_Vy.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+	handlerPin_ADC_Vy.GPIO_PinConfig.GPIO_PinSpeed = GPIO_OSPEEDR_FAST;
+	GPIO_Config(&handlerPin_ADC_Vy);
 
 
 
 	// TIMER 1 PARA CONTEO DE TIEMPO DEL PROCESO, ALTA RESOLUCION DE CONTEO
 	handlerTim1_Conteo.ptrTIMx = TIM1;
-	handlerTim1_Conteo.TIMx_Config.TIMx_interruptEnable = BTIMER_ENABLE_INTERRUPT;
+	handlerTim1_Conteo.TIMx_Config.TIMx_interruptEnable = BTIMER_DISABLE_INTERRUPT;
 	handlerTim1_Conteo.TIMx_Config.TIMx_mode = BTIMER_MODE_UP;
 	handlerTim1_Conteo.TIMx_Config.TIMx_period = 100;
-	handlerTim1_Conteo.TIMx_Config.TIMx_speed = BTIMER_SPEED_100MHz_100us;
+	handlerTim1_Conteo.TIMx_Config.TIMx_speed = BTIMER_SPEED_100MHz_10ns;
 	BasicTimer_Config(&handlerTim1_Conteo);
 
 
@@ -321,15 +376,6 @@ void inSystem (void){
 	pwm_Config(&handlerPWM_one_pulse);
 	enableOutput(&handlerPWM_one_pulse);
 
-	handlerPin_one_pulse.pGPIOx                             = GPIOA;
-	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinAltFunMode  = AF0;
-	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_OUT;
-	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
-	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinNumber      = PIN_4;
-	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-	handlerPin_one_pulse.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
-	GPIO_Config(&handlerPin_one_pulse);
-	GPIO_WritePin(&handlerPin_one_pulse, RESET);
 
 	handlerPin_one_pulse_out.pGPIOx                             = GPIOA;
 	handlerPin_one_pulse_out.GPIO_PinConfig.GPIO_PinAltFunMode  = AF2;
@@ -350,32 +396,32 @@ void inSystem (void){
 	GPIO_Config(&handlerPin_one_pulse_in);
 
 
-	////////////////////////////////Configuracion PINES B8 (SCL) B9 (SDA) e I2C1 //////////////////////////////////////////////
-
-
-	handler_PINB8_I2C1.pGPIOx                             = GPIOB;
-	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinAltFunMode  = AF4;
-	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
-	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinNumber      = PIN_8;
-	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_OPENDRAIN;
-	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
-	GPIO_Config(&handler_PINB8_I2C1);
-
-	handler_PINB9_I2C1.pGPIOx                             = GPIOB;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinAltFunMode  = AF4;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinNumber      = PIN_9;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_OPENDRAIN;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
-	GPIO_Config(&handler_PINB9_I2C1);
-
-	handler_I2C1.ptrI2Cx = I2C1;
-	handler_I2C1.I2C_Config.clkSpeed = MAIN_CLOCK_50_MHz_FOR_I2C;
-	handler_I2C1.I2C_Config.slaveAddress = 0;
-	handler_I2C1.I2C_Config.modeI2C = I2C_MODE_FM;
-	i2c_config(&handler_I2C1);
+//	////////////////////////////////Configuracion PINES B8 (SCL) B9 (SDA) e I2C1 //////////////////////////////////////////////
+//
+//
+//	handler_PINB8_I2C1.pGPIOx                             = GPIOB;
+//	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinAltFunMode  = AF4;
+//	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
+//	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinNumber      = PIN_8;
+//	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_OPENDRAIN;
+//	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+//	handler_PINB8_I2C1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
+//	GPIO_Config(&handler_PINB8_I2C1);
+//
+//	handler_PINB9_I2C1.pGPIOx                             = GPIOB;
+//	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinAltFunMode  = AF4;
+//	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
+//	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinNumber      = PIN_9;
+//	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_OPENDRAIN;
+//	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+//	handler_PINB9_I2C1.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
+//	GPIO_Config(&handler_PINB9_I2C1);
+//
+//	handler_I2C1.ptrI2Cx = I2C1;
+//	handler_I2C1.I2C_Config.clkSpeed = MAIN_CLOCK_50_MHz_FOR_I2C;
+//	handler_I2C1.I2C_Config.slaveAddress = 0;
+//	handler_I2C1.I2C_Config.modeI2C = I2C_MODE_FM;
+//	i2c_config(&handler_I2C1);
 
 }
 
@@ -404,19 +450,26 @@ void usart2Rx_Callback(void){
 
 }
 
-//Callback para comando de setear conversion ADC
-void BasicTimer4_Callback(void){
-	startSingleADC();
-}
 
 
 //Callback para interrupciones posterior a la multiconversion
 void adcComplete_Callback(void){
-	adcData[0] = getADC();
-	adcData[1] = getADC();
-	adcData[3] = getADC();
+	counter++;
+	if (counter % 2 == 0){
+		adcData[0] = getADC();
+	}else if (counter % 2 != 0){
+		adcData[1] = getADC();
+		adc_CONT_OFF();
+		adcFlag = SET;
+		counter = -1;
+	}
+}
 
-	adcFlag = SET;
+void watchdogs_Callback(void){
+
+	stopTimerFlag = SET;
+	adc_OFF();
+
 }
 
 //Interrupción Timer 3
@@ -425,6 +478,16 @@ void BasicTimer2_Callback(void){
 	GPIOxTooglePin(&handlerPinA5);
 
 }
+
+float counts2time(uint64_t counts){
+	// Usando la velocidad mas rápida del micro y 20ns por cuenta tenemos que
+	float time = 0;
+
+	time = 20.0 * counts;
+
+	return time;
+}
+
 
 
 

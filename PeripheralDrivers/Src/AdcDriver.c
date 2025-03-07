@@ -74,11 +74,11 @@ void adc_Config(ADC_Config_t *adcConfig){
 			/* 6. Desactivamos el "continuos mode" */
 
 			if (adcConfig->continuosModeEnable == ADC_CONT_DISABLE){
-				ADC1->CR2 &= ~ADC_CR2_CONT;
+				adc_CONT_OFF();
 
 			}else{
 				// Si estamos aqui es porque queremos conversion continua
-				ADC1->CR2 |= ADC_CR2_CONT;
+				adc_CONT_ON();
 			}
 
 			/* 7. Acá se debería configurar el sampling...*/
@@ -100,6 +100,28 @@ void adc_Config(ADC_Config_t *adcConfig){
 			/* 9. Configuramos el preescaler del ADC en 2:1 (el mas rápido que se puede tener */
 			ADC->CCR |= ADC_CCR_ADCPRE_0;
 
+			if (adcConfig->watchdogs_Enable == ADC_WATCHDOG_ENABLE ){
+				// Activamos el watchdogs para todos los canales regulares
+				ADC1->CR1 |= ADC_CR1_AWDEN;
+
+				// Activamos las interrupciones por watchdogs
+				ADC1->CR1 |= ADC_CR1_AWDIE;
+
+				ADC1->HTR &= 0;
+
+				ADC1->HTR |= adcConfig->threshold_up;
+
+				ADC1->LTR &= 0;
+
+				ADC1->LTR |= adcConfig->threshold_down;
+
+			}else{
+
+				__NOP();
+
+			}
+
+
 			/* 10. Desactivamos las interrupciones globales */
 			__disable_irq();
 
@@ -114,7 +136,7 @@ void adc_Config(ADC_Config_t *adcConfig){
 			__NVIC_SetPriority(ADC_IRQn, 4);
 
 			/* 12. Activamos el modulo ADC */
-			ADC1->CR2 |= ADC_CR2_ADON;
+			adc_ON();
 
 			/* 13. Activamos las interrupciones globales */
 			__enable_irq();
@@ -180,11 +202,11 @@ void adc_Config(ADC_Config_t *adcConfig){
 
 			/* 6. Desactivamos el "continuos mode" */
 			if (adcConfig->continuosModeEnable == ADC_CONT_DISABLE){
-				ADC1->CR2 &= ~ADC_CR2_CONT;
+				adc_CONT_OFF();
 
 			}else{
 				// Si estamos aqui es porque queremos conversion continua
-				ADC1->CR2 |= ADC_CR2_CONT;
+				adc_CONT_ON();
 			}
 
 			/* 7. Acá se debería configurar el sampling...*/
@@ -203,7 +225,7 @@ void adc_Config(ADC_Config_t *adcConfig){
 
 
 
-			ADC1->SQR1 = ((adcConfig->numeroDeCanales - 1) << ADC_SQR1_L_Pos);
+			ADC1->SQR1 |= ((adcConfig->numeroDeCanales - 1) << ADC_SQR1_L_Pos);
 
 
 
@@ -229,9 +251,30 @@ void adc_Config(ADC_Config_t *adcConfig){
 			ADC1->CR2 |= ADC_CR2_EOCS;
 
 
-
 			/* 9. Configuramos el preescaler del ADC en 2:1 (el mas rápido que se puede tener */
 			ADC->CCR |= ADC_CCR_ADCPRE_0;
+
+			if (adcConfig->watchdogs_Enable == ADC_WATCHDOG_ENABLE ){
+				// Activamos el watchdogs para todos los canales regulares
+				ADC1->CR1 |= ADC_CR1_AWDEN;
+
+				// Activamos las interrupciones por watchdogs
+				ADC1->CR1 |= ADC_CR1_AWDIE;
+
+				ADC1->HTR &= 0;
+
+				ADC1->HTR |= adcConfig->threshold_up;
+
+				ADC1->LTR &= 0;
+
+				ADC1->LTR |= adcConfig->threshold_down;
+
+			}else{
+
+				__NOP();
+
+			}
+
 
 			/* 10. Desactivamos las interrupciones globales */
 			__disable_irq();
@@ -246,7 +289,7 @@ void adc_Config(ADC_Config_t *adcConfig){
 			__NVIC_SetPriority(ADC_IRQn, 4);
 
 			/* 12. Activamos el modulo ADC */
-			ADC1->CR2 |= ADC_CR2_ADON;
+			adc_ON();
 
 			/* 13. Activamos las interrupciones globales */
 			__enable_irq();
@@ -256,36 +299,11 @@ void adc_Config(ADC_Config_t *adcConfig){
 	}
 }
 
-/*
- * Esta función lanza la conversion ADC y si la configuración es la correcta, solo se hace
- * una conversion ADC.
- * Al terminar la conversion, el sistema lanza una interrupción y el dato es leido en la
- * función callback, utilizando la funciona getADC().
- *
- * */
-void startSingleADC(void){
-	/* Desactivamos el modo continuo de ADC */
-	ADC1->CR2 &= ~ADC_CR2_CONT;
-
-	/* Limpiamos el bit del overrun (CR1) */
-	ADC1->CR1 &= ~ADC_CR1_OVRIE;
-
-	/* Iniciamos un ciclo de conversión ADC (CR2)*/
-	ADC1->CR2 |= ADC_CR2_SWSTART;
-
-}
 
 /*
- * Esta función habilita la conversion ADC de forma continua.
- * Una vez ejecutada esta función, el sistema lanza una nueva conversion ADC cada vez que
- * termina, sin necesidad de utilizar para cada conversion el bit SWSTART del registro CR2.
- * Solo es necesario activar una sola vez dicho bit y las conversiones posteriores se lanzan
- * automaticamente.
+ * Esta función habilita la conversion ADC de forma continua o simple.
  * */
-void startContinousADC(void){
-
-	/* Activamos el modo continuo de ADC */
-	ADC1->CR2 |= ADC_CR2_CONT;
+void startConvertion(void){
 
 	/* Iniciamos un ciclo de conversión ADC */
 	ADC1->CR2 |= ADC_CR2_SWSTART;
@@ -303,21 +321,50 @@ uint16_t getADC(void){
 	return adcRawData;
 }
 
+void adc_ON(void){
+
+	ADC1->CR2 |= ADC_CR2_ADON; // PRENDEMOS EL ADC
+
+}
+
+void adc_OFF(void){
+
+	ADC1->CR2 &= ~ADC_CR2_ADON; // APAGAMOS EL ADC
+
+}
+
+void adc_CONT_ON(void){
+	ADC1->CR2 |= ADC_CR2_CONT;
+
+}
+
+void adc_CONT_OFF(void){
+	ADC1->CR2 &= ~ADC_CR2_CONT;
+
+}
+
 /*
  * Esta es la ISR de la interrupción por conversión ADC
  */
 void ADC_IRQHandler(void){
+
+	if (ADC1->SR & ADC_SR_AWD){
+
+		ADC1->SR &= ~ADC_SR_AWD;
+
+		watchdogs_Callback();
+	}
+
 	// Evaluamos que se dio la interrupción por conversión ADC
 	if(ADC1->SR & ADC_SR_EOC){
 		// Leemos el resultado de la conversión ADC y lo cargamos en una variale auxiliar
 		// la cual es utilizada en la función getADC()
 		adcRawData = ADC1->DR;
 
-
-
 		// Hacemos el llamado a la función que se ejecutará en el main
 		adcComplete_Callback();
 	}
+
 
 }
 
@@ -326,6 +373,9 @@ __attribute__ ((weak)) void adcComplete_Callback(void){
 	__NOP();
 }
 
+__attribute__ ((weak)) void watchdogs_Callback(void){
+	__NOP();
+}
 
 
 
@@ -346,134 +396,6 @@ void adcTimerEventConfig(){
 
 }
 
-void ADC_ConfigMultichannel(ADC_Config_t *adcConfig, uint8_t numeroDeCanales){
-
-	/* 1. Activamos la señal de reloj para el periférico ADC1 (bus APB2)*/
-
-	RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
-
-	// Limpiamos los registros antes de comenzar a configurar
-	ADC1->CR1 = 0;
-	ADC1->CR2 = 0;
-
-	/* Comenzamos la configuración del ADC1 */
-	/* 3. Resolución del ADC */
-	switch(adcConfig->resolution){
-		case ADC_RESOLUTION_12_BIT:
-		{
-			ADC1->CR1 &= ~ADC_CR1_RES;
-
-			break;
-		}
-
-		case ADC_RESOLUTION_10_BIT:
-		{
-			ADC1->CR1 |= ADC_CR1_RES_0;
-			break;
-		}
-
-		case ADC_RESOLUTION_8_BIT:
-		{
-
-			ADC1->CR1 |= ADC_CR1_RES_1;
-			break;
-		}
-
-		case ADC_RESOLUTION_6_BIT:
-		{
-			ADC1->CR1 |= ADC_CR1_RES;
-			break;
-		}
-
-		default:
-		{	ADC1->CR1 |= ADC_CR1_RES;
-			break;
-		}
-	}
-
-	/* 4. Configuramos el modo Scan como activado */
-	ADC1->CR1 |= ADC_CR1_SCAN;
-
-	/* 5. Configuramos la alineación de los datos (derecha o izquierda) */
-	if(adcConfig->dataAlignment == ADC_ALIGNMENT_RIGHT){
-		// Alineación a la derecha (esta es la forma "natural")
-		ADC1->CR2 &= ~ADC_CR2_ALIGN;
-	}
-	else{
-
-		// Alineación a la izquierda (para algunos cálculos matemáticos)
-		ADC1->CR2 |= ADC_CR2_ALIGN;
-	}
-
-	/* 6. Desactivamos el "continuos mode" */
-	ADC1->CR2 &= ~ADC_CR2_CONT;
-
-	/* 7. Acá se debería configurar el sampling...*/
-	for (uint8_t i = 0; i < numeroDeCanales ; i++){
-		if(adcConfig->channelVector[i] <= ADC_CHANNEL_9){
-			ADC1->SMPR2 |= (adcConfig->samplingPeriod) << (0x3 * adcConfig->channelVector[i]);
-		}
-		else{
-			ADC1->SMPR1 |= (adcConfig->samplingPeriod) << (0x3 * (adcConfig->channelVector[i]- 10));
-		}
-
-	}
-
-	/* 8. Configuramos la secuencia y cuantos elementos hay en la secuencia */
-	// Al hacerlo todo 0, estamos seleccionando solo 1 elemento en el conteo de la secuencia
-
-
-
-	ADC1->SQR1 = ((numeroDeCanales-1) << ADC_SQR1_L_Pos);
-
-
-
-	for (uint8_t i = 0; i < numeroDeCanales ; i++){
-		if (i <= 5){
-
-			ADC1->SQR3 |= (adcConfig->channelVector[i] << 5 * i);
-
-		}else if ((i <= 11) & (i > 5)){
-
-			ADC1->SQR2 |= (adcConfig->channelVector[i] << 5 * (i-6));
-
-		}else if (i <= 15){
-
-			ADC1->SQR1 |= (adcConfig->channelVector[i] << 5 * (i-12));
-
-		}
-
-	}
-
-
-	//Activamos interrupciones cada fin de secuencia.
-	ADC1->CR2 |= ADC_CR2_EOCS;
-
-
-
-	/* 9. Configuramos el preescaler del ADC en 2:1 (el mas rápido que se puede tener */
-	ADC->CCR |= ADC_CCR_ADCPRE_0;
-
-	/* 10. Desactivamos las interrupciones globales */
-	__disable_irq();
-
-	/* 11. Activamos la interrupción debida a la finalización de una conversión EOC (CR1)*/
-	ADC1->CR1 |= ADC_CR1_EOCIE;
-
-	/* 11a. Matriculamos la interrupción en el NVIC*/
-	__NVIC_EnableIRQ(ADC_IRQn);
-
-	/* 11b. Configuramos la prioridad para la interrupción ADC */
-	__NVIC_SetPriority(ADC_IRQn, 4);
-
-	/* 12. Activamos el modulo ADC */
-	ADC1->CR2 |= ADC_CR2_ADON;
-
-	/* 13. Activamos las interrupciones globales */
-	__enable_irq();
-
-
-}
 
 
 void adc_Set_Priority(ADC_Config_t *ptrAdcConfig, uint8_t newPriority){

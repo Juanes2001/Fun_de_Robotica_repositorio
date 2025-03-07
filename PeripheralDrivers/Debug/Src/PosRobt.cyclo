@@ -1,0 +1,9 @@
+../Src/PosRobt.c:16:6:build_Operation	3
+../Src/PosRobt.c:47:6:add_Operation	1
+../Src/PosRobt.c:57:6:change_position	1
+../Src/PosRobt.c:72:6:change_coordinates_position	1
+../Src/PosRobt.c:87:6:calculation_parameter_distance	1
+../Src/PosRobt.c:124:8:distance_to_straight_line	1
+../Src/PosRobt.c:133:8:distance_traveled	1
+../Src/PosRobt.c:144:8:calculed_ang_turn	2
+../Src/PosRobt.c:161:6:unitary_vector	1
