@@ -38,6 +38,7 @@
 void inSystem (void);
 void parseCommands(char *stringVector);
 void builtTerminalString (char** terminalString);
+float counts2time(uint64_t counts);
 
 
 
@@ -52,8 +53,7 @@ GPIO_Handler_t handlerPinTx         = {0};
 
 // Pin de salida PWM
 GPIO_Handler_t handlerPin_one_pulse 	= {0};
-GPIO_Handler_t handlerPin_one_pulse_out = {0};
-GPIO_Handler_t handlerPin_one_pulse_in  = {0};
+GPIO_Handler_t handlerPin_PWM_out 		= {0};
 GPIO_Handler_t handlerPin_ADC_Vx 		= {0};
 GPIO_Handler_t handlerPin_ADC_Vy 		= {0};
 
@@ -99,7 +99,7 @@ float t_lockin = 30; // Tiempo en el que se demora la señal en ser procesada en
 					 // dentro del lock in hasta que sea detectado por el ADC.
 
 // ADC variables
-uint32_t adcData[3] ;
+uint32_t adcData[2] ;
 uint8_t counterADC = 0;
 
 // Banderas
@@ -119,8 +119,11 @@ double t_total 				= 0;
 double threshold    		= 0;
 float voltageX 				= 0;
 float voltageY 				= 0;
-int counter 				= 0;
+float voltageT				= 0;
+float vref 					= 0;
+int counter 				= -1;
 double distancia 			= 0;
+
 
 
 int main(void)
@@ -145,8 +148,12 @@ int main(void)
 
 
 		if (rxData == 'm'){
-			startTimer(&handlerTimerBlinky);
-			flagMeas =SET;
+			if (~flagMeas){flagMeas = enableOutput(&handlerPWM_one_pulse);
+
+				startConvertion();
+			}
+			else{flagMeas = disableOutput(&handlerPWM_one_pulse);}
+
 			rxData = '\0';
 		}
 
@@ -154,39 +161,24 @@ int main(void)
 			// el tiempo de comienzo con el tiempo de finalizacion del proceso
 
 
-		if (flagMeas){
-			startTimer(&handlerTim1_Conteo);
+
+
+		if (adcFlag){
+
+			voltageX = adcData[0]*(3.3/(powf(2.0,12)));
+			voltageY = adcData[1]*(3.3/(powf(2.0,12)));
+
+			voltageT = sqrt(pow(voltageX,2)+pow(voltageY,2));
+
+			sprintf(userMsg,"%.3f\t%.2f\t%.3f\t%.2f\t%.3f\n",voltageX,1.65,voltageY,1.65,voltageT);
+
+			writeMsg(&handlerUSART, userMsg);
+
+			adcFlag = RESET;
+			adc_CONT_ON();
 			startConvertion();
-
-			while(~stopTimerFlag){
-
-				cuentas_totales += handlerTim1_Conteo.ptrTIMx->CNT;
-
-				if (adcFlag){
-
-					voltageX = adcData[0]*(3.3/(powf(2.0,12)));
-					voltageY = adcData[1]*(3.3/(powf(2.0,12)));
-
-
-					sprintf(userMsg,"%.3f\t%.2f\t%.3f\t%.2f\n",voltageX,1.65,voltageY,1.65);
-
-					writeMsg(&handlerUSART, userMsg);
-
-					adcFlag = RESET;
-					adc_CONT_ON();
-					startConvertion();
-				}
-
-			}
-
-			t_total = counts2time(cuentas_totales);
-
-			t_luz = t_total-t_lockin-t_mosfet;
-
-			distancia = (C0*t_luz)/2;
-			distancia *= pow(10,-9);
-
 		}
+
 
 
 
@@ -371,29 +363,18 @@ void inSystem (void){
 	handlerPWM_one_pulse.config.prescaler   = PWM_SPEED_100MHz_1us;
 	handlerPWM_one_pulse.config.polarity    = PWM_DISABLE_POLARITY;
 	handlerPWM_one_pulse.config.optocoupler = PWM_DISABLE_OPTOCOUPLER;
-	handlerPWM_one_pulse.config.one_pulse   = PWM_ENABLE_ONE_PULSE;
-	handlerPWM_one_pulse.config.channel_in  = PWM_IN_CHANNEL_2;
+	handlerPWM_one_pulse.config.one_pulse   = PWM_DISABLE_ONE_PULSE;
 	pwm_Config(&handlerPWM_one_pulse);
-	enableOutput(&handlerPWM_one_pulse);
+	startPwmSignal(&handlerPWM_one_pulse);
 
-
-	handlerPin_one_pulse_out.pGPIOx                             = GPIOA;
-	handlerPin_one_pulse_out.GPIO_PinConfig.GPIO_PinAltFunMode  = AF2;
-	handlerPin_one_pulse_out.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
-	handlerPin_one_pulse_out.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
-	handlerPin_one_pulse_out.GPIO_PinConfig.GPIO_PinNumber      = PIN_0;
-	handlerPin_one_pulse_out.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-	handlerPin_one_pulse_out.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
-	GPIO_Config(&handlerPin_one_pulse_out);
-
-	handlerPin_one_pulse_in.pGPIOx                             = GPIOA;
-	handlerPin_one_pulse_in.GPIO_PinConfig.GPIO_PinAltFunMode  = AF2;
-	handlerPin_one_pulse_in.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
-	handlerPin_one_pulse_in.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
-	handlerPin_one_pulse_in.GPIO_PinConfig.GPIO_PinNumber      = PIN_1;
-	handlerPin_one_pulse_in.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
-	handlerPin_one_pulse_in.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
-	GPIO_Config(&handlerPin_one_pulse_in);
+	handlerPin_PWM_out.pGPIOx                             = GPIOA;
+	handlerPin_PWM_out.GPIO_PinConfig.GPIO_PinAltFunMode  = AF2;
+	handlerPin_PWM_out.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
+	handlerPin_PWM_out.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
+	handlerPin_PWM_out.GPIO_PinConfig.GPIO_PinNumber      = PIN_0;
+	handlerPin_PWM_out.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+	handlerPin_PWM_out.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
+	GPIO_Config(&handlerPin_PWM_out);
 
 
 //	////////////////////////////////Configuracion PINES B8 (SCL) B9 (SDA) e I2C1 //////////////////////////////////////////////
