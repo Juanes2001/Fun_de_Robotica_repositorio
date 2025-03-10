@@ -148,11 +148,16 @@ int main(void)
 
 
 		if (rxData == 'm'){
-			if (~flagMeas){flagMeas = enableOutput(&handlerPWM_one_pulse);
+			if (~flagMeas){
+
+				flagMeas = enableOutput(&handlerPWM_one_pulse);
 
 				startConvertion();
+			}else{
+
+				flagMeas = disableOutput(&handlerPWM_one_pulse);
+
 			}
-			else{flagMeas = disableOutput(&handlerPWM_one_pulse);}
 
 			rxData = '\0';
 		}
@@ -166,11 +171,21 @@ int main(void)
 		if (adcFlag){
 
 			voltageX = adcData[0]*(3.3/(powf(2.0,12)));
-			voltageY = adcData[1]*(3.3/(powf(2.0,12)));
+//			voltageY = adcData[1]*(3.3/(powf(2.0,12)));
 
-			voltageT = sqrt(pow(voltageX,2)+pow(voltageY,2));
+//			voltageT = sqrt(pow(voltageX,2)+pow(voltageY,2));
 
-			sprintf(userMsg,"%.3f\t%.2f\t%.3f\t%.2f\t%.3f\n",voltageX,1.65,voltageY,1.65,voltageT);
+//			sprintf(userMsg,
+//					"%.3f\t%.2f\t%.3f\t%.2f\t%.3f\n",
+//					voltageX,
+//					1.65,
+//					voltageY,
+//					1.65,
+//					voltageT);
+
+			sprintf(userMsg,
+					"%.3f\n",
+					voltageX);
 
 			writeMsg(&handlerUSART, userMsg);
 
@@ -264,7 +279,7 @@ void inSystem (void){
 	GPIO_Config(&handlerPinA5);
 	GPIO_WritePin(&handlerPinA5, RESET);
 
-	handlerTimerBlinky.ptrTIMx                           = TIM2;
+	handlerTimerBlinky.ptrTIMx                           = TIM5;
 	handlerTimerBlinky.TIMx_Config.TIMx_interruptEnable  = BTIMER_ENABLE_INTERRUPT;
 	handlerTimerBlinky.TIMx_Config.TIMx_mode             = BTIMER_MODE_UP;
 	handlerTimerBlinky.TIMx_Config.TIMx_speed            = BTIMER_SPEED_100MHz_100us;
@@ -313,14 +328,15 @@ void inSystem (void){
 
 
 	// Conversión
-	handlerADC.channelVector[0] 	= ADC_CHANNEL_6;
-	handlerADC.channelVector[1] 	= ADC_CHANNEL_7;
+//	handlerADC.channelVector[0] 	= ADC_CHANNEL_0;
+//	handlerADC.channelVector[1] 	= ADC_CHANNEL_1;
+	handlerADC.channel				= ADC_CHANNEL_0;
 	handlerADC.dataAlignment 		= ADC_ALIGNMENT_RIGHT;
 	handlerADC.resolution			= ADC_RESOLUTION_12_BIT;
 	handlerADC.samplingPeriod 		= ADC_SAMPLING_PERIOD_3_CYCLES;
 	handlerADC.continuosModeEnable  = ADC_CONT_ENABLE;
-	handlerADC.multiChannel 		= ADC_MULTCH_ENABLE;
-	handlerADC.watchdogs_Enable 	= ADC_WATCHDOG_ENABLE;
+	handlerADC.multiChannel 		= ADC_MULTCH_DISABLE;
+	handlerADC.watchdogs_Enable 	= ADC_WATCHDOG_DISABLE;
 	handlerADC.threshold_up 		= pow(2.0,12)/2;
 	handlerADC.threshold_down 		= 0;
 	adc_Config(&handlerADC);
@@ -329,7 +345,7 @@ void inSystem (void){
 	handlerPin_ADC_Vx.GPIO_PinConfig.GPIO_PinAltFunMode = AF0;
 	handlerPin_ADC_Vx.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ANALOG;
 	handlerPin_ADC_Vx.GPIO_PinConfig.GPIO_PinOPType = GPIO_OTYPE_PUSHPULL;
-	handlerPin_ADC_Vx.GPIO_PinConfig.GPIO_PinNumber = PIN_6;
+	handlerPin_ADC_Vx.GPIO_PinConfig.GPIO_PinNumber = PIN_0;
 	handlerPin_ADC_Vx.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	handlerPin_ADC_Vx.GPIO_PinConfig.GPIO_PinSpeed = GPIO_OSPEEDR_FAST;
 	GPIO_Config(&handlerPin_ADC_Vx);
@@ -356,10 +372,10 @@ void inSystem (void){
 
 
 	// PWM definicion y PIN USANDO EL MODO DE SIMGLE PULSE
-	handlerPWM_one_pulse.ptrTIMx            = TIM5;
-	handlerPWM_one_pulse.config.channel     = PWM_CHANNEL_1;
+	handlerPWM_one_pulse.ptrTIMx            = TIM2;
+	handlerPWM_one_pulse.config.channel     = PWM_CHANNEL_2;
 	handlerPWM_one_pulse.config.duttyCicle  = dutty_cycle;
-	handlerPWM_one_pulse.config.periodo     = 50;
+	handlerPWM_one_pulse.config.periodo     = 1000;
 	handlerPWM_one_pulse.config.prescaler   = PWM_SPEED_100MHz_1us;
 	handlerPWM_one_pulse.config.polarity    = PWM_DISABLE_POLARITY;
 	handlerPWM_one_pulse.config.optocoupler = PWM_DISABLE_OPTOCOUPLER;
@@ -367,11 +383,11 @@ void inSystem (void){
 	pwm_Config(&handlerPWM_one_pulse);
 	startPwmSignal(&handlerPWM_one_pulse);
 
-	handlerPin_PWM_out.pGPIOx                             = GPIOA;
-	handlerPin_PWM_out.GPIO_PinConfig.GPIO_PinAltFunMode  = AF2;
+	handlerPin_PWM_out.pGPIOx                             = GPIOB;
+	handlerPin_PWM_out.GPIO_PinConfig.GPIO_PinAltFunMode  = AF1;
 	handlerPin_PWM_out.GPIO_PinConfig.GPIO_PinMode        = GPIO_MODE_ALTFN;
 	handlerPin_PWM_out.GPIO_PinConfig.GPIO_PinOPType      = GPIO_OTYPE_PUSHPULL;
-	handlerPin_PWM_out.GPIO_PinConfig.GPIO_PinNumber      = PIN_0;
+	handlerPin_PWM_out.GPIO_PinConfig.GPIO_PinNumber      = PIN_3;
 	handlerPin_PWM_out.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	handlerPin_PWM_out.GPIO_PinConfig.GPIO_PinSpeed       = GPIO_OSPEEDR_FAST;
 	GPIO_Config(&handlerPin_PWM_out);
@@ -435,26 +451,30 @@ void usart2Rx_Callback(void){
 
 //Callback para interrupciones posterior a la multiconversion
 void adcComplete_Callback(void){
-	counter++;
-	if (counter % 2 == 0){
-		adcData[0] = getADC();
-	}else if (counter % 2 != 0){
-		adcData[1] = getADC();
-		adc_CONT_OFF();
-		adcFlag = SET;
-		counter = -1;
-	}
+//	counter++;
+//	if (counter % 2 == 0){
+//		adcData[0] = getADC();
+//	}else if (counter % 2 != 0){
+//		adcData[1] = getADC();
+//		adc_CONT_OFF();
+//		adcFlag = SET;
+//		counter = -1;
+//	}
+
+	adcData[0] = getADC();
+	adcFlag = SET;
+	adc_CONT_OFF();
 }
 
-void watchdogs_Callback(void){
-
-	stopTimerFlag = SET;
-	adc_OFF();
-
-}
+//void watchdogs_Callback(void){
+//
+//	stopTimerFlag = SET;
+//	adc_OFF();
+//
+//}
 
 //Interrupción Timer 3
-void BasicTimer2_Callback(void){
+void BasicTimer5_Callback(void){
 
 	GPIOxTooglePin(&handlerPinA5);
 

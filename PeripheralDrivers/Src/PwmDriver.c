@@ -8,8 +8,6 @@
 #include "assert.h"
 #include <math.h>
 
-uint16_t periodo = 0;
-
 
 /**/
 void pwm_Config(PWM_Handler_t *ptrPwmHandler){
@@ -468,6 +466,7 @@ uint8_t enableComplementaryOutput(PWM_Handler_t *ptrPwmHandler) {
 void setFrequency(PWM_Handler_t *ptrPwmHandler){
 
 	uint32_t speed   = 0;
+	uint32_t periodo = 0;
 
 	// Cargamos el valor del prescaler, nos define la velocidad (en ns) a la cual
 	// se incrementa el Timer
@@ -565,6 +564,7 @@ void updateFrequency(PWM_Handler_t *ptrPwmHandler, uint16_t freq){
 /* El valor del dutty debe estar dado en valores de %, entre 0% y 100%*/
 void setDuttyCycle(PWM_Handler_t *ptrPwmHandler){
 
+	uint32_t periodo = ptrPwmHandler->ptrTIMx->ARR+1;
 	// Seleccionamos el canal para configurar su dutty
 	switch(ptrPwmHandler->config.channel){
 	case PWM_CHANNEL_1:{
@@ -602,6 +602,8 @@ void setDuttyCycle(PWM_Handler_t *ptrPwmHandler){
 
 void setDuttyCycleAfOpt(PWM_Handler_t *ptrPwmHandler){
 
+
+	uint32_t periodo = ptrPwmHandler->ptrTIMx->ARR+1;
 	// Seleccionamos el canal para configurar su dutty
 	switch(ptrPwmHandler->config.channel){
 	case PWM_CHANNEL_1:{
@@ -641,6 +643,7 @@ uint8_t showPWM (PWM_Handler_t *ptrPwmHandler){
 
 	uint8_t PWMdutty = 0;
 
+	uint32_t periodo = ptrPwmHandler->ptrTIMx->ARR+1;
 	// Seleccionamos el canal para configurar su dutty
 	switch(ptrPwmHandler->config.channel){
 	case PWM_CHANNEL_1:{
@@ -677,7 +680,7 @@ uint8_t showPWM (PWM_Handler_t *ptrPwmHandler){
 uint8_t showPWMBfOpt (PWM_Handler_t *ptrPwmHandler){
 
 	uint8_t PWMdutty = 0;
-
+	uint32_t periodo = ptrPwmHandler->ptrTIMx->ARR+1;
 	// Seleccionamos el canal para configurar su dutty
 	switch(ptrPwmHandler->config.channel){
 	case PWM_CHANNEL_1:{
